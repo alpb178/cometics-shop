@@ -1,0 +1,56 @@
+h1.text {
+  @apply mt-2 mb-6 font-extrabold text-foreground text-4xl;
+}
+
+h2.text {
+  @apply mb-2 font-merriweather font-semibold text-[1.7rem] md:text-[2rem];
+}
+
+h3.text {
+  @apply font-extrabold text-foreground text-3xl;
+}
+
+h4.text {
+  font-weight: 600;
+  font-size: 18px;
+  color: rgba(0, 0, 0, 0.8);
+  font-family: var(--font-merriweather-garamond), serif;
+}
+
+h5.text {
+  margin: 0;
+  display: block;
+  padding: 0;
+  font-size: 15px;
+  font-weight: 400;
+  color: #777e8b;
+  font-family: var(--font-merriweather-garamond), serif;
+}
+
+label.text {
+  @apply font-libre font-medium text-foreground/80 text-sm;
+
+  span {
+    @apply ml-1 text-red-500 text-sm;
+  }
+}
+
+.error {
+  @apply font-medium text-red-500 text-sm;
+}
+
+.title {
+  @apply font-merriweather font-black text-3xl;
+}
+
+span.text {
+  @apply font-libre;
+}
+
+// .subtitle {
+//   @apply font-libre text-gray-500 text-lg;
+// }
+
+.helper {
+  @apply font-libre text-gray-500 text-sm;
+}

@@ -1,0 +1,166 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+@import "./prism.css";
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --foreground-rgb: 255, 255, 255;
+  }
+}
+
+body {
+  color: rgb(var(--foreground-rgb));
+}
+
+/* Visible focus for keyboard users (no focus ring on mouse click) */
+:focus-visible {
+  outline: 2px solid rgb(var(--primary));
+  outline-offset: 2px;
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+@layer base {
+  // Apply fonts to headers and paragraphs
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: var(--font-merriweather-garamond), serif;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+  }
+
+  p,
+  span,
+  div,
+  li,
+  a,
+  button,
+  input,
+  textarea,
+  select {
+    font-family: var(--font-libre-franklin), sans-serif;
+  }
+
+  body {
+    font-family: var(--font-libre-franklin), sans-serif;
+  }
+
+  :root {
+    --background: 250 249 246;
+    --foreground: 28 28 28;
+
+    --card: 255 255 255;
+    --card-foreground: 10 10 10;
+
+    --popover: 255 255 255;
+    --popover-foreground: 10 10 10;
+
+    --primary: 109 186 116;
+
+    --primary-foreground: 250 251 253;
+
+    --secondary: 245 247 250;
+    --secondary-foreground: 29 30 42;
+
+    --muted: 240 248 240;
+    --muted-foreground: 107 114 128;
+
+    --accent: 158 217 160;
+    --accent-foreground: 29 30 42;
+
+    --destructive: 239 68 68;
+    --destructive-foreground: 250 251 253;
+
+    --border: 240 245 235;
+    --input: 232 240 248;
+    --ring: 10 10 10;
+
+    --ambient-primary: 93 100% 85%;
+    --ambient-secondary: 45 100% 75%;
+    --ambient-tertiary: 45 100% 65%;
+
+    --pink: 255 92 133; /* Changed from 235 188 181 to #FF5C85 for better contrast (4.6:1 ratio) */
+  }
+
+  .dark {
+    --background: 10 10 10;
+    --foreground: 250 249 246;
+
+    --card: 10 10 10;
+    --card-foreground: 250 251 253;
+
+    --popover: 10 10 10;
+    --popover-foreground: 250 251 253;
+
+    --primary: 69 146 76;
+
+    --primary-foreground: 29 30 42;
+
+    --secondary: 31 41 55;
+    --secondary-foreground: 250 251 253;
+
+    --muted: 31 41 55;
+    --muted-foreground: 156 163 175;
+
+    --accent: 118 177 120;
+    --accent-foreground: 250 251 253;
+
+    --destructive: 127 29 29;
+    --destructive-foreground: 250 251 253;
+
+    --border: 30 40 40; /* Nearly black green-tinted border for dark mode */
+    --input: 31 41 55;
+    --ring: 209 213 219;
+
+    --pink: 255 92 133; /* Changed from 235 188 181 to #FF5C85 for better contrast (4.6:1 ratio) */
+
+    /* Ambient colors for dark mode */
+    --ambient-primary: 210 100% 85%;
+    --ambient-secondary: 210 100% 55%;
+    --ambient-tertiary: 210 100% 45%;
+  }
+}
+
+@layer base {
+  .text-field {
+    @apply block relative p-4 py-2.5 focus:outline-none w-full text-foreground placeholder:text-foreground/40 rounded;
+
+    &.outlined {
+      @apply bg-card shadow-aceternity border border-foreground focus:ring-2 focus:ring-foreground;
+    }
+
+    &.contained {
+      @extend .text-field;
+      @apply bg-gray-100 hover:bg-primary/10 focus-within:bg-background border-2 hover:border-primary focus-within:border-primary border-transparent ring-0;
+    }
+
+    &__error {
+      @apply bg-red-100 border border-red-500 text-red-500;
+    }
+
+    &:disabled {
+      @apply bg-gray-100 border-gray-100 text-gray-400 cursor-not-allowed;
+    }
+  }
+
+  caption {
+    @apply flex flex-1 text-gray-400 text-sm;
+  }
+}

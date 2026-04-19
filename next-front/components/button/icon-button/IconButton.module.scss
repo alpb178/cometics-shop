@@ -1,0 +1,15 @@
+.IconButton {
+  @apply relative flex justify-center items-center bg-card active:opacity-50 p-3 overflow-hidden transition duration-300 ease-in-out;
+
+  &:disabled {
+    @apply bg-gray-300 cursor-not-allowed;
+  }
+
+  svg {
+    @apply size-[22px];
+  }
+}
+
+.sm {
+  @apply p-2 font-normal text-sm;
+}

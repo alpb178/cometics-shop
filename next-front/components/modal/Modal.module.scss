@@ -1,0 +1,35 @@
+.dialog {
+  @apply relative focus:outline-none;
+
+  .panel {
+    @apply shadow-2xl w-full transition duration-300 ease-in-out transform;
+  }
+
+  .full {
+    @apply z-50 h-dvh data-[closed]:translate-y-full;
+
+    .header {
+      @apply shadow-lg border-b;
+    }
+  }
+
+  .bottom {
+    @apply bottom-0 z-50 fixed mx-auto rounded-t-2xl w-screen xs:max-w-xl data-[closed]:translate-y-full;
+  }
+
+  .center {
+    @apply z-40 data-[closed]:opacity-0 rounded-xl xs:max-w-xl text-left data-[closed]:scale-95;
+
+    .header {
+      @apply shadow-lg xs:shadow-none border-b xs:border-none;
+    }
+  }
+
+  .left {
+    @apply left-0 fixed mx-auto xs:max-w-md h-screen xs:h-full data-[closed]:-translate-x-full;
+  }
+
+  .right {
+    @apply right-0 fixed mx-auto xs:max-w-md h-screen xs:h-full overflow-y-auto data-[closed]:translate-x-full;
+  }
+}

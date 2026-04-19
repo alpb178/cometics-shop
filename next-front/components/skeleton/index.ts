@@ -1,0 +1,9 @@
+export { Skeleton } from "./Skeleton";
+export { PageSkeleton } from "./page";
+export { ProductSkeleton } from "./product";
+export { ProductListSkeleton } from "./product-list";
+export { HowItWorksSkeleton } from "./how-it-works";
+export { AboutSkeleton } from "./about";
+export { ContactSkeleton } from "./contact";
+export { FAQSkeleton } from "./faq";
+export { NavbarSkeleton } from "./navbar";

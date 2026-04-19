@@ -1,0 +1,16 @@
+.container {
+  @apply relative w-full;
+
+  > span {
+    @apply flex items-center;
+
+    > input,
+    textarea {
+      @apply my-2;
+    }
+
+    .resetButton {
+      @apply absolute right-0 p-2 mx-2 text-foreground/40 rounded hover:text-foreground/60 hover:bg-foreground/10 active:opacity-50;
+    }
+  }
+}
