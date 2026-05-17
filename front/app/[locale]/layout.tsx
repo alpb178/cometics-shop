@@ -29,7 +29,7 @@ export default async function LocaleLayout({
         className={cn(
           libreFranklin.variable,
           merriweatherGaramond.variable,
-          "font-sans !bg-gray-100 text-foreground antialiased h-full w-full"
+          "font-sans bg-background text-foreground antialiased h-full w-full"
         )}
       >
         <OrganizationWebSiteJsonLd />
