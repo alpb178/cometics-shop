@@ -1,6 +1,6 @@
 "use client";
 
-import { IconSearch } from "@tabler/icons-react";
+import { Search as SearchIcon } from "lucide-react";
 
 export const SearchBar = ({
   searchQuery,
@@ -10,21 +10,21 @@ export const SearchBar = ({
   setSearchQuery: (query: string) => void;
 }) => {
   return (
-    <div className="relative w-full">
+    <div className="relative w-full max-w-lg">
       <label htmlFor="product-search" className="sr-only">
         Buscar productos
       </label>
-      <IconSearch
-        className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none"
+      <SearchIcon
+        className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
         aria-hidden
       />
       <input
         id="product-search"
         type="search"
-        placeholder="Buscar productos..."
+        placeholder="Buscar productos"
         value={searchQuery}
         onChange={(e) => setSearchQuery(e.target.value)}
-        className="w-full min-h-[44px] pl-12 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-shadow"
+        className="w-full min-h-[44px] border border-border bg-background pl-11 pr-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-foreground"
         aria-label="Buscar productos"
         autoComplete="off"
       />

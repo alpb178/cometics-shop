@@ -34,16 +34,22 @@ body {
 }
 
 @layer base {
-  // Apply fonts to headers and paragraphs
+  // Brand serif reserved for editorial headlines (h1, h2)
   h1,
-  h2,
+  h2 {
+    font-family: var(--font-merriweather-garamond), serif;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+  }
+
+  // Functional UI titles use the sans family for ASOS-style clarity
   h3,
   h4,
   h5,
   h6 {
-    font-family: var(--font-merriweather-garamond), serif;
+    font-family: var(--font-libre-franklin), sans-serif;
     font-weight: 600;
-    letter-spacing: -0.02em;
+    letter-spacing: -0.005em;
   }
 
   p,
@@ -63,34 +69,34 @@ body {
   }
 
   :root {
-    --background: 250 249 246;
-    --foreground: 28 28 28;
+    --background: 255 255 255;
+    --foreground: 17 17 17;
 
     --card: 255 255 255;
-    --card-foreground: 10 10 10;
+    --card-foreground: 17 17 17;
 
     --popover: 255 255 255;
-    --popover-foreground: 10 10 10;
+    --popover-foreground: 17 17 17;
 
     --primary: 109 186 116;
 
-    --primary-foreground: 250 251 253;
+    --primary-foreground: 255 255 255;
 
-    --secondary: 245 247 250;
-    --secondary-foreground: 29 30 42;
+    --secondary: 247 247 247;
+    --secondary-foreground: 17 17 17;
 
-    --muted: 240 248 240;
-    --muted-foreground: 107 114 128;
+    --muted: 245 245 245;
+    --muted-foreground: 115 115 115;
 
     --accent: 158 217 160;
-    --accent-foreground: 29 30 42;
+    --accent-foreground: 17 17 17;
 
-    --destructive: 239 68 68;
-    --destructive-foreground: 250 251 253;
+    --destructive: 220 38 38;
+    --destructive-foreground: 255 255 255;
 
-    --border: 240 245 235;
-    --input: 232 240 248;
-    --ring: 10 10 10;
+    --border: 229 229 229;
+    --input: 245 245 245;
+    --ring: 17 17 17;
 
     --ambient-primary: 93 100% 85%;
     --ambient-secondary: 45 100% 75%;
