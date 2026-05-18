@@ -2,7 +2,7 @@
 
 import { Logo } from "@/components/logo/logo";
 import { cn } from "@/lib/utils";
-import { MenuIcon, Search, X } from "lucide-react";
+import { MenuIcon, X } from "lucide-react";
 import { Link } from "next-view-transitions";
 import { Fragment, useState } from "react";
 import { usePathname } from "next/navigation";
@@ -32,20 +32,13 @@ export const MobileNavbar = ({ leftNavbarItems, logo, locale }: Props) => {
       className="flex w-full items-center justify-between border-b border-border bg-background px-4 py-3"
       role="banner"
     >
-      <div className="flex items-center gap-1">
+      <div className="flex items-center">
         <button
           onClick={() => setOpen(true)}
           className="-ml-2 flex h-10 w-10 items-center justify-center text-foreground hover:bg-secondary"
           aria-label="Abrir menú"
         >
           <MenuIcon className="h-5 w-5" strokeWidth={1.5} />
-        </button>
-        <button
-          type="button"
-          aria-label="Buscar"
-          className="flex h-10 w-10 items-center justify-center text-foreground hover:bg-secondary"
-        >
-          <Search className="h-5 w-5" strokeWidth={1.5} />
         </button>
       </div>
 
