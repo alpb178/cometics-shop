@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import Link from "next/link";
 import Image from "next/image";
 import { useEffect, useState } from "react";
-import { ArrowRight, MapPin } from "lucide-react";
+import { ArrowRight, ChevronLeft, ChevronRight, MapPin } from "lucide-react";
 
 const CAROUSEL_IMAGES = [
   "/images/carrousel/1.png",
@@ -19,37 +19,69 @@ const CAROUSEL_IMAGES = [
 
 const HeroCarousel = ({ images }: { images: string[] }) => {
   const [index, setIndex] = useState(0);
+  const [paused, setPaused] = useState(false);
 
   useEffect(() => {
-    if (images.length <= 1) return;
+    if (images.length <= 1 || paused) return;
     const id = setInterval(
       () => setIndex((p) => (p + 1) % images.length),
       5000
     );
     return () => clearInterval(id);
-  }, [images.length]);
+  }, [images.length, paused]);
+
+  const goPrev = () =>
+    setIndex((p) => (p - 1 + images.length) % images.length);
+  const goNext = () => setIndex((p) => (p + 1) % images.length);
 
   return (
-    <div className="relative h-full w-full overflow-hidden bg-secondary">
+    <div
+      className="relative h-full w-full overflow-hidden bg-background"
+      onMouseEnter={() => setPaused(true)}
+      onMouseLeave={() => setPaused(false)}
+      aria-roledescription="carousel"
+    >
       {images.map((src, i) => (
         <div
           key={src}
           className={`absolute inset-0 transition-opacity duration-700 ease-out ${
             i === index ? "opacity-100" : "opacity-0"
           }`}
+          aria-hidden={i !== index}
         >
           <Image
             src={src}
             alt=""
             fill
-            sizes="(max-width: 1024px) 100vw, 50vw"
-            className="object-cover object-center"
+            sizes="(max-width: 1024px) 90vw, 576px"
+            className="object-contain object-center"
             priority={i === 0}
           />
         </div>
       ))}
 
-      <div className="absolute bottom-5 left-1/2 z-10 flex -translate-x-1/2 gap-1.5">
+      {images.length > 1 && (
+        <>
+          <button
+            type="button"
+            onClick={goPrev}
+            aria-label="Anterior"
+            className="absolute left-2 top-1/2 z-10 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-foreground/10 text-foreground backdrop-blur-sm transition hover:bg-foreground/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </button>
+          <button
+            type="button"
+            onClick={goNext}
+            aria-label="Siguiente"
+            className="absolute right-2 top-1/2 z-10 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-foreground/10 text-foreground backdrop-blur-sm transition hover:bg-foreground/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+          >
+            <ChevronRight className="h-4 w-4" />
+          </button>
+        </>
+      )}
+
+      <div className="absolute bottom-2 left-1/2 z-10 flex -translate-x-1/2 gap-1.5">
         {images.map((_, i) => (
           <button
             key={i}
@@ -57,8 +89,8 @@ const HeroCarousel = ({ images }: { images: string[] }) => {
             onClick={() => setIndex(i)}
             aria-label={`Slide ${i + 1}`}
             aria-current={i === index}
-            className={`h-0.5 transition-all ${
-              i === index ? "w-8 bg-background" : "w-4 bg-background/50"
+            className={`h-1.5 rounded-full transition-all ${
+              i === index ? "w-6 bg-primary" : "w-1.5 bg-foreground/30"
             }`}
           />
         ))}
@@ -129,8 +161,20 @@ export const BrandHero = () => {
         </motion.div>
       </div>
 
-      <div className="order-1 relative aspect-[4/5] w-full lg:order-2 lg:aspect-auto lg:min-h-[600px]">
-        <HeroCarousel images={CAROUSEL_IMAGES} />
+      <div className="order-1 flex items-center justify-center px-6 py-8 lg:order-2 lg:px-10 lg:py-16">
+        <div className="relative w-full max-w-xl">
+          <div
+            aria-hidden
+            className="absolute -inset-6 -rotate-3 rounded-3xl bg-gradient-to-r from-pink-300/40 to-green-300/40"
+          />
+          <div
+            aria-hidden
+            className="absolute -inset-6 rotate-3 rounded-3xl bg-gradient-to-r from-green-300/30 to-yellow-300/30"
+          />
+          <div className="relative aspect-[10/3] w-full overflow-hidden rounded-2xl border border-border bg-background shadow-xl">
+            <HeroCarousel images={CAROUSEL_IMAGES} />
+          </div>
+        </div>
       </div>
     </section>
   );
