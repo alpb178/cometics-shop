@@ -1,4 +1,3 @@
-import { Container } from "@/components/container/container-page";
 import { ProductList } from "@/container/products/list";
 import { BrandHero } from "@/components/hero/brand-hero";
 import fetchContentType from "@/lib/strapi/fetchContentType";
@@ -14,23 +13,22 @@ export const metadata: Metadata = {
     title: siteMetadata.title,
     description: siteMetadata.description,
     url: siteMetadata.url,
-    type: "website",
-  },
+    type: "website"
+  }
 };
 
 export default async function HomePage() {
   const products = await fetchContentType("products");
 
-  // Handle case when products fetch fails
   if (!products || !products.data) {
     return (
       <>
         <BrandHero />
-        <Container>
-          <div id="productos" className="py-20 text-center">
-            <p className="text-gray-600">No se pudieron cargar los productos. Por favor, intenta más tarde.</p>
-          </div>
-        </Container>
+        <section className="mx-auto w-full max-w-screen-2xl px-4 py-20 text-center sm:px-6 lg:px-10">
+          <p className="text-sm text-muted-foreground">
+            No se pudieron cargar los productos. Por favor, intenta más tarde.
+          </p>
+        </section>
       </>
     );
   }
@@ -38,11 +36,9 @@ export default async function HomePage() {
   return (
     <>
       <BrandHero />
-      <Container>
-        <div id="productos">
-          <ProductList products={products.data} />
-        </div>
-      </Container>
+      <div id="productos">
+        <ProductList products={products.data} />
+      </div>
     </>
   );
 }
