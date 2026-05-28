@@ -1,34 +1,29 @@
+"use client";
 
 import { Product } from "@/definitions/Product";
 import { ProductItem } from "./ProductItem";
-import { logsStrapi } from "@/lib/strapi/logs";
-import { useLocale } from "next-intl";
-import { useRouter } from "next/navigation";
+import { cn } from "@/lib/utils";
 
-export const ProductShows = ({ products }: { products: Product[] }) => {
-  const router = useRouter();
-  const locale = useLocale();
-  const handleClick = async (product: Product) => {
-    try {
-      router.push(`/${locale}/products/${product.slug}`);
-      await logsStrapi(
-        "User Clicked Product Details on Product List",
-        `Product Name: ${product.name}`
-      );
-    } catch {
-      () => {};
-    }
-  };
+type Density = "comfortable" | "compact";
+
+export const ProductShows = ({
+  products,
+  density = "comfortable"
+}: {
+  products: Product[];
+  density?: Density;
+}) => {
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
+    <div
+      className={cn(
+        "grid gap-x-3 gap-y-8 sm:gap-x-4",
+        density === "compact"
+          ? "grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6"
+          : "grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5"
+      )}
+    >
       {products?.map((product) => (
-        <div
-          key={`${product.slug}`}
-          className="flex h-full cursor-pointer"
-          onClick={() => handleClick(product)}
-        >
-          <ProductItem product={product} />
-        </div>
+        <ProductItem key={product.slug} product={product} />
       ))}
     </div>
   );

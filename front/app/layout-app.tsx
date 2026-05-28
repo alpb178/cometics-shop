@@ -13,10 +13,10 @@ export default function LayoutApp({ children }: LayoutAppProps) {
   const { data: pageData } = useApp();
 
   return (
-    <div className="min-h-screen flex flex-col bg-gray-50">
+    <div className="min-h-screen flex flex-col bg-background">
       <Navbar locale="en" />
 
-      <div className="flex-1 mt-20">{children}</div>
+      <div className="flex-1">{children}</div>
 
       <Footer data={pageData?.footer || {}} locale="en" />
       <HelpButton />

@@ -1,4 +1,3 @@
-import { Container } from "@/components/container/container-page";
 import { SingleProduct } from "@/container/products/product/single-product";
 import fetchContentType from "@/lib/strapi/fetchContentType";
 import { redirect } from "next/navigation";
@@ -24,7 +23,8 @@ export async function generateMetadata({
   );
   if (!product) return { title: "Producto" };
   const name = product.name || "Producto";
-  const description = stripHtml(product.description || "", 160) || siteMetadata.description;
+  const description =
+    stripHtml(product.description || "", 160) || siteMetadata.description;
   const url = `${siteMetadata.url}/products/${slug}`;
   const image =
     product.images?.[0]?.url &&
@@ -39,14 +39,14 @@ export async function generateMetadata({
       description,
       url,
       type: "website",
-      images: image ? [{ url: image, alt: name }] : undefined,
+      images: image ? [{ url: image, alt: name }] : undefined
     },
     twitter: {
       card: "summary_large_image",
       title: name,
-      description,
+      description
     },
-    alternates: { canonical: url },
+    alternates: { canonical: url }
   };
 }
 
@@ -72,9 +72,7 @@ export default async function SingleProductPage({
   return (
     <>
       <ProductJsonLd product={product} locale={locale} />
-      <Container className="mt-6 mb-0 md:mt-20 md:mb-10">
-        <SingleProduct product={product} />
-      </Container>
+      <SingleProduct product={product} />
     </>
   );
 }
