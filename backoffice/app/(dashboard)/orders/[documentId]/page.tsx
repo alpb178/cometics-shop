@@ -1,0 +1,158 @@
+import Link from "next/link";
+import { notFound } from "next/navigation";
+import { ArrowLeft } from "lucide-react";
+import { getOrder } from "@/lib/data";
+import { formatDate, mediaUrl } from "@/lib/utils";
+import { StatusSelect } from "../status-select";
+
+export const dynamic = "force-dynamic";
+
+const DELIVERY_LABEL: Record<string, string> = {
+  delivery: "Envío a domicilio",
+  pickup: "Recojo en tienda"
+};
+const PAYMENT_LABEL: Record<string, string> = {
+  bank_transfer: "Transferencia bancaria",
+  qr: "Pago QR"
+};
+
+export default async function OrderDetailPage({
+  params
+}: {
+  params: Promise<{ documentId: string }>;
+}) {
+  const { documentId } = await params;
+  const order = await getOrder(documentId);
+  if (!order) notFound();
+
+  const proof = mediaUrl(order.paymentProof);
+  const addr = order.shippingAddress;
+
+  return (
+    <div>
+      <Link
+        href="/orders"
+        className="mb-4 inline-flex items-center gap-1 text-sm text-neutral-500 hover:text-neutral-800"
+      >
+        <ArrowLeft className="h-4 w-4" />
+        Pedidos
+      </Link>
+
+      <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <h1 className="font-mono text-2xl font-semibold">
+            {order.orderNumber}
+          </h1>
+          <p className="mt-1 text-sm text-neutral-500">
+            {formatDate(order.createdAt)} · {DELIVERY_LABEL[order.deliveryMethod]}{" "}
+            · {PAYMENT_LABEL[order.paymentMethod]}
+          </p>
+        </div>
+      </div>
+
+      <div className="grid gap-6 lg:grid-cols-3">
+        <div className="space-y-6 lg:col-span-2">
+          {/* Items */}
+          <div className="card overflow-hidden">
+            <h2 className="border-b border-neutral-100 px-5 py-3 font-medium">
+              Artículos
+            </h2>
+            <ul className="divide-y divide-neutral-100">
+              {order.items?.map((it) => (
+                <li
+                  key={it.id}
+                  className="flex items-center gap-3 px-5 py-3 text-sm"
+                >
+                  <div className="h-12 w-12 overflow-hidden rounded-lg bg-neutral-100">
+                    {it.imageUrl && (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={it.imageUrl}
+                        alt={it.name}
+                        className="h-full w-full object-cover"
+                      />
+                    )}
+                  </div>
+                  <div className="flex-1">
+                    <p className="font-medium">{it.name}</p>
+                    <p className="text-neutral-500">
+                      {it.quantity} × Bs {Number(it.price).toLocaleString("es-BO")}
+                    </p>
+                  </div>
+                  <span className="font-medium">
+                    Bs{" "}
+                    {(Number(it.price) * it.quantity).toLocaleString("es-BO")}
+                  </span>
+                </li>
+              ))}
+            </ul>
+            <div className="space-y-1 border-t border-neutral-100 px-5 py-3 text-sm">
+              <div className="flex justify-between text-neutral-500">
+                <span>Subtotal</span>
+                <span>Bs {Number(order.subtotal).toLocaleString("es-BO")}</span>
+              </div>
+              <div className="flex justify-between text-neutral-500">
+                <span>Envío</span>
+                <span>
+                  Bs {Number(order.shippingCost ?? 0).toLocaleString("es-BO")}
+                </span>
+              </div>
+              <div className="flex justify-between text-base font-semibold">
+                <span>Total</span>
+                <span>Bs {Number(order.total).toLocaleString("es-BO")}</span>
+              </div>
+            </div>
+          </div>
+
+          {order.customerNotes && (
+            <div className="card p-5">
+              <h2 className="mb-1 font-medium">Notas del cliente</h2>
+              <p className="text-sm text-neutral-600">{order.customerNotes}</p>
+            </div>
+          )}
+        </div>
+
+        {/* Lateral */}
+        <div className="space-y-6">
+          <div className="card p-5">
+            <StatusSelect documentId={order.documentId} current={order.status} />
+          </div>
+
+          {addr && (
+            <div className="card p-5 text-sm">
+              <h2 className="mb-2 font-medium">Envío</h2>
+              <p className="font-medium">{addr.fullName}</p>
+              <p className="text-neutral-600">{addr.phone}</p>
+              <p className="mt-1 text-neutral-600">
+                {addr.line1}
+                {addr.line2 ? `, ${addr.line2}` : ""}
+              </p>
+              <p className="text-neutral-600">
+                {addr.city}, {addr.department}
+              </p>
+              {addr.notes && (
+                <p className="mt-1 text-neutral-500">{addr.notes}</p>
+              )}
+            </div>
+          )}
+
+          <div className="card p-5">
+            <h2 className="mb-2 font-medium">Comprobante de pago</h2>
+            {proof ? (
+              <a href={proof} target="_blank" rel="noreferrer">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={proof}
+                  alt="Comprobante de pago"
+                  className="w-full rounded-lg border border-neutral-200"
+                />
+              </a>
+            ) : (
+              <p className="text-sm text-neutral-400">Sin comprobante.</p>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
