@@ -1,0 +1,476 @@
+"use client";
+
+import Image from "next/image";
+import { useRouter } from "next/navigation";
+import { useMemo, useState } from "react";
+import { FormProvider, useForm } from "react-hook-form";
+import { Upload, X } from "lucide-react";
+import { TextInput } from "@/components/form/text-input/TextInput";
+import { useAuth } from "@/context/auth-context";
+import { useCart } from "@/context/cart-context";
+import type { User } from "@/definitions/User";
+import type { PaymentInfo } from "@/definitions/PaymentInfo";
+import type {
+  DeliveryMethod,
+  PaymentMethod
+} from "@/definitions/Order";
+
+type FormValues = {
+  fullName: string;
+  phone: string;
+  line1: string;
+  line2?: string;
+  city: string;
+  department: string;
+  notes?: string;
+};
+
+const STRAPI_URL = process.env.NEXT_PUBLIC_API_URL;
+
+function mediaUrl(url?: string | null) {
+  if (!url) return null;
+  if (url.startsWith("http")) return url;
+  return `${STRAPI_URL}${url}`;
+}
+
+export function CheckoutForm({
+  user,
+  paymentInfo
+}: {
+  user: User;
+  paymentInfo: PaymentInfo | null;
+}) {
+  const router = useRouter();
+  const { items, getCartTotal, clearCart } = useCart();
+  const { refresh } = useAuth();
+  const fullName =
+    [user.firstName, user.lastName].filter(Boolean).join(" ") || "";
+
+  const methods = useForm<FormValues>({
+    mode: "onTouched",
+    defaultValues: {
+      fullName,
+      phone: user.phone ?? "",
+      department: "Santa Cruz"
+    }
+  });
+
+  const [deliveryMethod, setDeliveryMethod] = useState<DeliveryMethod>("delivery");
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod | null>(null);
+  const [proofFile, setProofFile] = useState<File | null>(null);
+  const [proofPreview, setProofPreview] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const subtotal = useMemo(() => getCartTotal(), [getCartTotal]);
+  const total = subtotal;
+
+  const qrUrl = mediaUrl(paymentInfo?.qrImage?.url);
+
+  const canSubmit =
+    items.length > 0 &&
+    paymentMethod !== null &&
+    proofFile !== null &&
+    !submitting;
+
+  function onProofChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setProofFile(file);
+    setProofPreview(URL.createObjectURL(file));
+  }
+
+  function clearProof() {
+    setProofFile(null);
+    if (proofPreview) URL.revokeObjectURL(proofPreview);
+    setProofPreview(null);
+  }
+
+  const onSubmit = methods.handleSubmit(async (values) => {
+    if (!proofFile || !paymentMethod) return;
+    setSubmitting(true);
+    setError(null);
+
+    try {
+      const payload = {
+        address:
+          deliveryMethod === "delivery"
+            ? {
+                fullName: values.fullName,
+                phone: values.phone,
+                line1: values.line1,
+                line2: values.line2 || undefined,
+                city: values.city,
+                department: values.department,
+                notes: values.notes || undefined
+              }
+            : null,
+        deliveryMethod,
+        paymentMethod,
+        customerNotes: values.notes || undefined,
+        items: items.map((it) => ({
+          productId: it.product.id,
+          name: it.product.name,
+          slug: it.product.slug,
+          price: Number(it.product.price),
+          quantity: it.quantity,
+          imageUrl:
+            it.product.image?.url ||
+            it.product.image?.formats?.small?.url ||
+            ""
+        })),
+        subtotal,
+        total
+      };
+
+      const formData = new FormData();
+      formData.append("payload", JSON.stringify(payload));
+      formData.append("proof", proofFile);
+
+      const res = await fetch("/api/orders/create", {
+        method: "POST",
+        body: formData,
+        credentials: "include"
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data?.error || "No se pudo crear el pedido.");
+      }
+
+      clearCart();
+      await refresh();
+      router.push(`/account/orders/${data.orderId}`);
+      router.refresh();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Algo salió mal.");
+    } finally {
+      setSubmitting(false);
+    }
+  });
+
+  if (items.length === 0) {
+    return (
+      <section className="mx-auto w-full max-w-md px-6 py-24 text-center">
+        <h1 className="font-display text-2xl font-semibold">Tu carrito está vacío</h1>
+        <p className="mt-2 text-sm text-muted-foreground">
+          Añade productos antes de pasar por el checkout.
+        </p>
+      </section>
+    );
+  }
+
+  return (
+    <section className="mx-auto w-full max-w-6xl px-6 py-12 lg:py-16">
+      <header className="mb-10 border-b border-border pb-6">
+        <p className="text-xs font-semibold uppercase tracking-[0.22em] text-primary">
+          Checkout
+        </p>
+        <h1 className="font-display text-3xl font-semibold tracking-tight">
+          Finaliza tu pedido
+        </h1>
+      </header>
+
+      <FormProvider {...methods}>
+        <form
+          onSubmit={onSubmit}
+          noValidate
+          className="grid grid-cols-1 gap-12 lg:grid-cols-[1fr_360px]"
+        >
+          <div className="space-y-12">
+            <section>
+              <h2 className="mb-4 text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+                1 · Método de entrega
+              </h2>
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                {(
+                  [
+                    { value: "delivery", label: "Envío a domicilio" },
+                    { value: "pickup", label: "Recoger en tienda" }
+                  ] as const
+                ).map((opt) => (
+                  <label
+                    key={opt.value}
+                    className={`cursor-pointer border px-4 py-3 text-sm ${
+                      deliveryMethod === opt.value
+                        ? "border-foreground"
+                        : "border-border"
+                    }`}
+                  >
+                    <input
+                      type="radio"
+                      name="deliveryMethod"
+                      value={opt.value}
+                      checked={deliveryMethod === opt.value}
+                      onChange={() => setDeliveryMethod(opt.value)}
+                      className="sr-only"
+                    />
+                    {opt.label}
+                  </label>
+                ))}
+              </div>
+            </section>
+
+            {deliveryMethod === "delivery" && (
+              <section>
+                <h2 className="mb-4 text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+                  2 · Datos de envío
+                </h2>
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  <TextInput
+                    name="fullName"
+                    label="Nombre completo"
+                    required
+                    validation={{ required: "Requerido" }}
+                  />
+                  <TextInput
+                    name="phone"
+                    label="Teléfono"
+                    type="tel"
+                    required
+                    validation={{ required: "Requerido" }}
+                  />
+                </div>
+                <div className="mt-4">
+                  <TextInput
+                    name="line1"
+                    label="Dirección"
+                    required
+                    validation={{ required: "Requerido" }}
+                  />
+                </div>
+                <div className="mt-4">
+                  <TextInput
+                    name="line2"
+                    label="Referencia / apartamento (opcional)"
+                  />
+                </div>
+                <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  <TextInput
+                    name="city"
+                    label="Ciudad"
+                    required
+                    validation={{ required: "Requerido" }}
+                  />
+                  <TextInput
+                    name="department"
+                    label="Departamento"
+                    required
+                    validation={{ required: "Requerido" }}
+                  />
+                </div>
+                <div className="mt-4">
+                  <TextInput
+                    name="notes"
+                    as="textarea"
+                    label="Notas para la entrega (opcional)"
+                  />
+                </div>
+              </section>
+            )}
+
+            <section>
+              <h2 className="mb-4 text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+                {deliveryMethod === "delivery" ? "3" : "2"} · Método de pago
+              </h2>
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                {(
+                  [
+                    { value: "bank_transfer", label: "Transferencia bancaria" },
+                    { value: "qr", label: "Pago por QR" }
+                  ] as const
+                ).map((opt) => (
+                  <label
+                    key={opt.value}
+                    className={`cursor-pointer border px-4 py-3 text-sm ${
+                      paymentMethod === opt.value
+                        ? "border-foreground"
+                        : "border-border"
+                    }`}
+                  >
+                    <input
+                      type="radio"
+                      name="paymentMethod"
+                      value={opt.value}
+                      checked={paymentMethod === opt.value}
+                      onChange={() => setPaymentMethod(opt.value)}
+                      className="sr-only"
+                    />
+                    {opt.label}
+                  </label>
+                ))}
+              </div>
+
+              {paymentMethod === "bank_transfer" && (
+                <div className="mt-6 space-y-2 border border-border bg-secondary/50 px-5 py-4 text-sm">
+                  {paymentInfo?.bankName && (
+                    <p>
+                      <span className="text-muted-foreground">Banco: </span>
+                      {paymentInfo.bankName}
+                    </p>
+                  )}
+                  {paymentInfo?.accountName && (
+                    <p>
+                      <span className="text-muted-foreground">Titular: </span>
+                      {paymentInfo.accountName}
+                    </p>
+                  )}
+                  {paymentInfo?.accountNumber && (
+                    <p>
+                      <span className="text-muted-foreground">Nro. cuenta: </span>
+                      {paymentInfo.accountNumber}
+                    </p>
+                  )}
+                  {paymentInfo?.accountType && (
+                    <p>
+                      <span className="text-muted-foreground">Tipo: </span>
+                      {paymentInfo.accountType}
+                    </p>
+                  )}
+                  {paymentInfo?.ci && (
+                    <p>
+                      <span className="text-muted-foreground">CI: </span>
+                      {paymentInfo.ci}
+                    </p>
+                  )}
+                  {paymentInfo?.instructions && (
+                    <p className="pt-2 text-muted-foreground">
+                      {paymentInfo.instructions}
+                    </p>
+                  )}
+                  {!paymentInfo && (
+                    <p className="text-muted-foreground">
+                      Los datos bancarios todavía no están configurados.
+                      Contacta a la tienda.
+                    </p>
+                  )}
+                </div>
+              )}
+
+              {paymentMethod === "qr" && (
+                <div className="mt-6 border border-border bg-secondary/50 px-5 py-4 text-sm">
+                  {qrUrl ? (
+                    <div className="flex flex-col items-center gap-3">
+                      <div className="relative h-64 w-64 bg-background">
+                        <Image
+                          src={qrUrl}
+                          alt="QR de pago"
+                          fill
+                          sizes="256px"
+                          className="object-contain"
+                        />
+                      </div>
+                      <p className="text-center text-xs text-muted-foreground">
+                        Escanea el QR con tu app bancaria y sube luego el
+                        comprobante.
+                      </p>
+                    </div>
+                  ) : (
+                    <p className="text-muted-foreground">
+                      El QR todavía no está configurado. Contacta a la tienda.
+                    </p>
+                  )}
+                </div>
+              )}
+            </section>
+
+            {paymentMethod !== null && (
+              <section>
+                <h2 className="mb-4 text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+                  {deliveryMethod === "delivery" ? "4" : "3"} · Comprobante de pago
+                </h2>
+
+                {!proofFile ? (
+                  <label className="flex cursor-pointer flex-col items-center justify-center gap-2 border border-dashed border-border bg-secondary/30 px-6 py-10 text-sm text-muted-foreground hover:bg-secondary">
+                    <Upload className="h-6 w-6" />
+                    <span>Subir foto del comprobante</span>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="sr-only"
+                      onChange={onProofChange}
+                    />
+                  </label>
+                ) : (
+                  <div className="relative inline-block">
+                    {proofPreview && (
+                      <div className="relative h-48 w-48 overflow-hidden border border-border">
+                        <Image
+                          src={proofPreview}
+                          alt="Comprobante"
+                          fill
+                          sizes="192px"
+                          className="object-cover"
+                        />
+                      </div>
+                    )}
+                    <button
+                      type="button"
+                      onClick={clearProof}
+                      className="absolute -right-2 -top-2 flex h-7 w-7 items-center justify-center rounded-full bg-foreground text-background"
+                      aria-label="Quitar comprobante"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  </div>
+                )}
+              </section>
+            )}
+
+            {error && (
+              <p className="border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                {error}
+              </p>
+            )}
+          </div>
+
+          <aside className="lg:sticky lg:top-24 lg:self-start">
+            <div className="border border-border bg-secondary/30 p-6">
+              <h2 className="mb-4 font-display text-lg font-semibold">
+                Tu pedido
+              </h2>
+              <ul className="mb-4 divide-y divide-border">
+                {items.map((it) => (
+                  <li
+                    key={it.product.id}
+                    className="flex justify-between gap-4 py-3 text-sm"
+                  >
+                    <span>
+                      {it.product.name}{" "}
+                      <span className="text-muted-foreground">× {it.quantity}</span>
+                    </span>
+                    <span>
+                      Bs {(Number(it.product.price) * it.quantity).toFixed(2)}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+
+              <dl className="space-y-2 border-t border-border pt-4 text-sm">
+                <div className="flex justify-between">
+                  <dt className="text-muted-foreground">Subtotal</dt>
+                  <dd>Bs {subtotal.toFixed(2)}</dd>
+                </div>
+                <div className="flex justify-between border-t border-border pt-2 text-base font-semibold">
+                  <dt>Total</dt>
+                  <dd>Bs {total.toFixed(2)}</dd>
+                </div>
+              </dl>
+
+              <button
+                type="submit"
+                disabled={!canSubmit}
+                className="mt-6 w-full bg-foreground px-6 py-4 text-xs font-semibold uppercase tracking-[0.16em] text-background transition-colors hover:bg-foreground/90 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {submitting ? "Enviando…" : "Confirmar pedido"}
+              </button>
+              <p className="mt-3 text-xs text-muted-foreground">
+                Verificaremos tu comprobante y te confirmaremos el pedido en
+                cuanto esté listo.
+              </p>
+            </div>
+          </aside>
+        </form>
+      </FormProvider>
+    </section>
+  );
+}

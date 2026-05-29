@@ -9,14 +9,12 @@ import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
 import { DeliveryOptions } from "../../container/products/product/components/delivery-options";
 import { useDeliveryOption } from "@/hooks/useDeliveryOption";
-import { CartWhatsapp } from "./cart-whatsapp";
 import { useState } from "react";
 
 export function CartPage({ locale }: { locale: string }) {
   const { items, updateQuantity, removeFromCart, getCartTotal, clearCart } =
     useCart();
-  const { deliveryOption, handleDeliveryChange, getDeliveryText } =
-    useDeliveryOption();
+  const { deliveryOption, handleDeliveryChange } = useDeliveryOption();
   const [confirm, setConfirm] = useState<{
     show: boolean;
     productId?: number;
@@ -244,11 +242,16 @@ export function CartPage({ locale }: { locale: string }) {
               </dl>
 
               <div className="mt-6">
-                <CartWhatsapp messageDelivery={getDeliveryText()} />
+                <Link
+                  href="/checkout"
+                  className="block w-full bg-foreground px-6 py-4 text-center text-xs font-semibold uppercase tracking-[0.16em] text-background transition-colors hover:bg-foreground/90"
+                >
+                  Ir a checkout
+                </Link>
               </div>
 
               <p className="mt-6 border-t border-border pt-4 text-xs text-muted-foreground">
-                Confirmamos tu pedido por WhatsApp antes de cobrar. Sin compromiso.
+                Confirmaremos tu pedido cuando recibamos el comprobante de pago.
               </p>
             </div>
           </aside>
