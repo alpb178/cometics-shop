@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { Upload, X } from "lucide-react";
+import { PhoneInput } from "@/components/form/phone-input/PhoneInput";
 import { TextInput } from "@/components/form/text-input/TextInput";
 import { useAuth } from "@/context/auth-context";
 import { useCart } from "@/context/cart-context";
@@ -222,13 +223,7 @@ export function CheckoutForm({
                     required
                     validation={{ required: "Requerido" }}
                   />
-                  <TextInput
-                    name="phone"
-                    label="Teléfono"
-                    type="tel"
-                    required
-                    validation={{ required: "Requerido" }}
-                  />
+                  <PhoneInput name="phone" label="Teléfono" required />
                 </div>
                 <div className="mt-4">
                   <TextInput

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
+import { PhoneInput } from "@/components/form/phone-input/PhoneInput";
 import { TextInput } from "@/components/form/text-input/TextInput";
 import { useAuth } from "@/context/auth-context";
 
@@ -74,19 +75,7 @@ export default function SignUpPage() {
           />
         </div>
 
-        <TextInput
-          name="phone"
-          label="Teléfono"
-          type="tel"
-          required
-          validation={{
-            required: "El teléfono es requerido",
-            pattern: {
-              value: /^[+]?[0-9\s-]{6,}$/,
-              message: "Teléfono inválido"
-            }
-          }}
-        />
+        <PhoneInput name="phone" label="Teléfono" required />
 
         <TextInput
           name="email"

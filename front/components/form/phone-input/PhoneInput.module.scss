@@ -1,0 +1,22 @@
+.phoneInputRoot {
+  :global(.PhoneInputCountry) {
+    @apply flex items-center gap-2 px-3 py-2.5 border border-foreground bg-card rounded-l;
+    border-right: none;
+  }
+
+  :global(.PhoneInputCountrySelect) {
+    @apply opacity-0 absolute inset-0 cursor-pointer;
+  }
+
+  :global(.PhoneInputCountryIcon) {
+    @apply h-4 w-6 shadow-none;
+  }
+
+  :global(.PhoneInputCountrySelectArrow) {
+    @apply text-foreground/60;
+  }
+}
+
+.phoneInputField {
+  @apply rounded-l-none flex-1;
+}
