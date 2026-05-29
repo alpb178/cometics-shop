@@ -4,6 +4,7 @@ import { getSessionToken } from "@/lib/auth/server";
 const STRAPI_URL = process.env.NEXT_PUBLIC_API_URL;
 
 type Payload = {
+  addressId?: number | null;
   address: null | {
     fullName: string;
     phone: string;
@@ -133,7 +134,11 @@ export async function POST(req: Request) {
   if (!payload.items?.length) {
     return NextResponse.json({ error: "Carrito vacío" }, { status: 400 });
   }
-  if (payload.deliveryMethod === "delivery" && !payload.address) {
+  if (
+    payload.deliveryMethod === "delivery" &&
+    !payload.address &&
+    !payload.addressId
+  ) {
     return NextResponse.json(
       { error: "Falta la dirección de envío" },
       { status: 400 }
@@ -142,9 +147,10 @@ export async function POST(req: Request) {
 
   try {
     const proofId = await uploadProof(token, proof);
-    const addressId = payload.address
-      ? await createAddress(token, payload.address)
-      : null;
+    let addressId: number | null = payload.addressId ?? null;
+    if (!addressId && payload.address) {
+      addressId = await createAddress(token, payload.address);
+    }
     const order = await createOrder(token, payload, proofId, addressId);
     return NextResponse.json({
       orderId: order.id,

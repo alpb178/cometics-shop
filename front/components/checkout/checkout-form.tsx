@@ -9,6 +9,7 @@ import { PhoneInput } from "@/components/form/phone-input/PhoneInput";
 import { TextInput } from "@/components/form/text-input/TextInput";
 import { useAuth } from "@/context/auth-context";
 import { useCart } from "@/context/cart-context";
+import type { Address } from "@/definitions/Address";
 import type { User } from "@/definitions/User";
 import type { PaymentInfo } from "@/definitions/PaymentInfo";
 import type {
@@ -36,10 +37,12 @@ function mediaUrl(url?: string | null) {
 
 export function CheckoutForm({
   user,
-  paymentInfo
+  paymentInfo,
+  savedAddresses
 }: {
   user: User;
   paymentInfo: PaymentInfo | null;
+  savedAddresses: Address[];
 }) {
   const router = useRouter();
   const { items, getCartTotal, clearCart } = useCart();
@@ -56,8 +59,16 @@ export function CheckoutForm({
     }
   });
 
+  const defaultAddress = savedAddresses[0] ?? null;
   const [deliveryMethod, setDeliveryMethod] = useState<DeliveryMethod>("delivery");
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod | null>(null);
+  const [selectedAddressId, setSelectedAddressId] = useState<number | null>(
+    defaultAddress?.id ?? null
+  );
+  const [addressMode, setAddressMode] = useState<"saved" | "new">(
+    savedAddresses.length > 0 ? "saved" : "new"
+  );
+  const [saveNewAddress, setSaveNewAddress] = useState(false);
   const [proofFile, setProofFile] = useState<File | null>(null);
   const [proofPreview, setProofPreview] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -68,10 +79,17 @@ export function CheckoutForm({
 
   const qrUrl = mediaUrl(paymentInfo?.qrImage?.url);
 
+  const needsAddress = deliveryMethod === "delivery";
+  const hasAddress =
+    !needsAddress ||
+    (addressMode === "saved" && selectedAddressId !== null) ||
+    addressMode === "new";
+
   const canSubmit =
     items.length > 0 &&
     paymentMethod !== null &&
     proofFile !== null &&
+    hasAddress &&
     !submitting;
 
   function onProofChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -93,19 +111,40 @@ export function CheckoutForm({
     setError(null);
 
     try {
+      const useSaved =
+        deliveryMethod === "delivery" && addressMode === "saved";
+      const useNew =
+        deliveryMethod === "delivery" && addressMode === "new";
+
+      const newAddress = useNew
+        ? {
+            fullName: values.fullName,
+            phone: values.phone,
+            line1: values.line1,
+            line2: values.line2 || undefined,
+            city: values.city,
+            department: values.department,
+            notes: values.notes || undefined
+          }
+        : null;
+
+      let finalAddressId: number | null = useSaved ? selectedAddressId : null;
+      if (useNew && saveNewAddress) {
+        const r = await fetch("/api/addresses", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({ data: newAddress })
+        });
+        if (r.ok) {
+          const j = (await r.json()) as { data: { id: number } };
+          finalAddressId = j.data.id;
+        }
+      }
+
       const payload = {
-        address:
-          deliveryMethod === "delivery"
-            ? {
-                fullName: values.fullName,
-                phone: values.phone,
-                line1: values.line1,
-                line2: values.line2 || undefined,
-                city: values.city,
-                department: values.department,
-                notes: values.notes || undefined
-              }
-            : null,
+        addressId: finalAddressId,
+        address: useNew && !finalAddressId ? newAddress : null,
         deliveryMethod,
         paymentMethod,
         customerNotes: values.notes || undefined,
@@ -216,50 +255,119 @@ export function CheckoutForm({
                 <h2 className="mb-4 text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
                   2 · Datos de envío
                 </h2>
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                  <TextInput
-                    name="fullName"
-                    label="Nombre completo"
-                    required
-                    validation={{ required: "Requerido" }}
-                  />
-                  <PhoneInput name="phone" label="Teléfono" required />
-                </div>
-                <div className="mt-4">
-                  <TextInput
-                    name="line1"
-                    label="Dirección"
-                    required
-                    validation={{ required: "Requerido" }}
-                  />
-                </div>
-                <div className="mt-4">
-                  <TextInput
-                    name="line2"
-                    label="Referencia / apartamento (opcional)"
-                  />
-                </div>
-                <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
-                  <TextInput
-                    name="city"
-                    label="Ciudad"
-                    required
-                    validation={{ required: "Requerido" }}
-                  />
-                  <TextInput
-                    name="department"
-                    label="Departamento"
-                    required
-                    validation={{ required: "Requerido" }}
-                  />
-                </div>
-                <div className="mt-4">
-                  <TextInput
-                    name="notes"
-                    as="textarea"
-                    label="Notas para la entrega (opcional)"
-                  />
-                </div>
+
+                {savedAddresses.length > 0 && (
+                  <div className="mb-4 flex gap-2 border border-border p-1 text-xs">
+                    {(
+                      [
+                        { value: "saved", label: "Direcciones guardadas" },
+                        { value: "new", label: "Usar una nueva" }
+                      ] as const
+                    ).map((tab) => (
+                      <button
+                        key={tab.value}
+                        type="button"
+                        onClick={() => setAddressMode(tab.value)}
+                        className={`flex-1 px-3 py-2 font-semibold uppercase tracking-[0.14em] transition-colors ${
+                          addressMode === tab.value
+                            ? "bg-foreground text-background"
+                            : "text-muted-foreground hover:text-foreground"
+                        }`}
+                      >
+                        {tab.label}
+                      </button>
+                    ))}
+                  </div>
+                )}
+
+                {addressMode === "saved" && savedAddresses.length > 0 ? (
+                  <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                    {savedAddresses.map((addr) => (
+                      <li key={addr.id}>
+                        <label
+                          className={`block cursor-pointer border p-4 text-sm transition-colors ${
+                            selectedAddressId === addr.id
+                              ? "border-foreground"
+                              : "border-border hover:border-foreground/40"
+                          }`}
+                        >
+                          <input
+                            type="radio"
+                            name="savedAddress"
+                            checked={selectedAddressId === addr.id}
+                            onChange={() => setSelectedAddressId(addr.id)}
+                            className="sr-only"
+                          />
+                          <p className="font-semibold">{addr.fullName}</p>
+                          <p className="mt-1 text-xs text-muted-foreground">
+                            {addr.line1}
+                            {addr.line2 && `, ${addr.line2}`}
+                            <br />
+                            {addr.city}, {addr.department}
+                            <br />
+                            Tel: {addr.phone}
+                          </p>
+                        </label>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <>
+                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                      <TextInput
+                        name="fullName"
+                        label="Nombre completo"
+                        required
+                        validation={{ required: "Requerido" }}
+                      />
+                      <PhoneInput name="phone" label="Teléfono" required />
+                    </div>
+                    <div className="mt-4">
+                      <TextInput
+                        name="line1"
+                        label="Dirección"
+                        required
+                        validation={{ required: "Requerido" }}
+                      />
+                    </div>
+                    <div className="mt-4">
+                      <TextInput
+                        name="line2"
+                        label="Referencia / apartamento (opcional)"
+                      />
+                    </div>
+                    <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
+                      <TextInput
+                        name="city"
+                        label="Ciudad"
+                        required
+                        validation={{ required: "Requerido" }}
+                      />
+                      <TextInput
+                        name="department"
+                        label="Departamento"
+                        required
+                        validation={{ required: "Requerido" }}
+                      />
+                    </div>
+                    <div className="mt-4">
+                      <TextInput
+                        name="notes"
+                        as="textarea"
+                        label="Notas para la entrega (opcional)"
+                      />
+                    </div>
+                    <label className="mt-4 flex items-center gap-3 text-sm">
+                      <input
+                        type="checkbox"
+                        checked={saveNewAddress}
+                        onChange={(e) => setSaveNewAddress(e.target.checked)}
+                        className="h-4 w-4 border-border accent-foreground"
+                      />
+                      Guardar esta dirección para próximas compras
+                    </label>
+                  </>
+                )}
               </section>
             )}
 

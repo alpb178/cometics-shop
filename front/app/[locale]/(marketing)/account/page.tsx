@@ -47,6 +47,13 @@ export default async function AccountPage() {
           Mis pedidos
           <ChevronRight className="h-4 w-4" />
         </Link>
+        <Link
+          href="/account/addresses"
+          className="flex items-center justify-between py-5 text-sm font-medium transition-colors hover:text-primary"
+        >
+          Mis direcciones
+          <ChevronRight className="h-4 w-4" />
+        </Link>
       </nav>
     </section>
   );
