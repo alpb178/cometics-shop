@@ -24,6 +24,7 @@
     "@strapi/plugin-cloud": "5.17.0",
     "@strapi/plugin-seo": "^2.0.4",
     "@strapi/plugin-users-permissions": "5.17.0",
+    "@strapi/provider-email-nodemailer": "^5.47.0",
     "@strapi/provider-upload-cloudinary": "^5.20.0",
     "@strapi/strapi": "5.17.0",
     "better-sqlite3": "11.7.0",

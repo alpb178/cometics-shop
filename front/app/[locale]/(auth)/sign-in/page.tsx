@@ -69,6 +69,12 @@ export default function SignInPage() {
             required
             validation={{ required: "La contraseña es requerida" }}
           />
+          <Link
+            href="/forgot-password"
+            className="self-end text-xs text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
+          >
+            ¿Olvidaste tu contraseña?
+          </Link>
         </div>
 
         {error && (

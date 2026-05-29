@@ -1,6 +1,7 @@
 import { requireUser } from "@/lib/auth/server";
 import { authFetch } from "@/lib/strapi/auth-fetch";
 import { CheckoutForm } from "@/components/checkout/checkout-form";
+import type { Address } from "@/definitions/Address";
 import type { PaymentInfo } from "@/definitions/PaymentInfo";
 
 async function loadPaymentInfo(): Promise<PaymentInfo | null> {
@@ -18,11 +19,22 @@ async function loadPaymentInfo(): Promise<PaymentInfo | null> {
   }
 }
 
+async function loadAddresses(): Promise<Address[]> {
+  const res = await authFetch(
+    "/api/addresses?sort[0]=isDefault:desc&sort[1]=createdAt:desc&pagination[pageSize]=20"
+  );
+  if (!res.ok) return [];
+  const { data } = (await res.json()) as { data: Address[] };
+  return data ?? [];
+}
+
 export default async function CheckoutPage() {
   const user = await requireUser("/checkout");
-  const paymentInfo = await loadPaymentInfo();
-  // Verify Strapi can still see us — also surfaces a clear error if the cookie is stale
-  const meRes = await authFetch("/api/users/me");
+  const [paymentInfo, addresses, meRes] = await Promise.all([
+    loadPaymentInfo(),
+    loadAddresses(),
+    authFetch("/api/users/me")
+  ]);
   if (!meRes.ok) {
     return (
       <section className="mx-auto w-full max-w-md px-6 py-24 text-center">
@@ -33,5 +45,11 @@ export default async function CheckoutPage() {
     );
   }
 
-  return <CheckoutForm user={user} paymentInfo={paymentInfo} />;
+  return (
+    <CheckoutForm
+      user={user}
+      paymentInfo={paymentInfo}
+      savedAddresses={addresses}
+    />
+  );
 }
