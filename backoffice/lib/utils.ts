@@ -1,6 +1,6 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
-import { STRAPI_URL } from "./strapi";
+import { STRAPI_URL } from "./env";
 import type { Currency, OrderStatus, StrapiMedia } from "./types";
 
 export function cn(...inputs: ClassValue[]) {

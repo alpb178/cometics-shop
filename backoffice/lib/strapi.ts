@@ -1,9 +1,9 @@
 import "server-only";
 import { getSessionToken } from "./session";
+import { STRAPI_URL } from "./env";
 import type { AuthUser, StrapiMedia } from "./types";
 
-export const STRAPI_URL =
-  process.env.NEXT_PUBLIC_STRAPI_URL || "http://localhost:1337";
+export { STRAPI_URL };
 
 export class StrapiError extends Error {
   status: number;
