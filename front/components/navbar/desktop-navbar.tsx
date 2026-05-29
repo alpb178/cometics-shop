@@ -6,6 +6,7 @@ import { useMotionValueEvent, useScroll } from "framer-motion";
 import { useState } from "react";
 import { useAppMode } from "@/hooks/useAppMode";
 import { CartIcon } from "../cart/cart-icon";
+import { UserMenu } from "../auth/user-menu";
 import { Link } from "next-view-transitions";
 import { usePathname } from "next/navigation";
 
@@ -54,8 +55,9 @@ export const DesktopNavbar = ({ leftNavbarItems, logo, locale }: Props) => {
 
         <nav
           className="flex items-center justify-end gap-1"
-          aria-label="Carrito"
+          aria-label="Cuenta y carrito"
         >
+          <UserMenu locale={locale} />
           <CartIcon
             href={`/${locale}/cart`}
             className="!rounded-none !p-0 !h-10 !w-10 !bg-transparent hover:!bg-secondary"

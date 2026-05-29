@@ -8,6 +8,7 @@ import { Fragment, useState } from "react";
 import { usePathname } from "next/navigation";
 import { Modal } from "../modal/Modal";
 import { CartIcon } from "../cart/cart-icon";
+import { useAuth } from "@/context/auth-context";
 
 type Props = {
   leftNavbarItems: {
@@ -23,6 +24,7 @@ type Props = {
 export const MobileNavbar = ({ leftNavbarItems, logo, locale }: Props) => {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
+  const { user, logout } = useAuth();
 
   const normalize = (p?: string) =>
     !p ? "/" : p.replace(/^\/(en|es)/, "") || "/";
@@ -73,6 +75,48 @@ export const MobileNavbar = ({ leftNavbarItems, logo, locale }: Props) => {
           </div>
 
           <ul className="flex max-h-[calc(100vh-72px)] flex-col overflow-y-auto">
+            <li className="border-b border-border">
+              {user ? (
+                <>
+                  <div className="px-5 pt-5 pb-2 text-xs uppercase tracking-[0.16em] text-muted-foreground">
+                    {[user.firstName, user.lastName].filter(Boolean).join(" ") ||
+                      user.email}
+                  </div>
+                  <Link
+                    href={`/${locale}/account`}
+                    onClick={() => setOpen(false)}
+                    className="block px-5 py-3 text-sm hover:bg-secondary"
+                  >
+                    Mi cuenta
+                  </Link>
+                  <Link
+                    href={`/${locale}/account/orders`}
+                    onClick={() => setOpen(false)}
+                    className="block px-5 py-3 text-sm hover:bg-secondary"
+                  >
+                    Mis pedidos
+                  </Link>
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      await logout();
+                      setOpen(false);
+                    }}
+                    className="block w-full px-5 py-3 text-left text-sm hover:bg-secondary"
+                  >
+                    Cerrar sesión
+                  </button>
+                </>
+              ) : (
+                <Link
+                  href={`/${locale}/sign-in`}
+                  onClick={() => setOpen(false)}
+                  className="block px-5 py-4 text-sm font-semibold uppercase tracking-[0.14em] hover:bg-secondary"
+                >
+                  Iniciar sesión / Registrarse
+                </Link>
+              )}
+            </li>
             {leftNavbarItems.map((navItem: any) => {
               const isActive =
                 normalize(pathname) === normalize(navItem.URL);
