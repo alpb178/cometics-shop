@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
+import { PasswordInput } from "@/components/form/password-input/PasswordInput";
 import { PhoneInput } from "@/components/form/phone-input/PhoneInput";
 import { TextInput } from "@/components/form/text-input/TextInput";
 import { useAuth } from "@/context/auth-context";
@@ -92,20 +93,18 @@ export default function SignUpPage() {
         />
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <TextInput
+          <PasswordInput
             name="password"
             label="Contraseña"
-            type="password"
             required
             validation={{
               required: "La contraseña es requerida",
               minLength: { value: 8, message: "Mínimo 8 caracteres" }
             }}
           />
-          <TextInput
+          <PasswordInput
             name="passwordConfirm"
             label="Repite la contraseña"
-            type="password"
             required
             validation={{
               required: "Confirma tu contraseña",

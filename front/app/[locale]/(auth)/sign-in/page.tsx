@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
+import { PasswordInput } from "@/components/form/password-input/PasswordInput";
 import { TextInput } from "@/components/form/text-input/TextInput";
 import { useAuth } from "@/context/auth-context";
 
@@ -62,10 +63,9 @@ export default function SignInPage() {
               }
             }}
           />
-          <TextInput
+          <PasswordInput
             name="password"
             label="Contraseña"
-            type="password"
             required
             validation={{ required: "La contraseña es requerida" }}
           />
