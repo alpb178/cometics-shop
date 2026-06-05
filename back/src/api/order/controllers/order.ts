@@ -19,8 +19,22 @@ export default factories.createCoreController(
     async create(ctx) {
       const user = ctx.state.user;
       if (!user) return ctx.unauthorized();
+      const data = ctx.request.body?.data || {};
+      // Recalcula items/subtotal/total con el precio real del catálogo.
+      // Nunca se confía en los importes que envía el cliente.
+      const pricing = await (
+        strapi.service("api::order.order") as {
+          buildVerifiedOrderData: (items: unknown) => Promise<{
+            items: unknown[];
+            subtotal: number;
+            shippingCost: number;
+            total: number;
+          }>;
+        }
+      ).buildVerifiedOrderData(data.items);
       ctx.request.body.data = {
-        ...(ctx.request.body.data || {}),
+        ...data,
+        ...pricing,
         user: user.id,
         status: "pending_verification"
       };
