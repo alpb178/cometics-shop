@@ -10,6 +10,7 @@ import {
   type ProductInput
 } from "@/lib/data";
 import { uploadFiles } from "@/lib/strapi";
+import { requireStaff } from "@/lib/auth-guard";
 
 function parseNumber(value: FormDataEntryValue | null): number | null {
   if (value == null || value === "") return null;
@@ -52,6 +53,7 @@ async function buildInput(formData: FormData): Promise<ProductInput> {
 }
 
 export async function createProductAction(formData: FormData) {
+  await requireStaff();
   const input = await buildInput(formData);
   const product = await createProduct(input);
 
@@ -67,6 +69,7 @@ export async function updateProductAction(
   documentId: string,
   formData: FormData
 ) {
+  await requireStaff();
   const input = await buildInput(formData);
   await updateProduct(documentId, input);
   revalidatePath("/products");
@@ -75,6 +78,7 @@ export async function updateProductAction(
 }
 
 export async function deleteProductAction(documentId: string) {
+  await requireStaff();
   await deleteProduct(documentId);
   revalidatePath("/products");
 }
@@ -83,6 +87,7 @@ export async function togglePublishAction(
   documentId: string,
   publish: boolean
 ) {
+  await requireStaff();
   await setProductPublished(documentId, publish);
   revalidatePath("/products");
 }

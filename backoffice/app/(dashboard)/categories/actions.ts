@@ -6,8 +6,10 @@ import {
   deleteCategory,
   updateCategory
 } from "@/lib/data";
+import { requireStaff } from "@/lib/auth-guard";
 
 export async function createCategoryAction(name: string) {
+  await requireStaff();
   const trimmed = name.trim();
   if (!trimmed) throw new Error("El nombre es obligatorio");
   await createCategory(trimmed);
@@ -15,6 +17,7 @@ export async function createCategoryAction(name: string) {
 }
 
 export async function updateCategoryAction(documentId: string, name: string) {
+  await requireStaff();
   const trimmed = name.trim();
   if (!trimmed) throw new Error("El nombre es obligatorio");
   await updateCategory(documentId, trimmed);
@@ -22,6 +25,7 @@ export async function updateCategoryAction(documentId: string, name: string) {
 }
 
 export async function deleteCategoryAction(documentId: string) {
+  await requireStaff();
   await deleteCategory(documentId);
   revalidatePath("/categories");
 }
