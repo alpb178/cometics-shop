@@ -9,8 +9,10 @@ import {
   type PaymentInfoInput
 } from "@/lib/data";
 import { uploadFiles } from "@/lib/strapi";
+import { requireStaff } from "@/lib/auth-guard";
 
 export async function savePaymentInfoAction(formData: FormData) {
+  await requireStaff();
   const input: PaymentInfoInput = {
     bankName: (String(formData.get("bankName") || "").trim() || null) as string | null,
     accountNumber:
@@ -35,6 +37,7 @@ export async function savePaymentInfoAction(formData: FormData) {
 }
 
 export async function createFaqAction(question: string, answer: string) {
+  await requireStaff();
   if (!question.trim()) throw new Error("La pregunta es obligatoria");
   await createFaq(question.trim(), answer.trim());
   revalidatePath("/content");
@@ -45,12 +48,14 @@ export async function updateFaqAction(
   question: string,
   answer: string
 ) {
+  await requireStaff();
   if (!question.trim()) throw new Error("La pregunta es obligatoria");
   await updateFaq(documentId, question.trim(), answer.trim());
   revalidatePath("/content");
 }
 
 export async function deleteFaqAction(documentId: string) {
+  await requireStaff();
   await deleteFaq(documentId);
   revalidatePath("/content");
 }

@@ -1,18 +1,12 @@
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
-import { strapiLogin } from "@/lib/strapi";
+import { strapiLogin, STRAPI_URL } from "@/lib/strapi";
+import { isStaffUser, type StaffCheckUser } from "@/lib/staff";
 import {
   SESSION_COOKIE,
   USER_COOKIE,
   sessionCookieOptions
 } from "@/lib/session";
-
-function staffEmails(): string[] {
-  return (process.env.STAFF_EMAILS || "")
-    .split(",")
-    .map((e) => e.trim().toLowerCase())
-    .filter(Boolean);
-}
 
 export async function POST(req: Request) {
   let body: { identifier?: string; password?: string };
@@ -32,11 +26,20 @@ export async function POST(req: Request) {
   try {
     const { jwt, user } = await strapiLogin(body.identifier, body.password);
 
-    const allowedEmails = staffEmails();
-    if (
-      allowedEmails.length > 0 &&
-      !allowedEmails.includes((user.email || "").toLowerCase())
-    ) {
+    // Verificación de staff OBLIGATORIA (fail-closed). Se trae el rol para
+    // soportar tanto STAFF_EMAILS como un rol de Strapi con type "staff".
+    let staffUser: StaffCheckUser = { email: user.email };
+    try {
+      const meRes = await fetch(`${STRAPI_URL}/api/users/me?populate=role`, {
+        headers: { Authorization: `Bearer ${jwt}` },
+        cache: "no-store"
+      });
+      if (meRes.ok) staffUser = (await meRes.json()) as StaffCheckUser;
+    } catch {
+      // Si /users/me falla, se evalúa solo contra STAFF_EMAILS con el email del login.
+    }
+
+    if (!isStaffUser(staffUser)) {
       return NextResponse.json(
         { error: "Esta cuenta no tiene acceso al panel." },
         { status: 403 }
