@@ -18,6 +18,7 @@ export function TextInput(props: Readonly<TextInputProps>) {
     name,
     required,
     validation,
+    hideReset,
     ...rest
   } = props;
 
@@ -63,7 +64,7 @@ export function TextInput(props: Readonly<TextInputProps>) {
           ? actionComponent
           : isDirty &&
             dirtyFields[name] &&
-            !props.hideReset && (
+            !hideReset && (
               <button
                 type="button"
                 className={styles.resetButton}

@@ -8,7 +8,7 @@ import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { DeliveryOptions } from "../../container/products/product/components/delivery-options";
 import { useDeliveryOption } from "@/hooks/useDeliveryOption";
-import { CartWhatsapp } from "./cart-whatsapp";
+import Link from "next/link";
 import { useEffect, useState } from "react";
 
 interface CartDrawerProps {
@@ -19,7 +19,7 @@ interface CartDrawerProps {
 export const CartDrawer = ({ isOpen, onClose }: CartDrawerProps) => {
   const { items, updateQuantity, removeFromCart, getCartTotal, clearCart } =
     useCart();
-  const { deliveryOption, handleDeliveryChange, getDeliveryText } =
+  const { deliveryOption, handleDeliveryChange } =
     useDeliveryOption();
   const [confirmDelete, setConfirmDelete] = useState<{
     show: boolean;
@@ -367,7 +367,12 @@ export const CartDrawer = ({ isOpen, onClose }: CartDrawerProps) => {
 
                 {/* Action Buttons */}
                 <div className="flex flex-col gap-2 pt-2">
-                  <CartWhatsapp messageDelivery={getDeliveryText()} />
+                  <Link
+                    href="/checkout"
+                    className="block w-full bg-foreground px-6 py-4 text-center text-xs font-semibold uppercase tracking-[0.16em] text-background transition-colors hover:bg-foreground/90"
+                  >
+                    Ir a checkout
+                  </Link>
                 </div>
               </div>
             )}

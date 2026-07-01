@@ -8,6 +8,7 @@ import { getMessages } from "next-intl/server";
 import { Providers } from "../providers";
 import { buildDefaultMetadata } from "@/lib/next-metadata";
 import { OrganizationWebSiteJsonLd } from "@/components/seo/json-ld";
+import { PageTracker } from "@/components/analytics/page-tracker";
 
 export function generateMetadata(): Metadata {
   return buildDefaultMetadata();
@@ -33,6 +34,7 @@ export default async function LocaleLayout({
         )}
       >
         <OrganizationWebSiteJsonLd />
+        <PageTracker />
         <Providers locale={locale} messages={messages}>
           <LayoutApp>{children}</LayoutApp>
         </Providers>

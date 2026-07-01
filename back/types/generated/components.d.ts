@@ -378,6 +378,29 @@ export interface ItemsRayItems extends Struct.ComponentSchema {
   };
 }
 
+export interface OrderItem extends Struct.ComponentSchema {
+  collectionName: 'components_order_items';
+  info: {
+    description: 'L\u00EDnea de pedido (snapshot del producto al momento de la compra)';
+    displayName: 'Order item';
+  };
+  attributes: {
+    imageUrl: Schema.Attribute.String;
+    name: Schema.Attribute.String & Schema.Attribute.Required;
+    price: Schema.Attribute.Decimal & Schema.Attribute.Required;
+    productId: Schema.Attribute.Integer & Schema.Attribute.Required;
+    quantity: Schema.Attribute.Integer &
+      Schema.Attribute.Required &
+      Schema.Attribute.SetMinMax<
+        {
+          min: 1;
+        },
+        number
+      >;
+    slug: Schema.Attribute.String;
+  };
+}
+
 export interface SharedButton extends Struct.ComponentSchema {
   collectionName: 'components_shared_buttons';
   info: {
@@ -576,6 +599,7 @@ declare module '@strapi/strapi' {
       'items.input': ItemsInput;
       'items.left-navbar-items': ItemsLeftNavbarItems;
       'items.ray-items': ItemsRayItems;
+      'order.item': OrderItem;
       'shared.button': SharedButton;
       'shared.form': SharedForm;
       'shared.launches': SharedLaunches;

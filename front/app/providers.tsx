@@ -1,5 +1,6 @@
 "use client";
 
+import { AuthProvider } from "@/context/auth-context";
 import { CartProvider } from "@/context/cart-context";
 import { ThemeProvider } from "@/context/theme-context";
 import { AppProvider } from "@/context/app-context";
@@ -42,11 +43,13 @@ export function Providers({
       <AppProvider>
         <SlugProvider>
           <ViewTransitions>
-            <CartProvider>
-              <ThemeProvider>{children}</ThemeProvider>
-              <SpeedInsights />
-              <Analytics />
-            </CartProvider>
+            <AuthProvider>
+              <CartProvider>
+                <ThemeProvider>{children}</ThemeProvider>
+                <SpeedInsights />
+                <Analytics />
+              </CartProvider>
+            </AuthProvider>
           </ViewTransitions>
         </SlugProvider>
       </AppProvider>
