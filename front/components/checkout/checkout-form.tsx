@@ -125,6 +125,26 @@ export function CheckoutForm({
 
   const qrUrl = mediaUrl(paymentInfo?.qrImage?.url);
 
+  // Fuera de Santa Cruz (envío a provincia) solo se acepta QR: el pedido viaja
+  // por terminal/mensajería, así que debe prepagarse. El efectivo (contra
+  // entrega o en tienda) solo aplica dentro de Santa Cruz o en recojo.
+  const onlyQr = deliveryMethod === "delivery" && isProvince;
+
+  const paymentOptions: { value: PaymentMethod; label: string }[] = onlyQr
+    ? [{ value: "qr", label: "Pago por QR" }]
+    : [
+        { value: "cash", label: "Efectivo" },
+        { value: "qr", label: "Pago por QR" }
+      ];
+
+  // Si el usuario tenía "efectivo" y pasa a zona solo-QR, se limpia la elección.
+  useEffect(() => {
+    if (onlyQr && paymentMethod === "cash") setPaymentMethod(null);
+  }, [onlyQr, paymentMethod]);
+
+  // El comprobante solo es obligatorio para pago por QR.
+  const proofRequired = paymentMethod === "qr";
+
   const needsAddress = deliveryMethod === "delivery";
   const hasAddress =
     !needsAddress ||
@@ -134,7 +154,7 @@ export function CheckoutForm({
   const canSubmit =
     items.length > 0 &&
     paymentMethod !== null &&
-    proofFile !== null &&
+    (!proofRequired || proofFile !== null) &&
     hasAddress &&
     !submitting;
 
@@ -162,7 +182,8 @@ export function CheckoutForm({
   }
 
   const onSubmit = methods.handleSubmit(async (values) => {
-    if (!proofFile || !paymentMethod) return;
+    if (!paymentMethod) return;
+    if (proofRequired && !proofFile) return;
     setSubmitting(true);
     setError(null);
 
@@ -227,7 +248,7 @@ export function CheckoutForm({
 
       const formData = new FormData();
       formData.append("payload", JSON.stringify(payload));
-      formData.append("proof", proofFile);
+      if (proofFile) formData.append("proof", proofFile);
 
       const res = await fetch("/api/orders/create", {
         method: "POST",
@@ -496,12 +517,7 @@ export function CheckoutForm({
                 {deliveryMethod === "delivery" ? "3" : "2"} · Método de pago
               </h2>
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                {(
-                  [
-                    { value: "bank_transfer", label: "Transferencia bancaria" },
-                    { value: "qr", label: "Pago por QR" }
-                  ] as const
-                ).map((opt) => (
+                {paymentOptions.map((opt) => (
                   <label
                     key={opt.value}
                     className={`cursor-pointer border px-4 py-3 text-sm ${
@@ -523,6 +539,16 @@ export function CheckoutForm({
                 ))}
               </div>
 
+              {onlyQr && (
+                <p className="mt-3 text-xs text-muted-foreground">
+                  Para envíos fuera de Santa Cruz solo se acepta{" "}
+                  <span className="font-semibold text-foreground">
+                    pago por QR
+                  </span>{" "}
+                  (el pedido se envía por mensajería y debe estar pagado).
+                </p>
+              )}
+
               {paymentMethod !== null && (
                 <div className="mt-6 flex flex-wrap items-center justify-between gap-3 border border-foreground/20 bg-secondary/50 px-5 py-4">
                   <div>
@@ -533,8 +559,9 @@ export function CheckoutForm({
                       Bs {total.toFixed(2)}
                     </p>
                     <p className="mt-1 text-xs text-muted-foreground">
-                      El QR/transferencia no lleva el monto: ingrésalo
-                      manualmente en tu app bancaria.
+                      {paymentMethod === "qr"
+                        ? "El QR no lleva el monto: ingrésalo manualmente en tu app bancaria."
+                        : "Prepara el monto exacto en efectivo para pagar al recibir o al recoger."}
                     </p>
                   </div>
                   <button
@@ -547,49 +574,15 @@ export function CheckoutForm({
                 </div>
               )}
 
-              {paymentMethod === "bank_transfer" && (
+              {paymentMethod === "cash" && (
                 <div className="mt-6 space-y-2 border border-border bg-secondary/50 px-5 py-4 text-sm">
-                  {paymentInfo?.bankName && (
-                    <p>
-                      <span className="text-muted-foreground">Banco: </span>
-                      {paymentInfo.bankName}
-                    </p>
-                  )}
-                  {paymentInfo?.accountName && (
-                    <p>
-                      <span className="text-muted-foreground">Titular: </span>
-                      {paymentInfo.accountName}
-                    </p>
-                  )}
-                  {paymentInfo?.accountNumber && (
-                    <p>
-                      <span className="text-muted-foreground">Nro. cuenta: </span>
-                      {paymentInfo.accountNumber}
-                    </p>
-                  )}
-                  {paymentInfo?.accountType && (
-                    <p>
-                      <span className="text-muted-foreground">Tipo: </span>
-                      {paymentInfo.accountType}
-                    </p>
-                  )}
-                  {paymentInfo?.ci && (
-                    <p>
-                      <span className="text-muted-foreground">CI: </span>
-                      {paymentInfo.ci}
-                    </p>
-                  )}
-                  {paymentInfo?.instructions && (
-                    <p className="pt-2 text-muted-foreground">
-                      {paymentInfo.instructions}
-                    </p>
-                  )}
-                  {!paymentInfo && (
-                    <p className="text-muted-foreground">
-                      Los datos bancarios todavía no están configurados.
-                      Contacta a la tienda.
-                    </p>
-                  )}
+                  <p className="font-medium">Pago en efectivo</p>
+                  <p className="text-muted-foreground">
+                    {deliveryMethod === "pickup"
+                      ? "Paga en efectivo al recoger tu pedido en la tienda."
+                      : "Paga en efectivo al recibir tu pedido (contra entrega)."}{" "}
+                    Ten listo el monto exacto: Bs {total.toFixed(2)}.
+                  </p>
                 </div>
               )}
 
@@ -625,7 +618,7 @@ export function CheckoutForm({
               )}
             </section>
 
-            {paymentMethod !== null && (
+            {paymentMethod === "qr" && (
               <section>
                 <h2 className="mb-4 text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
                   {deliveryMethod === "delivery" ? "4" : "3"} · Comprobante de pago
