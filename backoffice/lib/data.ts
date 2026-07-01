@@ -11,7 +11,9 @@ import type {
   OrderStatus,
   PaymentInfo,
   Product,
-  SocialNetwork
+  SocialNetwork,
+  TopPath,
+  VisitStats
 } from "./types";
 
 interface ListResponse<T> {
@@ -215,6 +217,25 @@ export async function deleteFaq(documentId: string): Promise<void> {
 export async function listSocials(): Promise<SocialNetwork[]> {
   const res = await strapiGet<ListResponse<SocialNetwork>>(
     `/api/social-networks?${ALL}&populate[link]=true&pagination[pageSize]=200`
+  );
+  return res.data ?? [];
+}
+
+/* ------------------------------- Visitas ------------------------------ */
+
+export async function getVisitStats(): Promise<VisitStats> {
+  const res = await strapiGet<SingleResponse<VisitStats>>(
+    `/api/page-visits/stats`
+  );
+  return res.data ?? { total: 0, today: 0, last7Days: 0 };
+}
+
+export async function getTopPaths(
+  days = 30,
+  limit = 10
+): Promise<TopPath[]> {
+  const res = await strapiGet<ListResponse<TopPath>>(
+    `/api/page-visits/top?days=${days}&limit=${limit}`
   );
   return res.data ?? [];
 }

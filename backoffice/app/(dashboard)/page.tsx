@@ -1,8 +1,20 @@
 import Link from "next/link";
-import { Package, Tags, ShoppingBag, FileText } from "lucide-react";
+import {
+  Package,
+  Tags,
+  ShoppingBag,
+  FileText,
+  Eye,
+  type LucideIcon
+} from "lucide-react";
 import { PageHeader } from "@/components/page-header";
 import { getCurrentUser } from "@/lib/session";
-import { listProducts, listCategories, listOrders } from "@/lib/data";
+import {
+  listProducts,
+  listCategories,
+  listOrders,
+  getVisitStats
+} from "@/lib/data";
 import { ORDER_STATUS_META } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
@@ -10,17 +22,24 @@ export const dynamic = "force-dynamic";
 export default async function DashboardHome() {
   const user = await getCurrentUser();
 
-  const [products, categories, orders] = await Promise.all([
+  const [products, categories, orders, visits] = await Promise.all([
     listProducts().catch(() => []),
     listCategories().catch(() => []),
-    listOrders().catch(() => [])
+    listOrders().catch(() => []),
+    getVisitStats().catch(() => ({ total: 0, today: 0, last7Days: 0 }))
   ]);
 
   const pending = orders.filter(
     (o) => o.status === "pending_verification"
   ).length;
 
-  const stats = [
+  const stats: {
+    label: string;
+    value: number;
+    href: string;
+    icon: LucideIcon;
+    hint?: string;
+  }[] = [
     {
       label: "Productos",
       value: products.length,
@@ -44,6 +63,13 @@ export default async function DashboardHome() {
       value: pending,
       href: "/orders",
       icon: FileText
+    },
+    {
+      label: "Visitas",
+      value: visits.total,
+      href: "/visits",
+      icon: Eye,
+      hint: `Hoy ${visits.today} · 7 días ${visits.last7Days}`
     }
   ];
 
@@ -54,14 +80,15 @@ export default async function DashboardHome() {
         subtitle="Resumen de la tienda"
       />
 
-      <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
-        {stats.map(({ label, value, href, icon: Icon }) => (
+      <div className="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-5">
+        {stats.map(({ label, value, href, icon: Icon, hint }) => (
           <Link key={label} href={href} className="card p-5 transition hover:shadow-md">
             <div className="flex items-center justify-between">
               <Icon className="h-5 w-5 text-brand" />
               <span className="text-2xl font-semibold">{value}</span>
             </div>
             <p className="mt-2 text-sm text-neutral-500">{label}</p>
+            {hint && <p className="mt-1 text-xs text-neutral-400">{hint}</p>}
           </Link>
         ))}
       </div>

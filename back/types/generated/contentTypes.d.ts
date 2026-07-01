@@ -703,6 +703,48 @@ export interface ApiOrderOrder extends Struct.CollectionTypeSchema {
   };
 }
 
+export interface ApiPageVisitPageVisit extends Struct.CollectionTypeSchema {
+  collectionName: 'page_visits';
+  info: {
+    description: 'Trazas de visitas a las p\u00E1ginas del storefront';
+    displayName: 'Page Visit';
+    pluralName: 'page-visits';
+    singularName: 'page-visit';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  attributes: {
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::page-visit.page-visit'
+    > &
+      Schema.Attribute.Private;
+    path: Schema.Attribute.String &
+      Schema.Attribute.Required &
+      Schema.Attribute.SetMinMaxLength<{
+        maxLength: 512;
+      }>;
+    publishedAt: Schema.Attribute.DateTime;
+    referrer: Schema.Attribute.String &
+      Schema.Attribute.SetMinMaxLength<{
+        maxLength: 512;
+      }>;
+    sessionId: Schema.Attribute.String &
+      Schema.Attribute.SetMinMaxLength<{
+        maxLength: 128;
+      }>;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    userAgent: Schema.Attribute.Text;
+  };
+}
+
 export interface ApiPagePage extends Struct.CollectionTypeSchema {
   collectionName: 'pages';
   info: {
@@ -1464,6 +1506,7 @@ declare module '@strapi/strapi' {
       'api::log.log': ApiLogLog;
       'api::logo.logo': ApiLogoLogo;
       'api::order.order': ApiOrderOrder;
+      'api::page-visit.page-visit': ApiPageVisitPageVisit;
       'api::page.page': ApiPagePage;
       'api::payment-info.payment-info': ApiPaymentInfoPaymentInfo;
       'api::product-page.product-page': ApiProductPageProductPage;
