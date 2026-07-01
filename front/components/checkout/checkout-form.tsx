@@ -2,9 +2,15 @@
 
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
-import { Upload, X } from "lucide-react";
+import { Upload, X, MapPin } from "lucide-react";
+import {
+  getPricingSettings,
+  isProvinceCoords,
+  PRICING_DEFAULTS,
+  type PricingSettings
+} from "@/lib/pricing";
 import { PhoneInput } from "@/components/form/phone-input/PhoneInput";
 import { TextInput } from "@/components/form/text-input/TextInput";
 import { useAuth } from "@/context/auth-context";
@@ -74,8 +80,45 @@ export function CheckoutForm({
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Configuración de precios/envío y zona de entrega.
+  const [pricing, setPricing] = useState<PricingSettings>(PRICING_DEFAULTS);
+  const [isProvince, setIsProvince] = useState(false);
+  const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(
+    null
+  );
+  const [geoStatus, setGeoStatus] = useState<
+    "idle" | "locating" | "ok" | "denied"
+  >("idle");
+
+  useEffect(() => {
+    getPricingSettings().then(setPricing);
+  }, []);
+
+  const requestLocation = () => {
+    if (typeof navigator === "undefined" || !navigator.geolocation) {
+      setGeoStatus("denied");
+      return;
+    }
+    setGeoStatus("locating");
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const lat = pos.coords.latitude;
+        const lng = pos.coords.longitude;
+        setCoords({ lat, lng });
+        setIsProvince(isProvinceCoords(pricing, lat, lng));
+        setGeoStatus("ok");
+      },
+      () => setGeoStatus("denied"),
+      { enableHighAccuracy: true, timeout: 10000 }
+    );
+  };
+
   const subtotal = useMemo(() => getCartTotal(), [getCartTotal]);
-  const total = subtotal;
+  const shippingCost =
+    deliveryMethod === "delivery" && isProvince
+      ? pricing.provinceShippingCost
+      : 0;
+  const total = subtotal + shippingCost;
 
   const qrUrl = mediaUrl(paymentInfo?.qrImage?.url);
 
@@ -160,7 +203,12 @@ export function CheckoutForm({
             ""
         })),
         subtotal,
-        total
+        total,
+        // Zona de entrega: el servidor verifica con las coords si están; si no,
+        // usa este flag como respaldo.
+        isProvince: deliveryMethod === "delivery" ? isProvince : false,
+        destLat: coords?.lat ?? null,
+        destLng: coords?.lng ?? null
       };
 
       const formData = new FormData();
@@ -249,6 +297,64 @@ export function CheckoutForm({
                 ))}
               </div>
             </section>
+
+            {deliveryMethod === "delivery" && (
+              <section>
+                <h2 className="mb-4 text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+                  Zona de entrega
+                </h2>
+                <div className="flex flex-col gap-3">
+                  <div className="flex gap-2 border border-border p-1 text-xs">
+                    {(
+                      [
+                        { value: false, label: "Santa Cruz" },
+                        { value: true, label: "Provincia (fuera de SC)" }
+                      ] as const
+                    ).map((opt) => (
+                      <button
+                        key={String(opt.value)}
+                        type="button"
+                        onClick={() => setIsProvince(opt.value)}
+                        className={`flex-1 px-3 py-2 font-semibold uppercase tracking-[0.14em] transition-colors ${
+                          isProvince === opt.value
+                            ? "bg-foreground text-background"
+                            : "text-muted-foreground hover:text-foreground"
+                        }`}
+                      >
+                        {opt.label}
+                      </button>
+                    ))}
+                  </div>
+                  <button
+                    type="button"
+                    onClick={requestLocation}
+                    className="flex items-center gap-2 self-start text-xs font-semibold uppercase tracking-[0.14em] text-foreground underline-offset-4 hover:underline"
+                  >
+                    <MapPin className="h-4 w-4" />
+                    {geoStatus === "locating"
+                      ? "Detectando ubicación…"
+                      : "Detectar mi ubicación"}
+                  </button>
+                  {geoStatus === "ok" && (
+                    <p className="text-xs text-muted-foreground">
+                      Ubicación detectada:{" "}
+                      {isProvince ? "fuera de Santa Cruz (provincia)" : "Santa Cruz"}.
+                    </p>
+                  )}
+                  {geoStatus === "denied" && (
+                    <p className="text-xs text-muted-foreground">
+                      No pudimos obtener tu ubicación. Selecciona tu zona manualmente.
+                    </p>
+                  )}
+                  {isProvince && (
+                    <p className="text-xs text-muted-foreground">
+                      Envío a provincia (a la terminal): Bs{" "}
+                      {pricing.provinceShippingCost.toFixed(2)}.
+                    </p>
+                  )}
+                </div>
+              </section>
+            )}
 
             {deliveryMethod === "delivery" && (
               <section>
@@ -553,6 +659,14 @@ export function CheckoutForm({
                   <dt className="text-muted-foreground">Subtotal</dt>
                   <dd>Bs {subtotal.toFixed(2)}</dd>
                 </div>
+                {shippingCost > 0 && (
+                  <div className="flex justify-between">
+                    <dt className="text-muted-foreground">
+                      Envío a provincia
+                    </dt>
+                    <dd>Bs {shippingCost.toFixed(2)}</dd>
+                  </div>
+                )}
                 <div className="flex justify-between border-t border-border pt-2 text-base font-semibold">
                   <dt>Total</dt>
                   <dd>Bs {total.toFixed(2)}</dd>

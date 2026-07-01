@@ -24,16 +24,35 @@ export default factories.createCoreController(
       // Nunca se confía en los importes que envía el cliente.
       const pricing = await (
         strapi.service("api::order.order") as {
-          buildVerifiedOrderData: (items: unknown) => Promise<{
+          buildVerifiedOrderData: (
+            items: unknown,
+            opts?: {
+              deliveryMethod?: string;
+              lat?: unknown;
+              lng?: unknown;
+              clientIsProvince?: unknown;
+            }
+          ) => Promise<{
             items: unknown[];
             subtotal: number;
             shippingCost: number;
             total: number;
           }>;
         }
-      ).buildVerifiedOrderData(data.items);
+      ).buildVerifiedOrderData(data.items, {
+        deliveryMethod: data.deliveryMethod,
+        lat: data.destLat,
+        lng: data.destLng,
+        clientIsProvince: data.isProvince
+      });
+      // `destLat`/`destLng`/`isProvince` son solo entradas de cálculo (no son
+      // atributos del content-type): se descartan antes de persistir.
+      const { destLat, destLng, isProvince, ...orderData } = data;
+      void destLat;
+      void destLng;
+      void isProvince;
       ctx.request.body.data = {
-        ...data,
+        ...orderData,
         ...pricing,
         user: user.id,
         status: "pending_verification"

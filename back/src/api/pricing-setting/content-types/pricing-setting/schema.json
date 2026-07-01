@@ -1,0 +1,44 @@
+{
+  "kind": "singleType",
+  "collectionName": "pricing_settings",
+  "info": {
+    "singularName": "pricing-setting",
+    "pluralName": "pricing-settings",
+    "displayName": "Pricing setting",
+    "description": "Configuración de precios y envío (markup + envío a provincia)"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "markupPercent": {
+      "type": "decimal",
+      "required": true,
+      "default": 10,
+      "min": 0
+    },
+    "provinceShippingCost": {
+      "type": "decimal",
+      "required": true,
+      "default": 17,
+      "min": 0
+    },
+    "scCenterLat": {
+      "type": "decimal",
+      "required": true,
+      "default": -17.7833
+    },
+    "scCenterLng": {
+      "type": "decimal",
+      "required": true,
+      "default": -63.1821
+    },
+    "scRadiusKm": {
+      "type": "decimal",
+      "required": true,
+      "default": 15,
+      "min": 0
+    }
+  }
+}
