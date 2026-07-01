@@ -7,7 +7,7 @@ export type StaffCheckUser = {
   role?: { type?: string | null } | null;
 };
 
-/** Es staff si su email está en STAFF_EMAILS o tiene un rol de Strapi con type "staff". */
+/** Es staff si su email está en STAFF_EMAILS o tiene un rol de Strapi con type "admin" (o "staff"). */
 export function isStaffUser(user: StaffCheckUser | null | undefined): boolean {
   if (!user) return false;
   const staffEmails = (process.env.STAFF_EMAILS || "")
@@ -16,6 +16,7 @@ export function isStaffUser(user: StaffCheckUser | null | undefined): boolean {
     .filter(Boolean);
   const email = (user.email || "").toLowerCase();
   if (email && staffEmails.includes(email)) return true;
-  if (user.role?.type === "staff") return true;
+  const roleType = user.role?.type;
+  if (roleType === "admin" || roleType === "staff") return true;
   return false;
 }

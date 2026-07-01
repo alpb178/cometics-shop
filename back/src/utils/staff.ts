@@ -11,7 +11,8 @@ export function isStaffUser(user: StaffCheckUser | null | undefined): boolean {
     .filter(Boolean);
   const email = (user.email || "").toLowerCase();
   if (email && staffEmails.includes(email)) return true;
-  if (user.role?.type === "staff") return true;
+  const roleType = user.role?.type;
+  if (roleType === "admin" || roleType === "staff") return true;
   return false;
 }
 
