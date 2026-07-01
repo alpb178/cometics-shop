@@ -118,6 +118,24 @@ export interface TopPath {
   count: number;
 }
 
+export interface TrafficSource {
+  source: string;
+  count: number;
+}
+
+export type StoreEventType = "product_view" | "add_to_cart" | "cart_view";
+
+export interface StoreEvent {
+  id: number;
+  type: StoreEventType;
+  label: string | null;
+  productSlug: string | null;
+  quantity: number | null;
+  path: string | null;
+  sessionId: string | null;
+  createdAt: string;
+}
+
 export type SocialName =
   | "instagram"
   | "x"

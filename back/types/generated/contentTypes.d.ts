@@ -985,6 +985,55 @@ export interface ApiSocialNetworkSocialNetwork
   };
 }
 
+export interface ApiStoreEventStoreEvent extends Struct.CollectionTypeSchema {
+  collectionName: 'store_events';
+  info: {
+    description: 'Interacciones del storefront (ver producto, a\u00F1adir al carrito, ver carrito)';
+    displayName: 'Store Event';
+    pluralName: 'store-events';
+    singularName: 'store-event';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  attributes: {
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    label: Schema.Attribute.String &
+      Schema.Attribute.SetMinMaxLength<{
+        maxLength: 255;
+      }>;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::store-event.store-event'
+    > &
+      Schema.Attribute.Private;
+    path: Schema.Attribute.String &
+      Schema.Attribute.SetMinMaxLength<{
+        maxLength: 512;
+      }>;
+    productSlug: Schema.Attribute.String &
+      Schema.Attribute.SetMinMaxLength<{
+        maxLength: 255;
+      }>;
+    publishedAt: Schema.Attribute.DateTime;
+    quantity: Schema.Attribute.Integer;
+    sessionId: Schema.Attribute.String &
+      Schema.Attribute.SetMinMaxLength<{
+        maxLength: 128;
+      }>;
+    type: Schema.Attribute.Enumeration<
+      ['product_view', 'add_to_cart', 'cart_view']
+    > &
+      Schema.Attribute.Required;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+  };
+}
+
 export interface PluginContentReleasesRelease
   extends Struct.CollectionTypeSchema {
   collectionName: 'strapi_releases';
@@ -1512,6 +1561,7 @@ declare module '@strapi/strapi' {
       'api::product-page.product-page': ApiProductPageProductPage;
       'api::product.product': ApiProductProduct;
       'api::social-network.social-network': ApiSocialNetworkSocialNetwork;
+      'api::store-event.store-event': ApiStoreEventStoreEvent;
       'plugin::content-releases.release': PluginContentReleasesRelease;
       'plugin::content-releases.release-action': PluginContentReleasesReleaseAction;
       'plugin::i18n.locale': PluginI18NLocale;
