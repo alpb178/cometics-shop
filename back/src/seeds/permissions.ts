@@ -107,6 +107,10 @@ const ADMIN_ACTIONS = [
   // Necesario para que el backoffice pueda pedir `/api/users/me?populate=role`
   // (requireStaff / login). Popular la relación `role` exige este scope.
   "plugin::users-permissions.role.find",
+  // KPI de visitas del dashboard (GET /api/page-visits/stats). El registro de
+  // visitas (POST /page-visits/track) es público vía auth:false, no necesita
+  // permiso de rol.
+  "api::page-visit.page-visit.stats",
   // Subida de imágenes (comprobantes, imágenes de producto).
   "plugin::upload.content-api.upload",
 ];

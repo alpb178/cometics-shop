@@ -11,7 +11,8 @@ import type {
   OrderStatus,
   PaymentInfo,
   Product,
-  SocialNetwork
+  SocialNetwork,
+  VisitStats
 } from "./types";
 
 interface ListResponse<T> {
@@ -217,4 +218,13 @@ export async function listSocials(): Promise<SocialNetwork[]> {
     `/api/social-networks?${ALL}&populate[link]=true&pagination[pageSize]=200`
   );
   return res.data ?? [];
+}
+
+/* ------------------------------- Visitas ------------------------------ */
+
+export async function getVisitStats(): Promise<VisitStats> {
+  const res = await strapiGet<SingleResponse<VisitStats>>(
+    `/api/page-visits/stats`
+  );
+  return res.data ?? { total: 0, today: 0, last7Days: 0 };
 }

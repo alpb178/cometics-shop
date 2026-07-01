@@ -107,6 +107,12 @@ export interface Faq {
   answer: string;
 }
 
+export interface VisitStats {
+  total: number;
+  today: number;
+  last7Days: number;
+}
+
 export type SocialName =
   | "instagram"
   | "x"

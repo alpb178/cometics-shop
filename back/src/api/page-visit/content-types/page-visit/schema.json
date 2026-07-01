@@ -1,0 +1,32 @@
+{
+  "kind": "collectionType",
+  "collectionName": "page_visits",
+  "info": {
+    "singularName": "page-visit",
+    "pluralName": "page-visits",
+    "displayName": "Page Visit",
+    "description": "Trazas de visitas a las páginas del storefront"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "path": {
+      "type": "string",
+      "required": true,
+      "maxLength": 512
+    },
+    "referrer": {
+      "type": "string",
+      "maxLength": 512
+    },
+    "sessionId": {
+      "type": "string",
+      "maxLength": 128
+    },
+    "userAgent": {
+      "type": "text"
+    }
+  }
+}
