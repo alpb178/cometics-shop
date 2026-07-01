@@ -116,6 +116,13 @@ const ADMIN_ACTIONS = [
   "plugin::upload.content-api.upload",
 ];
 
+// Rol "public": acciones de autenticación OAuth (Google) para visitantes
+// anónimos. Son las que usa el flujo /connect/:provider y su callback.
+const PUBLIC_ACTIONS = [
+  "plugin::users-permissions.auth.connect",
+  "plugin::users-permissions.auth.callback",
+];
+
 async function ensureRole(
   strapi: Core.Strapi,
   role: { name: string; type: string; description: string },
@@ -227,6 +234,15 @@ export async function seedPermissions(strapi: Core.Strapi): Promise<void> {
 
   await grantActions(strapi, adminRole, ADMIN_ACTIONS);
   await grantActions(strapi, clientRole, CLIENT_ACTIONS);
+
+  // Rol "public": acciones necesarias para el login OAuth (Google).
+  const publicRole = await strapi.db
+    .query(ROLE_UID)
+    .findOne({ where: { type: "public" } });
+  if (publicRole) {
+    await grantActions(strapi, publicRole, PUBLIC_ACTIONS);
+  }
+
   await setDefaultRole(strapi);
   await migrateUsers(strapi, adminRole.id, clientRole.id);
 }

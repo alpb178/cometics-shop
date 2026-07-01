@@ -1,6 +1,7 @@
 import type { Core } from "@strapi/strapi";
 import { seedAdminUser } from "./seeds/admin-user";
 import { seedPermissions } from "./seeds/permissions";
+import { seedGoogleProvider } from "./seeds/google-provider";
 
 export default {
   /**
@@ -25,5 +26,7 @@ export default {
     await seedPermissions(strapi);
     // Seeder: usuario staff por defecto para el backoffice.
     await seedAdminUser(strapi);
+    // Seeder: proveedor OAuth de Google (storefront).
+    await seedGoogleProvider(strapi);
   },
 };
