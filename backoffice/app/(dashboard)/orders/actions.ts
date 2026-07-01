@@ -14,3 +14,21 @@ export async function updateOrderStatusAction(
   revalidatePath("/orders");
   revalidatePath(`/orders/${documentId}`);
 }
+
+/** Confirma el pago tras verificar el comprobante manualmente. */
+export async function confirmOrderPaymentAction(documentId: string) {
+  await requireStaff();
+  await updateOrderStatus(documentId, "confirmed");
+  revalidatePath("/orders");
+  revalidatePath(`/orders/${documentId}`);
+}
+
+/** Rechaza el pedido (comprobante inválido) con un motivo. */
+export async function rejectOrderAction(documentId: string, reason: string) {
+  await requireStaff();
+  const trimmed = reason.trim();
+  if (!trimmed) throw new Error("Indica un motivo del rechazo.");
+  await updateOrderStatus(documentId, "cancelled", trimmed);
+  revalidatePath("/orders");
+  revalidatePath(`/orders/${documentId}`);
+}

@@ -154,9 +154,14 @@ export async function getOrder(documentId: string): Promise<Order | null> {
 
 export async function updateOrderStatus(
   documentId: string,
-  status: OrderStatus
+  status: OrderStatus,
+  cancellationReason?: string
 ): Promise<void> {
-  await strapiSend("PUT", `/api/orders/${documentId}`, { status });
+  const data: { status: OrderStatus; cancellationReason?: string } = { status };
+  if (cancellationReason !== undefined) {
+    data.cancellationReason = cancellationReason;
+  }
+  await strapiSend("PUT", `/api/orders/${documentId}`, data);
 }
 
 /* ------------------------------ Contenido ----------------------------- */

@@ -72,6 +72,13 @@
     },
     "customerNotes": {
       "type": "text"
+    },
+    "paymentReference": {
+      "type": "string",
+      "maxLength": 120
+    },
+    "cancellationReason": {
+      "type": "text"
     }
   }
 }

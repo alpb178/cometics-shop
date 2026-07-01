@@ -17,6 +17,7 @@ type Payload = {
   deliveryMethod: "delivery" | "pickup";
   paymentMethod: "bank_transfer" | "qr";
   customerNotes?: string;
+  paymentReference?: string;
   items: Array<{
     productId: number;
     name: string;
@@ -85,6 +86,7 @@ async function createOrder(
       subtotal: payload.subtotal,
       total: payload.total,
       customerNotes: payload.customerNotes,
+      paymentReference: payload.paymentReference,
       // Entradas de cálculo de envío; el servidor las verifica y no las persiste.
       isProvince: payload.isProvince ?? false,
       destLat: payload.destLat ?? null,

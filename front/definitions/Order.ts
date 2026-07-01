@@ -37,6 +37,8 @@ export interface Order {
   } | null;
   status: OrderStatus;
   customerNotes?: string | null;
+  paymentReference?: string | null;
+  cancellationReason?: string | null;
   createdAt: string;
   updatedAt: string;
 }
