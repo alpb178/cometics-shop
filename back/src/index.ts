@@ -1,4 +1,6 @@
 import type { Core } from "@strapi/strapi";
+import { seedAdminUser } from "./seeds/admin-user";
+import { seedPermissions } from "./seeds/permissions";
 
 export default {
   /**
@@ -19,6 +21,9 @@ export default {
    * run jobs, or perform some special logic.
    */
   async bootstrap({ strapi }: { strapi: Core.Strapi }) {
-    // Application bootstrap logic
+    // Seeder: permisos del rol "authenticated" que usa el backoffice.
+    await seedPermissions(strapi);
+    // Seeder: usuario staff por defecto para el backoffice.
+    await seedAdminUser(strapi);
   },
 };
