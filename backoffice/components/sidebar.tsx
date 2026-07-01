@@ -8,6 +8,7 @@ import {
   Tags,
   ShoppingBag,
   FileText,
+  Eye,
   LogOut
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -18,7 +19,8 @@ const NAV = [
   { href: "/products", label: "Productos", icon: Package },
   { href: "/categories", label: "Categorías", icon: Tags },
   { href: "/orders", label: "Pedidos", icon: ShoppingBag },
-  { href: "/content", label: "Contenido", icon: FileText }
+  { href: "/content", label: "Contenido", icon: FileText },
+  { href: "/visits", label: "Visitas", icon: Eye }
 ];
 
 export function Sidebar({ user }: { user: AuthUser | null }) {

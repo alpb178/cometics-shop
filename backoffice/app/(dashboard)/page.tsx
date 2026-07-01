@@ -67,7 +67,7 @@ export default async function DashboardHome() {
     {
       label: "Visitas",
       value: visits.total,
-      href: "/",
+      href: "/visits",
       icon: Eye,
       hint: `Hoy ${visits.today} · 7 días ${visits.last7Days}`
     }

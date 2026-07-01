@@ -44,4 +44,13 @@ export default factories.createCoreController(UID, ({ strapi }) => ({
     const data = await strapi.service(UID).getStats();
     ctx.body = { data };
   },
+
+  /** Páginas más visitadas. Solo staff. */
+  async top(ctx) {
+    if (!ensureStaff(ctx)) return;
+    const days = Number(ctx.query.days) || 30;
+    const limit = Math.min(Number(ctx.query.limit) || 10, 50);
+    const data = await strapi.service(UID).getTopPaths({ limit, days });
+    ctx.body = { data };
+  },
 }));

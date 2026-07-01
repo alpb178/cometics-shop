@@ -21,5 +21,10 @@ export default {
       path: "/page-visits/stats",
       handler: "page-visit.stats",
     },
+    {
+      method: "GET",
+      path: "/page-visits/top",
+      handler: "page-visit.top",
+    },
   ],
 };

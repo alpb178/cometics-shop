@@ -33,4 +33,26 @@ export default factories.createCoreService(UID, ({ strapi }) => ({
 
     return { total, today, last7Days };
   },
+
+  /** Páginas más visitadas en los últimos `days` días. */
+  async getTopPaths(
+    { limit = 10, days = 30 }: { limit?: number; days?: number } = {},
+  ): Promise<Array<{ path: string; count: number }>> {
+    const since = new Date(
+      Date.now() - days * 24 * 60 * 60 * 1000,
+    ).toISOString();
+
+    const rows = await strapi.db
+      .connection("page_visits")
+      .select("path")
+      .count("* as count")
+      .where("created_at", ">=", since)
+      .groupBy("path")
+      .orderBy("count", "desc")
+      .limit(limit);
+
+    return (rows as Array<{ path: string; count: number | string }>).map(
+      (r) => ({ path: r.path, count: Number(r.count) }),
+    );
+  },
 }));

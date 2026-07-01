@@ -12,6 +12,7 @@ import type {
   PaymentInfo,
   Product,
   SocialNetwork,
+  TopPath,
   VisitStats
 } from "./types";
 
@@ -227,4 +228,14 @@ export async function getVisitStats(): Promise<VisitStats> {
     `/api/page-visits/stats`
   );
   return res.data ?? { total: 0, today: 0, last7Days: 0 };
+}
+
+export async function getTopPaths(
+  days = 30,
+  limit = 10
+): Promise<TopPath[]> {
+  const res = await strapiGet<ListResponse<TopPath>>(
+    `/api/page-visits/top?days=${days}&limit=${limit}`
+  );
+  return res.data ?? [];
 }
