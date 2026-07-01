@@ -79,6 +79,7 @@ export function CheckoutForm({
   const [proofPreview, setProofPreview] = useState<string | null>(null);
   const [paymentReference, setPaymentReference] = useState("");
   const [amountCopied, setAmountCopied] = useState(false);
+  const [qrZoomed, setQrZoomed] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -596,7 +597,12 @@ export function CheckoutForm({
                 <div className="mt-6 border border-border bg-secondary/50 px-5 py-4 text-sm">
                   {qrUrl ? (
                     <div className="flex flex-col items-center gap-3">
-                      <div className="relative h-64 w-64 bg-background">
+                      <button
+                        type="button"
+                        onClick={() => setQrZoomed(true)}
+                        className="relative h-64 w-64 cursor-zoom-in bg-background transition-transform hover:scale-[1.02]"
+                        aria-label="Ampliar QR para escanear"
+                      >
                         <Image
                           src={qrUrl}
                           alt="QR de pago"
@@ -604,10 +610,10 @@ export function CheckoutForm({
                           sizes="256px"
                           className="object-contain"
                         />
-                      </div>
+                      </button>
                       <p className="text-center text-xs text-muted-foreground">
-                        Escanea el QR con tu app bancaria y sube luego el
-                        comprobante.
+                        Toca el QR para ampliarlo. Escanéalo con tu app bancaria
+                        y sube luego el comprobante.
                       </p>
                     </div>
                   ) : (
@@ -747,6 +753,41 @@ export function CheckoutForm({
           </aside>
         </form>
       </FormProvider>
+
+      {qrZoomed && qrUrl && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-label="QR de pago ampliado"
+          onClick={() => setQrZoomed(false)}
+          className="fixed inset-0 z-50 flex flex-col items-center justify-center gap-4 bg-black/80 p-6"
+        >
+          <button
+            type="button"
+            onClick={() => setQrZoomed(false)}
+            className="absolute right-4 top-4 flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/20"
+            aria-label="Cerrar"
+          >
+            <X className="h-5 w-5" />
+          </button>
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="relative aspect-square w-full max-w-[min(90vw,90vh)] bg-white p-4"
+          >
+            <Image
+              src={qrUrl}
+              alt="QR de pago ampliado"
+              fill
+              sizes="90vw"
+              className="object-contain p-2"
+              priority
+            />
+          </div>
+          <p className="text-center text-sm text-white/80">
+            Monto exacto: Bs {total.toFixed(2)} · Toca fuera del QR para cerrar
+          </p>
+        </div>
+      )}
     </section>
   );
 }
