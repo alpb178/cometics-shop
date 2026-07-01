@@ -104,6 +104,9 @@ const ADMIN_ACTIONS = [
   // `/api/users` queda restringido a staff mediante la extensión de
   // users-permissions (src/extensions/users-permissions/strapi-server.ts).
   "plugin::users-permissions.user.find",
+  // Alta de usuarios staff desde el backoffice (POST /api/users). También
+  // restringido a staff en la misma extensión.
+  "plugin::users-permissions.user.create",
   // Necesario para que el backoffice pueda pedir `/api/users/me?populate=role`
   // (requireStaff / login). Popular la relación `role` exige este scope.
   "plugin::users-permissions.role.find",

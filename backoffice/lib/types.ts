@@ -152,3 +152,22 @@ export interface AuthUser {
   username: string;
   email: string;
 }
+
+/** Rol de users-permissions (public/authenticated/admin/client). */
+export interface AppRole {
+  id: number;
+  name: string;
+  type: string;
+}
+
+/** Usuario tal como lo devuelve `GET /api/users?populate=role` (array plano). */
+export interface UserRow {
+  id: number;
+  username: string;
+  email: string;
+  provider: string | null;
+  confirmed: boolean;
+  blocked: boolean;
+  role: AppRole | null;
+  createdAt: string;
+}

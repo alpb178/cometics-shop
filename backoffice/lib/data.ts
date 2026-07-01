@@ -2,9 +2,11 @@ import "server-only";
 import {
   strapiDelete,
   strapiGet,
+  strapiPostRaw,
   strapiSend
 } from "./strapi";
 import type {
+  AppRole,
   Category,
   Faq,
   Order,
@@ -13,6 +15,7 @@ import type {
   Product,
   SocialNetwork,
   TopPath,
+  UserRow,
   VisitStats
 } from "./types";
 
@@ -238,4 +241,42 @@ export async function getTopPaths(
     `/api/page-visits/top?days=${days}&limit=${limit}`
   );
   return res.data ?? [];
+}
+
+/* ------------------------------- Usuarios ----------------------------- */
+
+// `GET /api/users` (users-permissions) devuelve un array plano, no `{ data }`.
+// Acceso restringido a staff en la extensión del plugin (back/).
+export async function listUsers(): Promise<UserRow[]> {
+  const users = await strapiGet<UserRow[]>(`/api/users?populate=role`);
+  // Ordenar por fecha de alta (desc) en el servidor Next para no depender de
+  // los query params de paginación/orden de users-permissions.
+  return (users ?? [])
+    .slice()
+    .sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1));
+}
+
+// Roles de users-permissions. La ruta NO fija prefix vacío, así que usa el
+// prefijo del plugin: `/api/users-permissions/roles`. Devuelve `{ roles: [] }`.
+export async function listRoles(): Promise<AppRole[]> {
+  const res = await strapiGet<{ roles: AppRole[] }>(
+    `/api/users-permissions/roles`
+  );
+  return res.roles ?? [];
+}
+
+export interface CreateUserInput {
+  username: string;
+  email: string;
+  password: string;
+  role: number;
+}
+
+export async function createUser(input: CreateUserInput): Promise<UserRow> {
+  // El body va sin envoltorio `{ data }`; `confirmed` lo fuerza además la
+  // extensión del backend por si acaso.
+  return await strapiPostRaw<UserRow>("/api/users", {
+    ...input,
+    confirmed: true
+  });
 }
