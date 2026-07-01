@@ -665,6 +665,7 @@ export interface ApiOrderOrder extends Struct.CollectionTypeSchema {
     draftAndPublish: false;
   };
   attributes: {
+    cancellationReason: Schema.Attribute.Text;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
@@ -680,6 +681,10 @@ export interface ApiOrderOrder extends Struct.CollectionTypeSchema {
     paymentMethod: Schema.Attribute.Enumeration<['bank_transfer', 'qr']> &
       Schema.Attribute.Required;
     paymentProof: Schema.Attribute.Media<'images'>;
+    paymentReference: Schema.Attribute.String &
+      Schema.Attribute.SetMinMaxLength<{
+        maxLength: 120;
+      }>;
     publishedAt: Schema.Attribute.DateTime;
     shippingAddress: Schema.Attribute.Relation<
       'oneToOne',

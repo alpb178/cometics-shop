@@ -4,6 +4,7 @@ import { ArrowLeft } from "lucide-react";
 import { getOrder } from "@/lib/data";
 import { formatDate, mediaUrl } from "@/lib/utils";
 import { StatusSelect } from "../status-select";
+import { PaymentVerification } from "../payment-verification";
 
 export const dynamic = "force-dynamic";
 
@@ -114,6 +115,12 @@ export default async function OrderDetailPage({
 
         {/* Lateral */}
         <div className="space-y-6">
+          <PaymentVerification
+            documentId={order.documentId}
+            status={order.status}
+            cancellationReason={order.cancellationReason}
+          />
+
           <div className="card p-5">
             <StatusSelect documentId={order.documentId} current={order.status} />
           </div>
@@ -138,6 +145,12 @@ export default async function OrderDetailPage({
 
           <div className="card p-5">
             <h2 className="mb-2 font-medium">Comprobante de pago</h2>
+            {order.paymentReference && (
+              <p className="mb-3 text-sm">
+                <span className="text-neutral-500">Nº comprobante: </span>
+                <span className="font-mono">{order.paymentReference}</span>
+              </p>
+            )}
             {proof ? (
               <a href={proof} target="_blank" rel="noreferrer">
                 {/* eslint-disable-next-line @next/next/no-img-element */}

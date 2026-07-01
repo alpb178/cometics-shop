@@ -96,7 +96,7 @@ export default factories.createCoreController(
       if (!isStaffUser(user)) return ctx.forbidden();
 
       const data = ctx.request.body?.data || {};
-      const allowedKeys = ["status", "customerNotes"];
+      const allowedKeys = ["status", "customerNotes", "cancellationReason"];
       const sanitized: Record<string, unknown> = {};
       for (const key of allowedKeys) {
         if (key in data) sanitized[key] = data[key];

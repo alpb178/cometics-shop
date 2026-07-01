@@ -77,6 +77,8 @@ export function CheckoutForm({
   const [saveNewAddress, setSaveNewAddress] = useState(false);
   const [proofFile, setProofFile] = useState<File | null>(null);
   const [proofPreview, setProofPreview] = useState<string | null>(null);
+  const [paymentReference, setPaymentReference] = useState("");
+  const [amountCopied, setAmountCopied] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -148,6 +150,16 @@ export function CheckoutForm({
     setProofPreview(null);
   }
 
+  async function copyAmount() {
+    try {
+      await navigator.clipboard.writeText(total.toFixed(2));
+      setAmountCopied(true);
+      setTimeout(() => setAmountCopied(false), 2000);
+    } catch {
+      // clipboard no disponible: el monto igual está visible en pantalla.
+    }
+  }
+
   const onSubmit = methods.handleSubmit(async (values) => {
     if (!proofFile || !paymentMethod) return;
     setSubmitting(true);
@@ -191,6 +203,7 @@ export function CheckoutForm({
         deliveryMethod,
         paymentMethod,
         customerNotes: values.notes || undefined,
+        paymentReference: paymentReference.trim() || undefined,
         items: items.map((it) => ({
           productId: it.product.id,
           name: it.product.name,
@@ -509,6 +522,30 @@ export function CheckoutForm({
                 ))}
               </div>
 
+              {paymentMethod !== null && (
+                <div className="mt-6 flex flex-wrap items-center justify-between gap-3 border border-foreground/20 bg-secondary/50 px-5 py-4">
+                  <div>
+                    <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">
+                      Monto exacto a pagar
+                    </p>
+                    <p className="font-display text-2xl font-semibold">
+                      Bs {total.toFixed(2)}
+                    </p>
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      El QR/transferencia no lleva el monto: ingrésalo
+                      manualmente en tu app bancaria.
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={copyAmount}
+                    className="shrink-0 border border-foreground px-4 py-2 text-xs font-semibold uppercase tracking-[0.14em] transition-colors hover:bg-foreground hover:text-background"
+                  >
+                    {amountCopied ? "¡Copiado!" : "Copiar monto"}
+                  </button>
+                </div>
+              )}
+
               {paymentMethod === "bank_transfer" && (
                 <div className="mt-6 space-y-2 border border-border bg-secondary/50 px-5 py-4 text-sm">
                   {paymentInfo?.bankName && (
@@ -622,6 +659,28 @@ export function CheckoutForm({
                     </button>
                   </div>
                 )}
+
+                <div className="mt-6">
+                  <label
+                    htmlFor="paymentReference"
+                    className="mb-2 block text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground"
+                  >
+                    Nº de comprobante / transacción (opcional)
+                  </label>
+                  <input
+                    id="paymentReference"
+                    type="text"
+                    inputMode="numeric"
+                    value={paymentReference}
+                    onChange={(e) => setPaymentReference(e.target.value)}
+                    maxLength={120}
+                    placeholder="Ej. 000123456789"
+                    className="w-full max-w-xs border border-border bg-background px-4 py-3 text-sm focus:border-foreground focus:outline-none"
+                  />
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    Cópialo desde tu app bancaria para agilizar la verificación.
+                  </p>
+                </div>
               </section>
             )}
 

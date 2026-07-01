@@ -95,6 +95,8 @@ export interface Order {
   items: OrderItem[];
   shippingAddress: Address | null;
   paymentProof: StrapiMedia | null;
+  paymentReference: string | null;
+  cancellationReason: string | null;
   user: OrderUser | null;
   createdAt: string;
   updatedAt: string;
