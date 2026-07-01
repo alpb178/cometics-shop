@@ -45,19 +45,33 @@ export default factories.createCoreController(
         lng: data.destLng,
         clientIsProvince: data.isProvince
       });
-      // `destLat`/`destLng`/`isProvince` son solo entradas de cálculo (no son
-      // atributos del content-type): se descartan antes de persistir.
-      const { destLat, destLng, isProvince, ...orderData } = data;
-      void destLat;
-      void destLng;
-      void isProvince;
-      ctx.request.body.data = {
-        ...orderData,
-        ...pricing,
-        user: user.id,
-        status: "pending_verification"
-      };
-      return await super.create(ctx);
+      // La relación `user` no se puede fijar en el body vía content-API (Strapi
+      // v5 la rechaza: "Invalid key user"). Se crea con el Document Service
+      // asignando el dueño server-side. Se toman solo campos permitidos del
+      // cliente; los importes vienen de `pricing` (verificados), y el estado y
+      // el usuario se fijan aquí. `destLat`/`destLng`/`isProvince` son entradas
+      // de cálculo (no atributos), así que no se persisten.
+      const ALLOWED = [
+        "shippingAddress",
+        "deliveryMethod",
+        "paymentMethod",
+        "paymentProof",
+        "customerNotes",
+        "paymentReference",
+      ];
+      const clean: Record<string, unknown> = {};
+      for (const key of ALLOWED) if (key in data) clean[key] = data[key];
+
+      const entity = await strapi.documents("api::order.order").create({
+        data: {
+          ...clean,
+          ...pricing,
+          user: user.id,
+          status: "pending_verification",
+        },
+      });
+      const sanitized = await this.sanitizeOutput(entity, ctx);
+      return this.transformResponse(sanitized);
     },
 
     async find(ctx) {
