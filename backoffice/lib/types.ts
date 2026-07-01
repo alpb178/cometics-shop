@@ -86,7 +86,7 @@ export interface Order {
   documentId: string;
   orderNumber: string;
   deliveryMethod: "delivery" | "pickup";
-  paymentMethod: "bank_transfer" | "qr";
+  paymentMethod: "cash" | "qr" | "bank_transfer";
   subtotal: number;
   shippingCost: number | null;
   total: number;

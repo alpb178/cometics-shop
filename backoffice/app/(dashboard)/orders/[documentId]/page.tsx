@@ -13,8 +13,10 @@ const DELIVERY_LABEL: Record<string, string> = {
   pickup: "Recojo en tienda"
 };
 const PAYMENT_LABEL: Record<string, string> = {
-  bank_transfer: "Transferencia bancaria",
-  qr: "Pago QR"
+  cash: "Efectivo",
+  qr: "Pago QR",
+  // Legado: pedidos antiguos creados antes del cambio a efectivo/QR.
+  bank_transfer: "Transferencia bancaria"
 };
 
 export default async function OrderDetailPage({

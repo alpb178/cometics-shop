@@ -1,7 +1,7 @@
 import type { Address } from "./Address";
 
 export type DeliveryMethod = "delivery" | "pickup";
-export type PaymentMethod = "bank_transfer" | "qr";
+export type PaymentMethod = "cash" | "qr";
 export type OrderStatus =
   | "pending_verification"
   | "confirmed"

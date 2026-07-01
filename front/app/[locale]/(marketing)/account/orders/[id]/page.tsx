@@ -13,9 +13,11 @@ const STATUS_LABELS: Record<Order["status"], string> = {
   cancelled: "Cancelado"
 };
 
-const PAYMENT_LABELS: Record<Order["paymentMethod"], string> = {
-  bank_transfer: "Transferencia bancaria",
-  qr: "Pago por QR"
+const PAYMENT_LABELS: Record<string, string> = {
+  cash: "Efectivo",
+  qr: "Pago por QR",
+  // Legado: pedidos anteriores al cambio a efectivo/QR.
+  bank_transfer: "Transferencia bancaria"
 };
 
 const STRAPI_URL = process.env.NEXT_PUBLIC_API_URL;

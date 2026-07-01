@@ -15,7 +15,7 @@ type Payload = {
     notes?: string;
   };
   deliveryMethod: "delivery" | "pickup";
-  paymentMethod: "bank_transfer" | "qr";
+  paymentMethod: "cash" | "qr";
   customerNotes?: string;
   paymentReference?: string;
   items: Array<{
@@ -73,7 +73,7 @@ async function createAddress(
 async function createOrder(
   token: string,
   payload: Payload,
-  proofId: number,
+  proofId: number | null,
   addressId: number | null
 ): Promise<{ id: number; orderNumber?: string }> {
   const body = {
@@ -129,9 +129,6 @@ export async function POST(req: Request) {
   if (typeof payloadRaw !== "string") {
     return NextResponse.json({ error: "Missing payload" }, { status: 400 });
   }
-  if (!(proof instanceof File)) {
-    return NextResponse.json({ error: "Missing proof file" }, { status: 400 });
-  }
 
   let payload: Payload;
   try {
@@ -142,6 +139,11 @@ export async function POST(req: Request) {
 
   if (!payload.items?.length) {
     return NextResponse.json({ error: "Carrito vacío" }, { status: 400 });
+  }
+  // El comprobante solo es obligatorio para pago por QR; en efectivo se paga
+  // contra entrega o en tienda.
+  if (payload.paymentMethod === "qr" && !(proof instanceof File)) {
+    return NextResponse.json({ error: "Missing proof file" }, { status: 400 });
   }
   if (
     payload.deliveryMethod === "delivery" &&
@@ -155,7 +157,8 @@ export async function POST(req: Request) {
   }
 
   try {
-    const proofId = await uploadProof(token, proof);
+    const proofId =
+      proof instanceof File ? await uploadProof(token, proof) : null;
     let addressId: number | null = payload.addressId ?? null;
     if (!addressId && payload.address) {
       addressId = await createAddress(token, payload.address);
