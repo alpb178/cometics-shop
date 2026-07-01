@@ -1,13 +1,28 @@
 import { PageHeader } from "@/components/page-header";
-import { getPaymentInfo, listFaqs, listSocials } from "@/lib/data";
+import {
+  getPaymentInfo,
+  getPricingSetting,
+  listFaqs,
+  listSocials
+} from "@/lib/data";
 import { PaymentInfoForm } from "./payment-info-form";
+import { PricingForm } from "./pricing-form";
 import { FaqManager } from "./faq-manager";
 
 export const dynamic = "force-dynamic";
 
+const PRICING_FALLBACK = {
+  markupPercent: 10,
+  provinceShippingCost: 17,
+  scCenterLat: -17.7833,
+  scCenterLng: -63.1821,
+  scRadiusKm: 15
+};
+
 export default async function ContentPage() {
-  const [info, faqs, socials] = await Promise.all([
+  const [info, pricing, faqs, socials] = await Promise.all([
     getPaymentInfo().catch(() => null),
+    getPricingSetting().catch(() => PRICING_FALLBACK),
     listFaqs().catch(() => []),
     listSocials().catch(() => [])
   ]);
@@ -21,6 +36,14 @@ export default async function ContentPage() {
         />
         <h2 className="mb-3 text-lg font-semibold">Datos de pago</h2>
         <PaymentInfoForm info={info} />
+      </div>
+
+      <div>
+        <h2 className="mb-1 text-lg font-semibold">Precios y envío</h2>
+        <p className="mb-3 text-sm text-neutral-500">
+          Markup global (invisible) y costo de envío a provincia.
+        </p>
+        <PricingForm setting={pricing} />
       </div>
 
       <FaqManager faqs={faqs} />

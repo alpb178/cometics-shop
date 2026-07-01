@@ -46,6 +46,7 @@ const CATALOG_READ = [
   "api::social-network.social-network.find",
   "api::social-network.social-network.findOne",
   "api::payment-info.payment-info.find",
+  "api::pricing-setting.pricing-setting.find",
 ];
 
 // Rol "client": storefront.
@@ -89,6 +90,8 @@ const ADMIN_ACTIONS = [
   // Datos de pago (single type).
   "api::payment-info.payment-info.update",
   "api::payment-info.payment-info.delete",
+  // Configuración de precios/envío (single type).
+  "api::pricing-setting.pricing-setting.update",
   // FAQs.
   "api::faq.faq.create",
   "api::faq.faq.update",
@@ -128,6 +131,8 @@ const ADMIN_ACTIONS = [
 const PUBLIC_ACTIONS = [
   "plugin::users-permissions.auth.connect",
   "plugin::users-permissions.auth.callback",
+  // El storefront anónimo necesita el markup para mostrar precios.
+  "api::pricing-setting.pricing-setting.find",
 ];
 
 async function ensureRole(

@@ -12,6 +12,7 @@ import type {
   Order,
   OrderStatus,
   PaymentInfo,
+  PricingSetting,
   Product,
   SocialNetwork,
   StoreEvent,
@@ -182,6 +183,30 @@ export async function updatePaymentInfo(
 ): Promise<void> {
   // Single type: PUT sin documentId.
   await strapiSend("PUT", "/api/payment-info", input);
+}
+
+/* --------------------- Precios / envío (config) ----------------------- */
+
+const PRICING_DEFAULTS: PricingSetting = {
+  markupPercent: 10,
+  provinceShippingCost: 17,
+  scCenterLat: -17.7833,
+  scCenterLng: -63.1821,
+  scRadiusKm: 15
+};
+
+export async function getPricingSetting(): Promise<PricingSetting> {
+  const res = await strapiGet<SingleResponse<PricingSetting>>(
+    `/api/pricing-setting`
+  );
+  return res.data ?? { ...PRICING_DEFAULTS };
+}
+
+export async function updatePricingSetting(
+  input: PricingSetting
+): Promise<void> {
+  // Single type: PUT sin documentId.
+  await strapiSend("PUT", "/api/pricing-setting", input);
 }
 
 export async function listFaqs(): Promise<Faq[]> {

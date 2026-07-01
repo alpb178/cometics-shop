@@ -118,6 +118,14 @@ export interface TopPath {
   count: number;
 }
 
+export interface PricingSetting {
+  markupPercent: number;
+  provinceShippingCost: number;
+  scCenterLat: number;
+  scCenterLng: number;
+  scRadiusKm: number;
+}
+
 export interface TrafficSource {
   source: string;
   count: number;

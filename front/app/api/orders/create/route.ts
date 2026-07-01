@@ -27,6 +27,9 @@ type Payload = {
   }>;
   subtotal: number;
   total: number;
+  isProvince?: boolean;
+  destLat?: number | null;
+  destLng?: number | null;
 };
 
 async function uploadProof(token: string, file: File): Promise<number> {
@@ -81,7 +84,11 @@ async function createOrder(
       paymentProof: proofId,
       subtotal: payload.subtotal,
       total: payload.total,
-      customerNotes: payload.customerNotes
+      customerNotes: payload.customerNotes,
+      // Entradas de cálculo de envío; el servidor las verifica y no las persiste.
+      isProvince: payload.isProvince ?? false,
+      destLat: payload.destLat ?? null,
+      destLng: payload.destLng ?? null
     }
   };
   const res = await fetch(`${STRAPI_URL}/api/orders`, {
