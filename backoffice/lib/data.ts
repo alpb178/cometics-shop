@@ -14,7 +14,9 @@ import type {
   PaymentInfo,
   Product,
   SocialNetwork,
+  StoreEvent,
   TopPath,
+  TrafficSource,
   UserRow,
   VisitStats
 } from "./types";
@@ -243,6 +245,22 @@ export async function getTopPaths(
   return res.data ?? [];
 }
 
+export async function getTrafficSources(days = 30): Promise<TrafficSource[]> {
+  const res = await strapiGet<ListResponse<TrafficSource>>(
+    `/api/page-visits/sources?days=${days}`
+  );
+  return res.data ?? [];
+}
+
+/* --------------------------- Interacciones ---------------------------- */
+
+export async function listStoreEvents(limit = 100): Promise<StoreEvent[]> {
+  const res = await strapiGet<ListResponse<StoreEvent>>(
+    `/api/store-events/recent?limit=${limit}`
+  );
+  return res.data ?? [];
+}
+
 /* ------------------------------- Usuarios ----------------------------- */
 
 // `GET /api/users` (users-permissions) devuelve un array plano, no `{ data }`.
@@ -279,4 +297,10 @@ export async function createUser(input: CreateUserInput): Promise<UserRow> {
     ...input,
     confirmed: true
   });
+}
+
+/** Nº de clientes registrados (rol "client"), excluye staff/admin. */
+export async function countClients(): Promise<number> {
+  const users = await listUsers();
+  return users.filter((u) => u.role?.type === "client").length;
 }

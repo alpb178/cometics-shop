@@ -53,4 +53,12 @@ export default factories.createCoreController(UID, ({ strapi }) => ({
     const data = await strapi.service(UID).getTopPaths({ limit, days });
     ctx.body = { data };
   },
+
+  /** Origen del tráfico agrupado por fuente. Solo staff. */
+  async sources(ctx) {
+    if (!ensureStaff(ctx)) return;
+    const days = Number(ctx.query.days) || 30;
+    const data = await strapi.service(UID).getTopSources({ days });
+    ctx.body = { data };
+  },
 }));

@@ -4,7 +4,8 @@ import { Product } from "@/definitions/Product";
 import { formatPrice } from "@/lib/price";
 import { strapiImage } from "@/lib/strapi/strapiImage";
 import { motion } from "framer-motion";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { trackEvent } from "@/lib/track-event";
 import { FormattedText } from "../../../components/text/formatted-text";
 import { QuantitySelector } from "./components/quantity-selector";
 import Image from "next/image";
@@ -29,6 +30,14 @@ export const SingleProduct = ({ product }: { product: Product }) => {
 
   const { addToCart } = useCart();
 
+  // Registra la vista del detalle de producto (una vez por producto montado).
+  useEffect(() => {
+    trackEvent("product_view", {
+      label: product.name,
+      productSlug: product.slug
+    });
+  }, [product.slug, product.name]);
+
   const images = product.images && product.images.length > 0 ? product.images : [];
   const activeImage = images[activeIndex];
 
@@ -46,6 +55,11 @@ export const SingleProduct = ({ product }: { product: Product }) => {
 
   const handleAddToCart = async () => {
     for (let i = 0; i < quantity; i++) addToCart(product);
+    trackEvent("add_to_cart", {
+      label: product.name,
+      productSlug: product.slug,
+      quantity
+    });
     setFeedback(
       `Añadido al carrito: ${product.name} × ${quantity}`
     );

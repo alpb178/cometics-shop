@@ -1,0 +1,40 @@
+{
+  "kind": "collectionType",
+  "collectionName": "store_events",
+  "info": {
+    "singularName": "store-event",
+    "pluralName": "store-events",
+    "displayName": "Store Event",
+    "description": "Interacciones del storefront (ver producto, añadir al carrito, ver carrito)"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "type": {
+      "type": "enumeration",
+      "enum": ["product_view", "add_to_cart", "cart_view"],
+      "required": true
+    },
+    "label": {
+      "type": "string",
+      "maxLength": 255
+    },
+    "productSlug": {
+      "type": "string",
+      "maxLength": 255
+    },
+    "quantity": {
+      "type": "integer"
+    },
+    "path": {
+      "type": "string",
+      "maxLength": 512
+    },
+    "sessionId": {
+      "type": "string",
+      "maxLength": 128
+    }
+  }
+}

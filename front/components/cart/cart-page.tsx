@@ -9,7 +9,8 @@ import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
 import { DeliveryOptions } from "../../container/products/product/components/delivery-options";
 import { useDeliveryOption } from "@/hooks/useDeliveryOption";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { trackEvent } from "@/lib/track-event";
 
 export function CartPage({ locale }: { locale: string }) {
   const { items, updateQuantity, removeFromCart, getCartTotal, clearCart } =
@@ -20,6 +21,11 @@ export function CartPage({ locale }: { locale: string }) {
     productId?: number;
     clearAll?: boolean;
   }>({ show: false });
+
+  // Registra la apertura del carrito (una vez por montaje).
+  useEffect(() => {
+    trackEvent("cart_view");
+  }, []);
 
   const handleQuantity = (
     productId: number,
