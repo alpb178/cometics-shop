@@ -7,6 +7,7 @@ import { FormProvider, useForm } from "react-hook-form";
 import { PasswordInput } from "@/components/form/password-input/PasswordInput";
 import { PhoneInput } from "@/components/form/phone-input/PhoneInput";
 import { TextInput } from "@/components/form/text-input/TextInput";
+import { GoogleButton } from "@/components/auth/google-button";
 import { useAuth } from "@/context/auth-context";
 
 type FormValues = {
@@ -127,6 +128,16 @@ export default function SignUpPage() {
         >
           {submitting ? "Creando cuenta…" : "Crear cuenta"}
         </button>
+
+        <div className="flex items-center gap-3">
+          <span className="h-px flex-1 bg-border" />
+          <span className="text-xs uppercase tracking-widest text-muted-foreground">
+            o
+          </span>
+          <span className="h-px flex-1 bg-border" />
+        </div>
+
+        <GoogleButton label="Registrarse con Google" />
 
         <p className="text-center text-sm text-muted-foreground">
           ¿Ya tienes cuenta?{" "}

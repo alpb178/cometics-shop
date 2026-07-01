@@ -6,6 +6,7 @@ import { useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { PasswordInput } from "@/components/form/password-input/PasswordInput";
 import { TextInput } from "@/components/form/text-input/TextInput";
+import { GoogleButton } from "@/components/auth/google-button";
 import { useAuth } from "@/context/auth-context";
 
 type FormValues = {
@@ -19,7 +20,11 @@ export default function SignInPage() {
   const { login } = useAuth();
   const methods = useForm<FormValues>({ mode: "onTouched" });
   const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(
+    searchParams.get("error") === "google"
+      ? "No se pudo iniciar sesión con Google. Inténtalo de nuevo."
+      : null
+  );
 
   const onSubmit = methods.handleSubmit(async (values) => {
     setSubmitting(true);
@@ -90,6 +95,16 @@ export default function SignInPage() {
         >
           {submitting ? "Entrando…" : "Iniciar sesión"}
         </button>
+
+        <div className="flex items-center gap-3">
+          <span className="h-px flex-1 bg-border" />
+          <span className="text-xs uppercase tracking-widest text-muted-foreground">
+            o
+          </span>
+          <span className="h-px flex-1 bg-border" />
+        </div>
+
+        <GoogleButton />
 
         <p className="text-center text-sm text-muted-foreground">
           ¿No tienes cuenta?{" "}
