@@ -10,6 +10,7 @@ import {
   FileText,
   Eye,
   Users,
+  QrCode,
   LogOut
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -21,6 +22,7 @@ const NAV = [
   { href: "/categories", label: "Categorías", icon: Tags },
   { href: "/orders", label: "Pedidos", icon: ShoppingBag },
   { href: "/content", label: "Contenido", icon: FileText },
+  { href: "/payment-qr", label: "QR de pago", icon: QrCode },
   { href: "/visits", label: "Visitas", icon: Eye },
   { href: "/users", label: "Usuarios", icon: Users }
 ];
