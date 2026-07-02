@@ -132,13 +132,20 @@ export default async function OrderDetailPage({
               <h2 className="mb-2 font-medium">Envío</h2>
               <p className="font-medium">{addr.fullName}</p>
               <p className="text-neutral-600">{addr.phone}</p>
-              <p className="mt-1 text-neutral-600">
-                {addr.line1}
-                {addr.line2 ? `, ${addr.line2}` : ""}
-              </p>
-              <p className="text-neutral-600">
-                {addr.city}, {addr.department}
-              </p>
+              {addr.ci && (
+                <p className="text-neutral-600">CI: {addr.ci}</p>
+              )}
+              {addr.line1 && (
+                <p className="mt-1 text-neutral-600">
+                  {addr.line1}
+                  {addr.line2 ? `, ${addr.line2}` : ""}
+                </p>
+              )}
+              {(addr.city || addr.department) && (
+                <p className="text-neutral-600">
+                  {[addr.city, addr.department].filter(Boolean).join(", ")}
+                </p>
+              )}
               {addr.notes && (
                 <p className="mt-1 text-neutral-500">{addr.notes}</p>
               )}

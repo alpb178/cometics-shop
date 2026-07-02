@@ -123,16 +123,34 @@ export default async function OrderDetailPage({
               <address className="not-italic mt-2 text-sm text-muted-foreground">
                 {order.shippingAddress.fullName}
                 <br />
-                {order.shippingAddress.line1}
-                {order.shippingAddress.line2 && (
+                {order.shippingAddress.line1 && (
                   <>
-                    , {order.shippingAddress.line2}
+                    {order.shippingAddress.line1}
+                    {order.shippingAddress.line2 && (
+                      <>, {order.shippingAddress.line2}</>
+                    )}
+                    <br />
                   </>
                 )}
-                <br />
-                {order.shippingAddress.city}, {order.shippingAddress.department}
-                <br />
+                {(order.shippingAddress.city ||
+                  order.shippingAddress.department) && (
+                  <>
+                    {[
+                      order.shippingAddress.city,
+                      order.shippingAddress.department
+                    ]
+                      .filter(Boolean)
+                      .join(", ")}
+                    <br />
+                  </>
+                )}
                 Tel: {order.shippingAddress.phone}
+                {order.shippingAddress.ci && (
+                  <>
+                    <br />
+                    CI: {order.shippingAddress.ci}
+                  </>
+                )}
               </address>
             )}
           </div>

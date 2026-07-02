@@ -21,6 +21,7 @@ export default factories.createCoreController(
         "line2",
         "city",
         "department",
+        "ci",
         "notes",
         "isDefault",
       ];

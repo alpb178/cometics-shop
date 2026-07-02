@@ -8,10 +8,11 @@ type Payload = {
   address: null | {
     fullName: string;
     phone: string;
-    line1: string;
+    line1?: string;
     line2?: string;
-    city: string;
-    department: string;
+    city?: string;
+    department?: string;
+    ci?: string;
     notes?: string;
   };
   deliveryMethod: "delivery" | "pickup";
