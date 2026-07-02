@@ -78,6 +78,8 @@ export default factories.createCoreController(
         .toUpperCase()}`;
 
       const entity = await strapi.documents("api::order.order").create({
+        // `data` combina campos saneados + importes verificados; casteamos al
+        // tipo de entrada del Document Service.
         data: {
           ...clean,
           ...pricing,
@@ -86,7 +88,7 @@ export default factories.createCoreController(
           destLng,
           user: user.id,
           status: "pending_verification",
-        },
+        } as never,
       });
       const sanitized = await this.sanitizeOutput(entity, ctx);
       return this.transformResponse(sanitized);

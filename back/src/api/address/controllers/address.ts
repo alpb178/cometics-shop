@@ -30,7 +30,9 @@ export default factories.createCoreController(
 
       const entity = await strapi
         .documents("api::address.address")
-        .create({ data });
+        // `data` se arma dinámicamente (whitelist + user); casteamos al tipo de
+        // entrada del Document Service.
+        .create({ data: data as never });
       const sanitized = await this.sanitizeOutput(entity, ctx);
       return this.transformResponse(sanitized);
     },
