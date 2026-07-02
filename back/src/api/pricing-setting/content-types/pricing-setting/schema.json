@@ -26,13 +26,11 @@
     },
     "scCenterLat": {
       "type": "decimal",
-      "required": true,
-      "default": -17.7833
+      "required": true
     },
     "scCenterLng": {
       "type": "decimal",
-      "required": true,
-      "default": -63.1821
+      "required": true
     },
     "scRadiusKm": {
       "type": "decimal",

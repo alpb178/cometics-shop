@@ -385,14 +385,18 @@ export interface ApiAddressAddress extends Struct.CollectionTypeSchema {
     draftAndPublish: false;
   };
   attributes: {
-    city: Schema.Attribute.String & Schema.Attribute.Required;
+    ci: Schema.Attribute.String &
+      Schema.Attribute.SetMinMaxLength<{
+        maxLength: 30;
+      }>;
+    city: Schema.Attribute.String;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
-    department: Schema.Attribute.String & Schema.Attribute.Required;
+    department: Schema.Attribute.String;
     fullName: Schema.Attribute.String & Schema.Attribute.Required;
     isDefault: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
-    line1: Schema.Attribute.String & Schema.Attribute.Required;
+    line1: Schema.Attribute.String;
     line2: Schema.Attribute.String;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<
@@ -673,12 +677,14 @@ export interface ApiOrderOrder extends Struct.CollectionTypeSchema {
     deliveryMethod: Schema.Attribute.Enumeration<['delivery', 'pickup']> &
       Schema.Attribute.Required &
       Schema.Attribute.DefaultTo<'pickup'>;
+    destLat: Schema.Attribute.Decimal;
+    destLng: Schema.Attribute.Decimal;
     items: Schema.Attribute.Component<'order.item', true>;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<'oneToMany', 'api::order.order'> &
       Schema.Attribute.Private;
     orderNumber: Schema.Attribute.UID;
-    paymentMethod: Schema.Attribute.Enumeration<['bank_transfer', 'qr']> &
+    paymentMethod: Schema.Attribute.Enumeration<['cash', 'qr']> &
       Schema.Attribute.Required;
     paymentProof: Schema.Attribute.Media<'images'>;
     paymentReference: Schema.Attribute.String &
@@ -843,6 +849,64 @@ export interface ApiPaymentInfoPaymentInfo extends Struct.SingleTypeSchema {
       Schema.Attribute.Private;
     publishedAt: Schema.Attribute.DateTime;
     qrImage: Schema.Attribute.Media<'images'>;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+  };
+}
+
+export interface ApiPricingSettingPricingSetting
+  extends Struct.SingleTypeSchema {
+  collectionName: 'pricing_settings';
+  info: {
+    description: 'Configuraci\u00F3n de precios y env\u00EDo (markup + env\u00EDo a provincia)';
+    displayName: 'Pricing setting';
+    pluralName: 'pricing-settings';
+    singularName: 'pricing-setting';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  attributes: {
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::pricing-setting.pricing-setting'
+    > &
+      Schema.Attribute.Private;
+    markupPercent: Schema.Attribute.Decimal &
+      Schema.Attribute.Required &
+      Schema.Attribute.SetMinMax<
+        {
+          min: 0;
+        },
+        number
+      > &
+      Schema.Attribute.DefaultTo<10>;
+    provinceShippingCost: Schema.Attribute.Decimal &
+      Schema.Attribute.Required &
+      Schema.Attribute.SetMinMax<
+        {
+          min: 0;
+        },
+        number
+      > &
+      Schema.Attribute.DefaultTo<17>;
+    publishedAt: Schema.Attribute.DateTime;
+    scCenterLat: Schema.Attribute.Decimal & Schema.Attribute.Required;
+    scCenterLng: Schema.Attribute.Decimal & Schema.Attribute.Required;
+    scRadiusKm: Schema.Attribute.Decimal &
+      Schema.Attribute.Required &
+      Schema.Attribute.SetMinMax<
+        {
+          min: 0;
+        },
+        number
+      > &
+      Schema.Attribute.DefaultTo<15>;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
@@ -1563,6 +1627,7 @@ declare module '@strapi/strapi' {
       'api::page-visit.page-visit': ApiPageVisitPageVisit;
       'api::page.page': ApiPagePage;
       'api::payment-info.payment-info': ApiPaymentInfoPaymentInfo;
+      'api::pricing-setting.pricing-setting': ApiPricingSettingPricingSetting;
       'api::product-page.product-page': ApiProductPageProductPage;
       'api::product.product': ApiProductProduct;
       'api::social-network.social-network': ApiSocialNetworkSocialNetwork;
