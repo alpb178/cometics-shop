@@ -1,8 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
-import { createUser } from "@/lib/data";
+import { createUser, deleteUser, setUserPassword } from "@/lib/data";
 import { requireStaff } from "@/lib/auth-guard";
 
 export async function createUserAction(formData: FormData) {
@@ -26,7 +25,23 @@ export async function createUserAction(formData: FormData) {
   }
 
   await createUser({ username, email, password, role });
-
   revalidatePath("/users");
-  redirect("/users");
+}
+
+export async function setUserPasswordAction(id: number, password: string) {
+  await requireStaff();
+  if (password.length < 8) {
+    throw new Error("La contraseña debe tener al menos 8 caracteres.");
+  }
+  await setUserPassword(id, password);
+  revalidatePath("/users");
+}
+
+export async function deleteUserAction(id: number) {
+  const me = await requireStaff();
+  if (me.id === id) {
+    throw new Error("No puedes eliminar tu propia cuenta.");
+  }
+  await deleteUser(id);
+  revalidatePath("/users");
 }
