@@ -26,6 +26,8 @@ type FormValues = {
   fullName: string;
   phone: string;
   ci?: string;
+  zona?: string;
+  department?: string;
 };
 
 const STRAPI_URL = process.env.NEXT_PUBLIC_API_URL;
@@ -72,7 +74,7 @@ export function CheckoutForm({
   const [addressMode, setAddressMode] = useState<"saved" | "new">(
     savedAddresses.length > 0 ? "saved" : "new"
   );
-  const [saveNewAddress, setSaveNewAddress] = useState(false);
+  const [saveNewAddress, setSaveNewAddress] = useState(true);
   const [proofFile, setProofFile] = useState<File | null>(null);
   const [proofPreview, setProofPreview] = useState<string | null>(null);
   const [paymentReference, setPaymentReference] = useState("");
@@ -192,7 +194,7 @@ export function CheckoutForm({
         }
       } else {
         const fields = isProvince
-          ? (["fullName", "phone", "ci"] as const)
+          ? (["fullName", "phone", "ci", "zona", "department"] as const)
           : (["fullName", "phone"] as const);
         const ok = await methods.trigger(fields as unknown as (keyof FormValues)[]);
         if (!ok) return;
@@ -220,12 +222,19 @@ export function CheckoutForm({
       const useNew = deliveryMethod === "delivery" && addressMode === "new";
 
       // Dentro de Santa Cruz solo pedimos nombre y teléfono; fuera de Santa
-      // Cruz (provincia) además el CI para reclamar el envío en terminal.
+      // Cruz (provincia) además CI, zona y departamento para el envío por
+      // terminal/mensajería. Zona -> `city`, Departamento -> `department`.
       const newAddress = useNew
         ? {
             fullName: values.fullName,
             phone: values.phone,
-            ci: isProvince ? values.ci?.trim() || undefined : undefined
+            ...(isProvince
+              ? {
+                  ci: values.ci?.trim() || undefined,
+                  city: values.zona?.trim() || undefined,
+                  department: values.department?.trim() || undefined
+                }
+              : {})
           }
         : null;
 
@@ -501,6 +510,14 @@ export function CheckoutForm({
                                     CI: {addr.ci}
                                   </>
                                 )}
+                                {(addr.city || addr.department) && (
+                                  <>
+                                    <br />
+                                    {[addr.city, addr.department]
+                                      .filter(Boolean)
+                                      .join(", ")}
+                                  </>
+                                )}
                               </p>
                             </label>
                           </li>
@@ -518,21 +535,37 @@ export function CheckoutForm({
                           <PhoneInput name="phone" label="Teléfono" required />
                         </div>
                         {isProvince && (
-                          <div className="mt-4">
-                            <TextInput
-                              name="ci"
-                              label="Carnet de identidad (CI)"
-                              required
-                              validation={{
-                                required:
-                                  "Requerido para envíos fuera de Santa Cruz"
-                              }}
-                            />
-                            <p className="mt-1 text-xs text-muted-foreground">
-                              Necesario para reclamar el envío en la
-                              terminal/mensajería.
-                            </p>
-                          </div>
+                          <>
+                            <div className="mt-4">
+                              <TextInput
+                                name="ci"
+                                label="Carnet de identidad (CI)"
+                                required
+                                validation={{
+                                  required:
+                                    "Requerido para envíos fuera de Santa Cruz"
+                                }}
+                              />
+                              <p className="mt-1 text-xs text-muted-foreground">
+                                Necesario para reclamar el envío en la
+                                terminal/mensajería.
+                              </p>
+                            </div>
+                            <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
+                              <TextInput
+                                name="zona"
+                                label="Zona"
+                                required
+                                validation={{ required: "Requerido" }}
+                              />
+                              <TextInput
+                                name="department"
+                                label="Departamento"
+                                required
+                                validation={{ required: "Requerido" }}
+                              />
+                            </div>
+                          </>
                         )}
                         <label className="mt-4 flex items-center gap-3 text-sm">
                           <input
