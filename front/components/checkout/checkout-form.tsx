@@ -4,7 +4,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
-import { Upload, X, MapPin } from "lucide-react";
+import { Upload, X, MapPin, ArrowLeft } from "lucide-react";
 import {
   getPricingSettings,
   isProvinceCoords,
@@ -13,15 +13,13 @@ import {
 } from "@/lib/pricing";
 import { PhoneInput } from "@/components/form/phone-input/PhoneInput";
 import { TextInput } from "@/components/form/text-input/TextInput";
+import { LocationPicker } from "@/components/checkout/location-picker";
 import { useAuth } from "@/context/auth-context";
 import { useCart } from "@/context/cart-context";
 import type { Address } from "@/definitions/Address";
 import type { User } from "@/definitions/User";
 import type { PaymentInfo } from "@/definitions/PaymentInfo";
-import type {
-  DeliveryMethod,
-  PaymentMethod
-} from "@/definitions/Order";
+import type { DeliveryMethod, PaymentMethod } from "@/definitions/Order";
 
 type FormValues = {
   fullName: string;
@@ -60,8 +58,12 @@ export function CheckoutForm({
     }
   });
 
+  // Paso del wizard: 1 = entrega, 2 = pago. Mejora la experiencia en móvil.
+  const [step, setStep] = useState<1 | 2>(1);
+
   const defaultAddress = savedAddresses[0] ?? null;
-  const [deliveryMethod, setDeliveryMethod] = useState<DeliveryMethod>("delivery");
+  const [deliveryMethod, setDeliveryMethod] =
+    useState<DeliveryMethod>("delivery");
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod | null>(null);
   const [selectedAddressId, setSelectedAddressId] = useState<number | null>(
     defaultAddress?.id ?? null
@@ -92,6 +94,17 @@ export function CheckoutForm({
     getPricingSettings().then(setPricing);
   }, []);
 
+  // Dentro de Santa Cruz mostramos el mapa para fijar el punto de entrega.
+  const showMap = deliveryMethod === "delivery" && !isProvince;
+
+  // Pre-centra el pin en el centro de Santa Cruz para que el cliente solo lo
+  // ajuste; así siempre hay una ubicación de entrega para envíos en SC.
+  useEffect(() => {
+    if (showMap && !coords) {
+      setCoords({ lat: pricing.scCenterLat, lng: pricing.scCenterLng });
+    }
+  }, [showMap, coords, pricing]);
+
   const requestLocation = () => {
     if (typeof navigator === "undefined" || !navigator.geolocation) {
       setGeoStatus("denied");
@@ -121,8 +134,7 @@ export function CheckoutForm({
   const qrUrl = mediaUrl(paymentInfo?.qrImage?.url);
 
   // Fuera de Santa Cruz (envío a provincia) solo se acepta QR: el pedido viaja
-  // por terminal/mensajería, así que debe prepagarse. El efectivo (contra
-  // entrega o en tienda) solo aplica dentro de Santa Cruz o en recojo.
+  // por terminal/mensajería, así que debe prepagarse.
   const onlyQr = deliveryMethod === "delivery" && isProvince;
 
   const paymentOptions: { value: PaymentMethod; label: string }[] = onlyQr
@@ -132,25 +144,16 @@ export function CheckoutForm({
         { value: "qr", label: "Pago por QR" }
       ];
 
-  // Si el usuario tenía "efectivo" y pasa a zona solo-QR, se limpia la elección.
   useEffect(() => {
     if (onlyQr && paymentMethod === "cash") setPaymentMethod(null);
   }, [onlyQr, paymentMethod]);
 
-  // El comprobante solo es obligatorio para pago por QR.
   const proofRequired = paymentMethod === "qr";
-
-  const needsAddress = deliveryMethod === "delivery";
-  const hasAddress =
-    !needsAddress ||
-    (addressMode === "saved" && selectedAddressId !== null) ||
-    addressMode === "new";
 
   const canSubmit =
     items.length > 0 &&
     paymentMethod !== null &&
     (!proofRequired || proofFile !== null) &&
-    hasAddress &&
     !submitting;
 
   function onProofChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -176,7 +179,35 @@ export function CheckoutForm({
     }
   }
 
+  // Valida el paso 1 (entrega) antes de pasar al pago.
+  async function goToStep2() {
+    setError(null);
+    if (deliveryMethod === "delivery") {
+      const useSaved = addressMode === "saved" && savedAddresses.length > 0;
+      if (useSaved) {
+        if (selectedAddressId == null) {
+          setError("Selecciona una dirección guardada.");
+          return;
+        }
+      } else {
+        const fields = isProvince
+          ? (["fullName", "phone", "ci"] as const)
+          : (["fullName", "phone"] as const);
+        const ok = await methods.trigger(fields as unknown as (keyof FormValues)[]);
+        if (!ok) return;
+      }
+      if (!isProvince && !coords) {
+        setError("Marca tu ubicación de entrega en el mapa.");
+        return;
+      }
+    }
+    setError(null);
+    setStep(2);
+    if (typeof window !== "undefined") window.scrollTo({ top: 0 });
+  }
+
   const onSubmit = methods.handleSubmit(async (values) => {
+    if (step !== 2) return;
     if (!paymentMethod) return;
     if (proofRequired && !proofFile) return;
     setSubmitting(true);
@@ -185,8 +216,7 @@ export function CheckoutForm({
     try {
       const useSaved =
         deliveryMethod === "delivery" && addressMode === "saved";
-      const useNew =
-        deliveryMethod === "delivery" && addressMode === "new";
+      const useNew = deliveryMethod === "delivery" && addressMode === "new";
 
       // Dentro de Santa Cruz solo pedimos nombre y teléfono; fuera de Santa
       // Cruz (provincia) además el CI para reclamar el envío en terminal.
@@ -267,7 +297,9 @@ export function CheckoutForm({
   if (items.length === 0) {
     return (
       <section className="mx-auto w-full max-w-md px-6 py-24 text-center">
-        <h1 className="font-display text-2xl font-semibold">Tu carrito está vacío</h1>
+        <h1 className="font-display text-2xl font-semibold">
+          Tu carrito está vacío
+        </h1>
         <p className="mt-2 text-sm text-muted-foreground">
           Añade productos antes de pasar por el checkout.
         </p>
@@ -277,13 +309,23 @@ export function CheckoutForm({
 
   return (
     <section className="mx-auto w-full max-w-6xl px-6 py-12 lg:py-16">
-      <header className="mb-10 border-b border-border pb-6">
+      <header className="mb-8 border-b border-border pb-6">
         <p className="text-xs font-semibold uppercase tracking-[0.22em] text-primary">
           Checkout
         </p>
         <h1 className="font-display text-3xl font-semibold tracking-tight">
           Finaliza tu pedido
         </h1>
+        {/* Indicador de pasos */}
+        <div className="mt-4 flex items-center gap-3 text-xs font-semibold uppercase tracking-[0.14em]">
+          <span className={step === 1 ? "text-foreground" : "text-muted-foreground"}>
+            1 · Entrega
+          </span>
+          <span className="h-px w-8 bg-border" />
+          <span className={step === 2 ? "text-foreground" : "text-muted-foreground"}>
+            2 · Pago
+          </span>
+        </div>
       </header>
 
       <FormProvider {...methods}>
@@ -293,383 +335,401 @@ export function CheckoutForm({
           className="grid grid-cols-1 gap-12 lg:grid-cols-[1fr_360px]"
         >
           <div className="space-y-12">
-            <section>
-              <h2 className="mb-4 text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
-                1 · Método de entrega
-              </h2>
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                {(
-                  [
-                    { value: "delivery", label: "Envío a domicilio" },
-                    { value: "pickup", label: "Recoger en tienda" }
-                  ] as const
-                ).map((opt) => (
-                  <label
-                    key={opt.value}
-                    className={`cursor-pointer border px-4 py-3 text-sm ${
-                      deliveryMethod === opt.value
-                        ? "border-foreground"
-                        : "border-border"
-                    }`}
-                  >
-                    <input
-                      type="radio"
-                      name="deliveryMethod"
-                      value={opt.value}
-                      checked={deliveryMethod === opt.value}
-                      onChange={() => setDeliveryMethod(opt.value)}
-                      className="sr-only"
-                    />
-                    {opt.label}
-                  </label>
-                ))}
-              </div>
-            </section>
-
-            {deliveryMethod === "delivery" && (
-              <section>
-                <h2 className="mb-4 text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
-                  Zona de entrega
-                </h2>
-                <div className="flex flex-col gap-3">
-                  <div className="flex gap-2 border border-border p-1 text-xs">
+            {/* ============================ PASO 1 ============================ */}
+            {step === 1 && (
+              <>
+                <section>
+                  <h2 className="mb-4 text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+                    Método de entrega
+                  </h2>
+                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                     {(
                       [
-                        { value: false, label: "Santa Cruz" },
-                        { value: true, label: "Provincia (fuera de SC)" }
+                        { value: "delivery", label: "Envío a domicilio" },
+                        { value: "pickup", label: "Recoger en tienda" }
                       ] as const
                     ).map((opt) => (
-                      <button
-                        key={String(opt.value)}
-                        type="button"
-                        onClick={() => setIsProvince(opt.value)}
-                        className={`flex-1 px-3 py-2 font-semibold uppercase tracking-[0.14em] transition-colors ${
-                          isProvince === opt.value
-                            ? "bg-foreground text-background"
-                            : "text-muted-foreground hover:text-foreground"
+                      <label
+                        key={opt.value}
+                        className={`cursor-pointer border px-4 py-3 text-sm ${
+                          deliveryMethod === opt.value
+                            ? "border-foreground"
+                            : "border-border"
                         }`}
                       >
+                        <input
+                          type="radio"
+                          name="deliveryMethod"
+                          value={opt.value}
+                          checked={deliveryMethod === opt.value}
+                          onChange={() => setDeliveryMethod(opt.value)}
+                          className="sr-only"
+                        />
                         {opt.label}
-                      </button>
+                      </label>
                     ))}
                   </div>
-                  <button
-                    type="button"
-                    onClick={requestLocation}
-                    className="flex items-center gap-2 self-start text-xs font-semibold uppercase tracking-[0.14em] text-foreground underline-offset-4 hover:underline"
-                  >
-                    <MapPin className="h-4 w-4" />
-                    {geoStatus === "locating"
-                      ? "Detectando ubicación…"
-                      : "Detectar mi ubicación"}
-                  </button>
-                  {geoStatus === "ok" && (
-                    <p className="text-xs text-muted-foreground">
-                      Ubicación detectada:{" "}
-                      {isProvince ? "fuera de Santa Cruz (provincia)" : "Santa Cruz"}.
-                    </p>
-                  )}
-                  {geoStatus === "denied" && (
-                    <p className="text-xs text-muted-foreground">
-                      No pudimos obtener tu ubicación. Selecciona tu zona manualmente.
-                    </p>
-                  )}
-                  {isProvince && (
-                    <p className="text-xs text-muted-foreground">
-                      Envío a provincia (a la terminal): Bs{" "}
-                      {pricing.provinceShippingCost.toFixed(2)}.
-                    </p>
-                  )}
-                </div>
-              </section>
-            )}
+                </section>
 
-            {deliveryMethod === "delivery" && (
-              <section>
-                <h2 className="mb-4 text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
-                  2 · Datos de envío
-                </h2>
-
-                {savedAddresses.length > 0 && (
-                  <div className="mb-4 flex gap-2 border border-border p-1 text-xs">
-                    {(
-                      [
-                        { value: "saved", label: "Direcciones guardadas" },
-                        { value: "new", label: "Usar una nueva" }
-                      ] as const
-                    ).map((tab) => (
+                {deliveryMethod === "delivery" && (
+                  <section>
+                    <h2 className="mb-4 text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+                      Zona de entrega
+                    </h2>
+                    <div className="flex flex-col gap-3">
+                      <div className="flex gap-2 border border-border p-1 text-xs">
+                        {(
+                          [
+                            { value: false, label: "Santa Cruz" },
+                            { value: true, label: "Provincia (fuera de SC)" }
+                          ] as const
+                        ).map((opt) => (
+                          <button
+                            key={String(opt.value)}
+                            type="button"
+                            onClick={() => setIsProvince(opt.value)}
+                            className={`flex-1 px-3 py-2 font-semibold uppercase tracking-[0.14em] transition-colors ${
+                              isProvince === opt.value
+                                ? "bg-foreground text-background"
+                                : "text-muted-foreground hover:text-foreground"
+                            }`}
+                          >
+                            {opt.label}
+                          </button>
+                        ))}
+                      </div>
                       <button
-                        key={tab.value}
                         type="button"
-                        onClick={() => setAddressMode(tab.value)}
-                        className={`flex-1 px-3 py-2 font-semibold uppercase tracking-[0.14em] transition-colors ${
-                          addressMode === tab.value
-                            ? "bg-foreground text-background"
-                            : "text-muted-foreground hover:text-foreground"
-                        }`}
+                        onClick={requestLocation}
+                        className="flex items-center gap-2 self-start text-xs font-semibold uppercase tracking-[0.14em] text-foreground underline-offset-4 hover:underline"
                       >
-                        {tab.label}
+                        <MapPin className="h-4 w-4" />
+                        {geoStatus === "locating"
+                          ? "Detectando ubicación…"
+                          : "Detectar mi ubicación"}
                       </button>
-                    ))}
-                  </div>
+                      {geoStatus === "denied" && (
+                        <p className="text-xs text-muted-foreground">
+                          No pudimos obtener tu ubicación. Selecciona tu zona
+                          manualmente.
+                        </p>
+                      )}
+                      {isProvince && (
+                        <p className="text-xs text-muted-foreground">
+                          Envío a provincia (a la terminal): Bs{" "}
+                          {pricing.provinceShippingCost.toFixed(2)}.
+                        </p>
+                      )}
+                    </div>
+                  </section>
                 )}
 
-                {addressMode === "saved" && savedAddresses.length > 0 ? (
-                  <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                    {savedAddresses.map((addr) => (
-                      <li key={addr.id}>
-                        <label
-                          className={`block cursor-pointer border p-4 text-sm transition-colors ${
-                            selectedAddressId === addr.id
-                              ? "border-foreground"
-                              : "border-border hover:border-foreground/40"
-                          }`}
-                        >
-                          <input
-                            type="radio"
-                            name="savedAddress"
-                            checked={selectedAddressId === addr.id}
-                            onChange={() => setSelectedAddressId(addr.id)}
-                            className="sr-only"
-                          />
-                          <p className="font-semibold">{addr.fullName}</p>
-                          <p className="mt-1 text-xs text-muted-foreground">
-                            {addr.line1 && (
-                              <>
-                                {addr.line1}
-                                {addr.line2 && `, ${addr.line2}`}
-                                <br />
-                              </>
-                            )}
-                            {(addr.city || addr.department) && (
-                              <>
-                                {[addr.city, addr.department]
-                                  .filter(Boolean)
-                                  .join(", ")}
-                                <br />
-                              </>
-                            )}
-                            Tel: {addr.phone}
-                            {addr.ci && (
-                              <>
-                                <br />
-                                CI: {addr.ci}
-                              </>
-                            )}
-                          </p>
-                        </label>
-                      </li>
-                    ))}
-                  </ul>
-                ) : (
-                  <>
-                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                      <TextInput
-                        name="fullName"
-                        label="Nombre completo"
-                        required
-                        validation={{ required: "Requerido" }}
-                      />
-                      <PhoneInput name="phone" label="Teléfono" required />
-                    </div>
-                    {isProvince && (
-                      <div className="mt-4">
-                        <TextInput
-                          name="ci"
-                          label="Carnet de identidad (CI)"
-                          required
-                          validation={{
-                            required: "Requerido para envíos fuera de Santa Cruz"
-                          }}
-                        />
-                        <p className="mt-1 text-xs text-muted-foreground">
-                          Necesario para reclamar el envío en la
-                          terminal/mensajería.
-                        </p>
+                {showMap && (
+                  <section>
+                    <h2 className="mb-2 text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+                      Ubicación de entrega
+                    </h2>
+                    <p className="mb-3 text-xs text-muted-foreground">
+                      Marca en el mapa dónde entregar (por si no estás en casa).
+                    </p>
+                    <LocationPicker
+                      value={coords}
+                      center={{
+                        lat: pricing.scCenterLat,
+                        lng: pricing.scCenterLng
+                      }}
+                      onChange={setCoords}
+                    />
+                  </section>
+                )}
+
+                {deliveryMethod === "delivery" && (
+                  <section>
+                    <h2 className="mb-4 text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+                      Datos de envío
+                    </h2>
+
+                    {savedAddresses.length > 0 && (
+                      <div className="mb-4 flex gap-2 border border-border p-1 text-xs">
+                        {(
+                          [
+                            { value: "saved", label: "Direcciones guardadas" },
+                            { value: "new", label: "Usar una nueva" }
+                          ] as const
+                        ).map((tab) => (
+                          <button
+                            key={tab.value}
+                            type="button"
+                            onClick={() => setAddressMode(tab.value)}
+                            className={`flex-1 px-3 py-2 font-semibold uppercase tracking-[0.14em] transition-colors ${
+                              addressMode === tab.value
+                                ? "bg-foreground text-background"
+                                : "text-muted-foreground hover:text-foreground"
+                            }`}
+                          >
+                            {tab.label}
+                          </button>
+                        ))}
                       </div>
                     )}
-                    <label className="mt-4 flex items-center gap-3 text-sm">
-                      <input
-                        type="checkbox"
-                        checked={saveNewAddress}
-                        onChange={(e) => setSaveNewAddress(e.target.checked)}
-                        className="h-4 w-4 border-border accent-foreground"
-                      />
-                      Guardar esta dirección para próximas compras
-                    </label>
-                  </>
+
+                    {addressMode === "saved" && savedAddresses.length > 0 ? (
+                      <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                        {savedAddresses.map((addr) => (
+                          <li key={addr.id}>
+                            <label
+                              className={`block cursor-pointer border p-4 text-sm transition-colors ${
+                                selectedAddressId === addr.id
+                                  ? "border-foreground"
+                                  : "border-border hover:border-foreground/40"
+                              }`}
+                            >
+                              <input
+                                type="radio"
+                                name="savedAddress"
+                                checked={selectedAddressId === addr.id}
+                                onChange={() => setSelectedAddressId(addr.id)}
+                                className="sr-only"
+                              />
+                              <p className="font-semibold">{addr.fullName}</p>
+                              <p className="mt-1 text-xs text-muted-foreground">
+                                Tel: {addr.phone}
+                                {addr.ci && (
+                                  <>
+                                    <br />
+                                    CI: {addr.ci}
+                                  </>
+                                )}
+                              </p>
+                            </label>
+                          </li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <>
+                        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                          <TextInput
+                            name="fullName"
+                            label="Nombre completo"
+                            required
+                            validation={{ required: "Requerido" }}
+                          />
+                          <PhoneInput name="phone" label="Teléfono" required />
+                        </div>
+                        {isProvince && (
+                          <div className="mt-4">
+                            <TextInput
+                              name="ci"
+                              label="Carnet de identidad (CI)"
+                              required
+                              validation={{
+                                required:
+                                  "Requerido para envíos fuera de Santa Cruz"
+                              }}
+                            />
+                            <p className="mt-1 text-xs text-muted-foreground">
+                              Necesario para reclamar el envío en la
+                              terminal/mensajería.
+                            </p>
+                          </div>
+                        )}
+                        <label className="mt-4 flex items-center gap-3 text-sm">
+                          <input
+                            type="checkbox"
+                            checked={saveNewAddress}
+                            onChange={(e) => setSaveNewAddress(e.target.checked)}
+                            className="h-4 w-4 border-border accent-foreground"
+                          />
+                          Guardar estos datos para próximas compras
+                        </label>
+                      </>
+                    )}
+                  </section>
                 )}
-              </section>
+
+                {deliveryMethod === "pickup" && (
+                  <section>
+                    <div className="border border-border bg-secondary/50 px-5 py-4 text-sm text-muted-foreground">
+                      Recoges tu pedido en la tienda. Te avisaremos cuando esté
+                      listo.
+                    </div>
+                  </section>
+                )}
+              </>
             )}
 
-            <section>
-              <h2 className="mb-4 text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
-                {deliveryMethod === "delivery" ? "3" : "2"} · Método de pago
-              </h2>
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                {paymentOptions.map((opt) => (
-                  <label
-                    key={opt.value}
-                    className={`cursor-pointer border px-4 py-3 text-sm ${
-                      paymentMethod === opt.value
-                        ? "border-foreground"
-                        : "border-border"
-                    }`}
-                  >
-                    <input
-                      type="radio"
-                      name="paymentMethod"
-                      value={opt.value}
-                      checked={paymentMethod === opt.value}
-                      onChange={() => setPaymentMethod(opt.value)}
-                      className="sr-only"
-                    />
-                    {opt.label}
-                  </label>
-                ))}
-              </div>
-
-              {onlyQr && (
-                <p className="mt-3 text-xs text-muted-foreground">
-                  Para envíos fuera de Santa Cruz solo se acepta{" "}
-                  <span className="font-semibold text-foreground">
-                    pago por QR
-                  </span>{" "}
-                  (el pedido se envía por mensajería y debe estar pagado).
-                </p>
-              )}
-
-              {paymentMethod !== null && (
-                <div className="mt-6 flex flex-wrap items-center justify-between gap-3 border border-foreground/20 bg-secondary/50 px-5 py-4">
-                  <div>
-                    <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">
-                      Monto exacto a pagar
-                    </p>
-                    <p className="font-display text-2xl font-semibold">
-                      Bs {total.toFixed(2)}
-                    </p>
-                    <p className="mt-1 text-xs text-muted-foreground">
-                      {paymentMethod === "qr"
-                        ? "El QR no lleva el monto: ingrésalo manualmente en tu app bancaria."
-                        : "Prepara el monto exacto en efectivo para pagar al recibir o al recoger."}
-                    </p>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={copyAmount}
-                    className="shrink-0 border border-foreground px-4 py-2 text-xs font-semibold uppercase tracking-[0.14em] transition-colors hover:bg-foreground hover:text-background"
-                  >
-                    {amountCopied ? "¡Copiado!" : "Copiar monto"}
-                  </button>
+            {/* ============================ PASO 2 ============================ */}
+            {step === 2 && (
+              <section>
+                <h2 className="mb-4 text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+                  Método de pago
+                </h2>
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                  {paymentOptions.map((opt) => (
+                    <label
+                      key={opt.value}
+                      className={`cursor-pointer border px-4 py-3 text-sm ${
+                        paymentMethod === opt.value
+                          ? "border-foreground"
+                          : "border-border"
+                      }`}
+                    >
+                      <input
+                        type="radio"
+                        name="paymentMethod"
+                        value={opt.value}
+                        checked={paymentMethod === opt.value}
+                        onChange={() => setPaymentMethod(opt.value)}
+                        className="sr-only"
+                      />
+                      {opt.label}
+                    </label>
+                  ))}
                 </div>
-              )}
 
-              {paymentMethod === "cash" && (
-                <div className="mt-6 space-y-2 border border-border bg-secondary/50 px-5 py-4 text-sm">
-                  <p className="font-medium">Pago en efectivo</p>
-                  <p className="text-muted-foreground">
-                    {deliveryMethod === "pickup"
-                      ? "Paga en efectivo al recoger tu pedido en la tienda."
-                      : "Paga en efectivo al recibir tu pedido (contra entrega)."}{" "}
-                    Ten listo el monto exacto: Bs {total.toFixed(2)}.
+                {onlyQr && (
+                  <p className="mt-3 text-xs text-muted-foreground">
+                    Para envíos fuera de Santa Cruz solo se acepta{" "}
+                    <span className="font-semibold text-foreground">
+                      pago por QR
+                    </span>{" "}
+                    (el pedido se envía por mensajería y debe estar pagado).
                   </p>
-                </div>
-              )}
+                )}
 
-              {paymentMethod === "qr" && (
-                <div className="mt-6 border border-border bg-secondary/50 px-5 py-4 text-sm">
-                  {qrUrl ? (
-                    <div className="flex flex-col items-center gap-3">
-                      <button
-                        type="button"
-                        onClick={() => setQrZoomed(true)}
-                        className="relative h-64 w-64 cursor-zoom-in bg-background transition-transform hover:scale-[1.02]"
-                        aria-label="Ampliar QR para escanear"
-                      >
-                        <Image
-                          src={qrUrl}
-                          alt="QR de pago"
-                          fill
-                          sizes="256px"
-                          className="object-contain"
-                        />
-                      </button>
-                      <p className="text-center text-xs text-muted-foreground">
-                        Toca el QR para ampliarlo. Escanéalo con tu app bancaria
-                        y sube luego el comprobante.
+                {paymentMethod !== null && (
+                  <div className="mt-6 flex flex-wrap items-center justify-between gap-3 border border-foreground/20 bg-secondary/50 px-5 py-4">
+                    <div>
+                      <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">
+                        Monto exacto a pagar
+                      </p>
+                      <p className="font-display text-2xl font-semibold">
+                        Bs {total.toFixed(2)}
+                      </p>
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        {paymentMethod === "qr"
+                          ? "El QR no lleva el monto: ingrésalo manualmente en tu app bancaria."
+                          : "Prepara el monto exacto en efectivo para pagar al recibir o al recoger."}
                       </p>
                     </div>
-                  ) : (
-                    <p className="text-muted-foreground">
-                      El QR todavía no está configurado. Contacta a la tienda.
-                    </p>
-                  )}
-                </div>
-              )}
-            </section>
-
-            {paymentMethod === "qr" && (
-              <section>
-                <h2 className="mb-4 text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
-                  {deliveryMethod === "delivery" ? "4" : "3"} · Comprobante de pago
-                </h2>
-
-                {!proofFile ? (
-                  <label className="flex cursor-pointer flex-col items-center justify-center gap-2 border border-dashed border-border bg-secondary/30 px-6 py-10 text-sm text-muted-foreground hover:bg-secondary">
-                    <Upload className="h-6 w-6" />
-                    <span>Subir foto del comprobante</span>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      className="sr-only"
-                      onChange={onProofChange}
-                    />
-                  </label>
-                ) : (
-                  <div className="relative inline-block">
-                    {proofPreview && (
-                      <div className="relative h-48 w-48 overflow-hidden border border-border">
-                        <Image
-                          src={proofPreview}
-                          alt="Comprobante"
-                          fill
-                          sizes="192px"
-                          className="object-cover"
-                        />
-                      </div>
-                    )}
                     <button
                       type="button"
-                      onClick={clearProof}
-                      className="absolute -right-2 -top-2 flex h-7 w-7 items-center justify-center rounded-full bg-foreground text-background"
-                      aria-label="Quitar comprobante"
+                      onClick={copyAmount}
+                      className="shrink-0 border border-foreground px-4 py-2 text-xs font-semibold uppercase tracking-[0.14em] transition-colors hover:bg-foreground hover:text-background"
                     >
-                      <X className="h-4 w-4" />
+                      {amountCopied ? "¡Copiado!" : "Copiar monto"}
                     </button>
                   </div>
                 )}
 
-                <div className="mt-6">
-                  <label
-                    htmlFor="paymentReference"
-                    className="mb-2 block text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground"
-                  >
-                    Nº de comprobante / transacción (opcional)
-                  </label>
-                  <input
-                    id="paymentReference"
-                    type="text"
-                    inputMode="numeric"
-                    value={paymentReference}
-                    onChange={(e) => setPaymentReference(e.target.value)}
-                    maxLength={120}
-                    placeholder="Ej. 000123456789"
-                    className="w-full max-w-xs border border-border bg-background px-4 py-3 text-sm focus:border-foreground focus:outline-none"
-                  />
-                  <p className="mt-1 text-xs text-muted-foreground">
-                    Cópialo desde tu app bancaria para agilizar la verificación.
-                  </p>
-                </div>
+                {paymentMethod === "cash" && (
+                  <div className="mt-6 space-y-2 border border-border bg-secondary/50 px-5 py-4 text-sm">
+                    <p className="font-medium">Pago en efectivo</p>
+                    <p className="text-muted-foreground">
+                      {deliveryMethod === "pickup"
+                        ? "Paga en efectivo al recoger tu pedido en la tienda."
+                        : "Paga en efectivo al recibir tu pedido (contra entrega)."}{" "}
+                      Ten listo el monto exacto: Bs {total.toFixed(2)}.
+                    </p>
+                  </div>
+                )}
+
+                {paymentMethod === "qr" && (
+                  <div className="mt-6 border border-border bg-secondary/50 px-5 py-4 text-sm">
+                    {qrUrl ? (
+                      <div className="flex flex-col items-center gap-3">
+                        <button
+                          type="button"
+                          onClick={() => setQrZoomed(true)}
+                          className="relative h-64 w-64 cursor-zoom-in bg-background transition-transform hover:scale-[1.02]"
+                          aria-label="Ampliar QR para escanear"
+                        >
+                          <Image
+                            src={qrUrl}
+                            alt="QR de pago"
+                            fill
+                            sizes="256px"
+                            className="object-contain"
+                          />
+                        </button>
+                        <p className="text-center text-xs text-muted-foreground">
+                          Toca el QR para ampliarlo. Escanéalo con tu app
+                          bancaria y sube luego el comprobante.
+                        </p>
+                      </div>
+                    ) : (
+                      <p className="text-muted-foreground">
+                        El QR todavía no está configurado. Contacta a la tienda.
+                      </p>
+                    )}
+                  </div>
+                )}
+
+                {paymentMethod === "qr" && (
+                  <div className="mt-8">
+                    <h3 className="mb-4 text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+                      Comprobante de pago
+                    </h3>
+
+                    {!proofFile ? (
+                      <label className="flex cursor-pointer flex-col items-center justify-center gap-2 border border-dashed border-border bg-secondary/30 px-6 py-10 text-sm text-muted-foreground hover:bg-secondary">
+                        <Upload className="h-6 w-6" />
+                        <span>Subir foto del comprobante</span>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="sr-only"
+                          onChange={onProofChange}
+                        />
+                      </label>
+                    ) : (
+                      <div className="relative inline-block">
+                        {proofPreview && (
+                          <div className="relative h-48 w-48 overflow-hidden border border-border">
+                            <Image
+                              src={proofPreview}
+                              alt="Comprobante"
+                              fill
+                              sizes="192px"
+                              className="object-cover"
+                            />
+                          </div>
+                        )}
+                        <button
+                          type="button"
+                          onClick={clearProof}
+                          className="absolute -right-2 -top-2 flex h-7 w-7 items-center justify-center rounded-full bg-foreground text-background"
+                          aria-label="Quitar comprobante"
+                        >
+                          <X className="h-4 w-4" />
+                        </button>
+                      </div>
+                    )}
+
+                    <div className="mt-6">
+                      <label
+                        htmlFor="paymentReference"
+                        className="mb-2 block text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground"
+                      >
+                        Nº de comprobante / transacción (opcional)
+                      </label>
+                      <input
+                        id="paymentReference"
+                        type="text"
+                        inputMode="numeric"
+                        value={paymentReference}
+                        onChange={(e) => setPaymentReference(e.target.value)}
+                        maxLength={120}
+                        placeholder="Ej. 000123456789"
+                        className="w-full max-w-xs border border-border bg-background px-4 py-3 text-sm focus:border-foreground focus:outline-none"
+                      />
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        Cópialo desde tu app bancaria para agilizar la
+                        verificación.
+                      </p>
+                    </div>
+                  </div>
+                )}
               </section>
             )}
 
@@ -693,7 +753,9 @@ export function CheckoutForm({
                   >
                     <span>
                       {it.product.name}{" "}
-                      <span className="text-muted-foreground">× {it.quantity}</span>
+                      <span className="text-muted-foreground">
+                        × {it.quantity}
+                      </span>
                     </span>
                     <span>
                       Bs {(Number(it.product.price) * it.quantity).toFixed(2)}
@@ -709,9 +771,7 @@ export function CheckoutForm({
                 </div>
                 {shippingCost > 0 && (
                   <div className="flex justify-between">
-                    <dt className="text-muted-foreground">
-                      Envío a provincia
-                    </dt>
+                    <dt className="text-muted-foreground">Envío a provincia</dt>
                     <dd>Bs {shippingCost.toFixed(2)}</dd>
                   </div>
                 )}
@@ -721,17 +781,40 @@ export function CheckoutForm({
                 </div>
               </dl>
 
-              <button
-                type="submit"
-                disabled={!canSubmit}
-                className="mt-6 w-full bg-foreground px-6 py-4 text-xs font-semibold uppercase tracking-[0.16em] text-background transition-colors hover:bg-foreground/90 disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                {submitting ? "Enviando…" : "Confirmar pedido"}
-              </button>
-              <p className="mt-3 text-xs text-muted-foreground">
-                Verificaremos tu comprobante y te confirmaremos el pedido en
-                cuanto esté listo.
-              </p>
+              {step === 1 ? (
+                <button
+                  type="button"
+                  onClick={goToStep2}
+                  className="mt-6 w-full bg-foreground px-6 py-4 text-xs font-semibold uppercase tracking-[0.16em] text-background transition-colors hover:bg-foreground/90"
+                >
+                  Continuar al pago
+                </button>
+              ) : (
+                <>
+                  <button
+                    type="submit"
+                    disabled={!canSubmit}
+                    className="mt-6 w-full bg-foreground px-6 py-4 text-xs font-semibold uppercase tracking-[0.16em] text-background transition-colors hover:bg-foreground/90 disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    {submitting ? "Enviando…" : "Confirmar pedido"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setError(null);
+                      setStep(1);
+                    }}
+                    className="mt-3 flex w-full items-center justify-center gap-2 text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground hover:text-foreground"
+                  >
+                    <ArrowLeft className="h-4 w-4" />
+                    Volver a entrega
+                  </button>
+                  <p className="mt-3 text-xs text-muted-foreground">
+                    Verificaremos tu comprobante y te confirmaremos el pedido en
+                    cuanto esté listo.
+                  </p>
+                </>
+              )}
             </div>
           </aside>
         </form>
