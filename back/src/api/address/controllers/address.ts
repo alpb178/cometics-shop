@@ -38,11 +38,15 @@ export default factories.createCoreController(
     async find(ctx) {
       const user = ctx.state.user;
       if (!user) return ctx.unauthorized();
-      ctx.query.filters = {
-        ...(ctx.query.filters || {}),
-        user: user.id
-      };
-      return await super.find(ctx);
+      // SUS direcciones. No se inyecta el filtro `user` en ctx.query porque la
+      // validación de query del content-API lo rechaza ("Invalid key user"); se
+      // filtra en la capa de servicio (Document Service).
+      const entities = await strapi.documents("api::address.address").findMany({
+        filters: { user: { id: user.id } },
+        sort: "createdAt:desc"
+      });
+      const sanitized = await this.sanitizeOutput(entities, ctx);
+      return this.transformResponse(sanitized);
     },
 
     async findOne(ctx) {

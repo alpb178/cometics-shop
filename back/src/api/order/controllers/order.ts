@@ -85,13 +85,17 @@ export default factories.createCoreController(
     async find(ctx) {
       const user = ctx.state.user;
       if (!user) return ctx.unauthorized();
-      if (!isStaffUser(user)) {
-        ctx.query.filters = {
-          ...(ctx.query.filters || {}),
-          user: user.id
-        };
-      }
-      return await super.find(ctx);
+      // Staff: listado completo por el flujo normal.
+      if (isStaffUser(user)) return await super.find(ctx);
+      // No-staff: SUS pedidos. No se inyecta el filtro `user` en ctx.query
+      // porque la validación de query del content-API lo rechaza ("Invalid key
+      // user"); se filtra en la capa de servicio (Document Service).
+      const entities = await strapi.documents("api::order.order").findMany({
+        filters: { user: { id: user.id } },
+        sort: "createdAt:desc"
+      });
+      const sanitized = await this.sanitizeOutput(entities, ctx);
+      return this.transformResponse(sanitized);
     },
 
     async findOne(ctx) {
