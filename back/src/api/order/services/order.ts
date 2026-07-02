@@ -28,8 +28,23 @@ export default factories.createCoreService("api::order.order", ({ strapi }) => (
    * publicado en la base de datos. Nunca confía en los precios/totales que envía
    * el cliente. Lanza ValidationError (HTTP 400) si algún item es inválido o el
    * producto no existe / no está publicado.
+   *
+   * Precios: se aplica un markup global (invisible) a cada producto — el precio
+   * cobrado es `base × (1 + markupPercent/100)`.
+   * Envío: si el pedido es delivery FUERA de Santa Cruz (provincia), se suma un
+   * costo fijo (provinceShippingCost). La condición de "provincia" se verifica en
+   * el servidor por coordenadas; si no hay coordenadas, se usa el flag del cliente
+   * como respaldo (el pedido pasa igualmente por verificación manual de staff).
    */
-  async buildVerifiedOrderData(rawItems: unknown) {
+  async buildVerifiedOrderData(
+    rawItems: unknown,
+    opts: {
+      deliveryMethod?: string;
+      lat?: unknown;
+      lng?: unknown;
+      clientIsProvince?: unknown;
+    } = {}
+  ) {
     if (!Array.isArray(rawItems) || rawItems.length === 0) {
       throw new ValidationError("La orden no contiene items");
     }
@@ -46,13 +61,15 @@ export default factories.createCoreService("api::order.order", ({ strapi }) => (
       throw new ValidationError("Items de la orden inválidos");
     }
 
-    const products = (await strapi.entityService.findMany(
-      "api::product.product",
-      {
-        filters: { id: { $in: ids }, publishedAt: { $notNull: true } },
-        fields: ["id", "name", "slug", "price", "currency"]
-      }
-    )) as Array<{
+    // Buscar en el scope PUBLICADO. En Strapi v5 borrador y publicado son
+    // entradas con `id` numérico distinto (mismo documentId); el front usa el id
+    // publicado, así que hay que consultar `status: "published"` (el
+    // entityService por defecto resuelve el borrador y no encontraría el id).
+    const products = (await strapi.documents("api::product.product").findMany({
+      status: "published",
+      filters: { id: { $in: ids } },
+      fields: ["id", "name", "slug", "price", "currency"]
+    })) as Array<{
       id: number;
       name: string;
       slug: string | null;
@@ -60,6 +77,21 @@ export default factories.createCoreService("api::order.order", ({ strapi }) => (
     }>;
 
     const byId = new Map(products.map((p) => [p.id, p]));
+
+    // Configuración de precios/envío (markup global + envío a provincia).
+    const pricing = strapi.service("api::pricing-setting.pricing-setting") as {
+      getSettings: () => Promise<{
+        markupPercent: number;
+        provinceShippingCost: number;
+        scCenterLat: number;
+        scCenterLng: number;
+        scRadiusKm: number;
+      }>;
+      isProvince: (s: unknown, lat: unknown, lng: unknown) => boolean | null;
+    };
+    const settings = await pricing.getSettings();
+    const markupFactor = 1 + Number(settings.markupPercent || 0) / 100;
+    const round2 = (n: number) => Math.round(n * 100) / 100;
 
     let subtotal = 0;
     const verifiedItems: VerifiedItem[] = items.map((raw) => {
@@ -72,7 +104,8 @@ export default factories.createCoreService("api::order.order", ({ strapi }) => (
       if (!Number.isInteger(quantity) || quantity < 1) {
         throw new ValidationError("Cantidad inválida en la orden");
       }
-      const price = Number(product.price) || 0;
+      // Precio cobrado = base × markup (invisible para el cliente).
+      const price = round2((Number(product.price) || 0) * markupFactor);
       subtotal += price * quantity;
       return {
         productId: product.id,
@@ -83,9 +116,18 @@ export default factories.createCoreService("api::order.order", ({ strapi }) => (
         imageUrl: typeof raw.imageUrl === "string" ? raw.imageUrl : undefined
       };
     });
+    subtotal = round2(subtotal);
 
-    const shippingCost = 0; // sin tarifa de envío configurable por ahora
-    const total = subtotal + shippingCost;
+    // Envío a provincia: solo para delivery fuera de Santa Cruz.
+    let shippingCost = 0;
+    if (opts.deliveryMethod === "delivery") {
+      const verified = pricing.isProvince(settings, opts.lat, opts.lng);
+      const isProvince =
+        verified !== null ? verified : Boolean(opts.clientIsProvince);
+      if (isProvince) shippingCost = round2(Number(settings.provinceShippingCost) || 0);
+    }
+
+    const total = round2(subtotal + shippingCost);
 
     return { items: verifiedItems, subtotal, shippingCost, total };
   }

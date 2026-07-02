@@ -10,18 +10,45 @@ export default factories.createCoreController(
     async create(ctx) {
       const user = ctx.state.user;
       if (!user) return ctx.unauthorized();
-      ctx.request.body.data = { ...(ctx.request.body.data || {}), user: user.id };
-      return await super.create(ctx);
+      // La relación `user` no se puede fijar en el body vía content-API (Strapi
+      // v5 la rechaza: "Invalid key user"). Se crea con el Document Service
+      // asignando el dueño server-side, con whitelist de campos del cliente.
+      const body = (ctx.request.body?.data || {}) as Record<string, unknown>;
+      const ALLOWED = [
+        "fullName",
+        "phone",
+        "line1",
+        "line2",
+        "city",
+        "department",
+        "ci",
+        "notes",
+        "isDefault",
+      ];
+      const data: Record<string, unknown> = { user: user.id };
+      for (const key of ALLOWED) if (key in body) data[key] = body[key];
+
+      const entity = await strapi
+        .documents("api::address.address")
+        // `data` se arma dinámicamente (whitelist + user); casteamos al tipo de
+        // entrada del Document Service.
+        .create({ data: data as never });
+      const sanitized = await this.sanitizeOutput(entity, ctx);
+      return this.transformResponse(sanitized);
     },
 
     async find(ctx) {
       const user = ctx.state.user;
       if (!user) return ctx.unauthorized();
-      ctx.query.filters = {
-        ...(ctx.query.filters || {}),
-        user: user.id
-      };
-      return await super.find(ctx);
+      // SUS direcciones. No se inyecta el filtro `user` en ctx.query porque la
+      // validación de query del content-API lo rechaza ("Invalid key user"); se
+      // filtra en la capa de servicio (Document Service).
+      const entities = await strapi.documents("api::address.address").findMany({
+        filters: { user: { id: user.id } },
+        sort: "createdAt:desc"
+      });
+      const sanitized = await this.sanitizeOutput(entities, ctx);
+      return this.transformResponse(sanitized);
     },
 
     async findOne(ctx) {

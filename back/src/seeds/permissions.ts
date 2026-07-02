@@ -46,6 +46,7 @@ const CATALOG_READ = [
   "api::social-network.social-network.find",
   "api::social-network.social-network.findOne",
   "api::payment-info.payment-info.find",
+  "api::pricing-setting.pricing-setting.find",
 ];
 
 // Rol "client": storefront.
@@ -89,6 +90,8 @@ const ADMIN_ACTIONS = [
   // Datos de pago (single type).
   "api::payment-info.payment-info.update",
   "api::payment-info.payment-info.delete",
+  // Configuración de precios/envío (single type).
+  "api::pricing-setting.pricing-setting.update",
   // FAQs.
   "api::faq.faq.create",
   "api::faq.faq.update",
@@ -104,14 +107,25 @@ const ADMIN_ACTIONS = [
   // `/api/users` queda restringido a staff mediante la extensión de
   // users-permissions (src/extensions/users-permissions/strapi-server.ts).
   "plugin::users-permissions.user.find",
+  // Alta de usuarios staff desde el backoffice (POST /api/users). También
+  // restringido a staff en la misma extensión.
+  "plugin::users-permissions.user.create",
+  // Gestión de usuarios desde el backoffice: setear contraseña/rol (update) y
+  // eliminar (destroy). Restringidos a staff en la misma extensión.
+  "plugin::users-permissions.user.update",
+  "plugin::users-permissions.user.destroy",
   // Necesario para que el backoffice pueda pedir `/api/users/me?populate=role`
   // (requireStaff / login). Popular la relación `role` exige este scope.
   "plugin::users-permissions.role.find",
-  // KPI y sección de visitas del dashboard (GET /api/page-visits/stats y /top).
-  // El registro de visitas (POST /page-visits/track) es público vía auth:false,
-  // no necesita permiso de rol.
+  // KPI y sección de visitas del dashboard (GET /api/page-visits/stats, /top y
+  // /sources). El registro de visitas (POST /page-visits/track) es público vía
+  // auth:false, no necesita permiso de rol.
   "api::page-visit.page-visit.stats",
   "api::page-visit.page-visit.top",
+  "api::page-visit.page-visit.sources",
+  // Tabla de interacciones del backoffice (GET /store-events/recent). El
+  // registro (POST /store-events/track) es público vía auth:false.
+  "api::store-event.store-event.recent",
   // Subida de imágenes (comprobantes, imágenes de producto).
   "plugin::upload.content-api.upload",
 ];
@@ -121,6 +135,8 @@ const ADMIN_ACTIONS = [
 const PUBLIC_ACTIONS = [
   "plugin::users-permissions.auth.connect",
   "plugin::users-permissions.auth.callback",
+  // El storefront anónimo necesita el markup para mostrar precios.
+  "api::pricing-setting.pricing-setting.find",
 ];
 
 async function ensureRole(

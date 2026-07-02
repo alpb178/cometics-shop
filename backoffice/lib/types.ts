@@ -68,11 +68,12 @@ export interface Address {
   documentId: string;
   fullName: string;
   phone: string;
-  line1: string;
-  line2?: string;
-  city: string;
-  department: string;
-  notes?: string;
+  line1?: string | null;
+  line2?: string | null;
+  city?: string | null;
+  department?: string | null;
+  ci?: string | null;
+  notes?: string | null;
 }
 
 export interface OrderUser {
@@ -86,7 +87,7 @@ export interface Order {
   documentId: string;
   orderNumber: string;
   deliveryMethod: "delivery" | "pickup";
-  paymentMethod: "bank_transfer" | "qr";
+  paymentMethod: "cash" | "qr" | "bank_transfer";
   subtotal: number;
   shippingCost: number | null;
   total: number;
@@ -95,6 +96,10 @@ export interface Order {
   items: OrderItem[];
   shippingAddress: Address | null;
   paymentProof: StrapiMedia | null;
+  paymentReference: string | null;
+  cancellationReason: string | null;
+  destLat: number | null;
+  destLng: number | null;
   user: OrderUser | null;
   createdAt: string;
   updatedAt: string;
@@ -116,6 +121,32 @@ export interface VisitStats {
 export interface TopPath {
   path: string;
   count: number;
+}
+
+export interface PricingSetting {
+  markupPercent: number;
+  provinceShippingCost: number;
+  scCenterLat: number;
+  scCenterLng: number;
+  scRadiusKm: number;
+}
+
+export interface TrafficSource {
+  source: string;
+  count: number;
+}
+
+export type StoreEventType = "product_view" | "add_to_cart" | "cart_view";
+
+export interface StoreEvent {
+  id: number;
+  type: StoreEventType;
+  label: string | null;
+  productSlug: string | null;
+  quantity: number | null;
+  path: string | null;
+  sessionId: string | null;
+  createdAt: string;
 }
 
 export type SocialName =
@@ -151,4 +182,23 @@ export interface AuthUser {
   id: number;
   username: string;
   email: string;
+}
+
+/** Rol de users-permissions (public/authenticated/admin/client). */
+export interface AppRole {
+  id: number;
+  name: string;
+  type: string;
+}
+
+/** Usuario tal como lo devuelve `GET /api/users?populate=role` (array plano). */
+export interface UserRow {
+  id: number;
+  username: string;
+  email: string;
+  provider: string | null;
+  confirmed: boolean;
+  blocked: boolean;
+  role: AppRole | null;
+  createdAt: string;
 }

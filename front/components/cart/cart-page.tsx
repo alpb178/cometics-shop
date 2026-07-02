@@ -7,19 +7,22 @@ import { Plus, Minus, X, ShoppingBag } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
-import { DeliveryOptions } from "../../container/products/product/components/delivery-options";
-import { useDeliveryOption } from "@/hooks/useDeliveryOption";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { trackEvent } from "@/lib/track-event";
 
 export function CartPage({ locale }: { locale: string }) {
   const { items, updateQuantity, removeFromCart, getCartTotal, clearCart } =
     useCart();
-  const { deliveryOption, handleDeliveryChange } = useDeliveryOption();
   const [confirm, setConfirm] = useState<{
     show: boolean;
     productId?: number;
     clearAll?: boolean;
   }>({ show: false });
+
+  // Registra la apertura del carrito (una vez por montaje).
+  useEffect(() => {
+    trackEvent("cart_view");
+  }, []);
 
   const handleQuantity = (
     productId: number,
@@ -196,18 +199,10 @@ export function CartPage({ locale }: { locale: string }) {
           <aside className="lg:sticky lg:top-32 lg:h-fit">
             <div className="border border-border p-6">
               <p className="text-xs font-semibold uppercase tracking-[0.16em] text-foreground">
-                Entrega
+                Resumen
               </p>
-              <div className="mt-4">
-                <DeliveryOptions
-                  value={deliveryOption}
-                  onChange={handleDeliveryChange}
-                  showInfo={true}
-                  className="mb-0"
-                />
-              </div>
 
-              <dl className="mt-6 space-y-2 border-t border-border pt-6 text-sm">
+              <dl className="mt-4 space-y-2 border-t border-border pt-6 text-sm">
                 <div className="flex items-center justify-between">
                   <dt className="text-muted-foreground">Subtotal</dt>
                   <dd className="font-medium text-foreground">
@@ -217,12 +212,6 @@ export function CartPage({ locale }: { locale: string }) {
                     }).toString()}
                   </dd>
                 </div>
-                {deliveryOption === "delivery" && (
-                  <div className="flex items-center justify-between">
-                    <dt className="text-muted-foreground">Envío</dt>
-                    <dd className="text-muted-foreground">A cotizar</dd>
-                  </div>
-                )}
                 <div className="flex items-center justify-between border-t border-border pt-4">
                   <dt className="text-base font-semibold text-foreground">
                     Total
@@ -232,11 +221,6 @@ export function CartPage({ locale }: { locale: string }) {
                       price: getCartTotal(),
                       currency
                     }).toString()}
-                    {deliveryOption === "delivery" && (
-                      <span className="ml-1 text-xs font-normal text-muted-foreground">
-                        + envío
-                      </span>
-                    )}
                   </dd>
                 </div>
               </dl>
@@ -250,8 +234,8 @@ export function CartPage({ locale }: { locale: string }) {
                 </Link>
               </div>
 
-              <p className="mt-6 border-t border-border pt-4 text-xs text-muted-foreground">
-                Confirmaremos tu pedido cuando recibamos el comprobante de pago.
+              <p className="mt-4 text-xs text-muted-foreground">
+                Elegirás el método de entrega y de pago en el checkout.
               </p>
             </div>
           </aside>

@@ -2,17 +2,24 @@ import "server-only";
 import {
   strapiDelete,
   strapiGet,
+  strapiPostRaw,
+  strapiPutRaw,
   strapiSend
 } from "./strapi";
 import type {
+  AppRole,
   Category,
   Faq,
   Order,
   OrderStatus,
   PaymentInfo,
+  PricingSetting,
   Product,
   SocialNetwork,
+  StoreEvent,
   TopPath,
+  TrafficSource,
+  UserRow,
   VisitStats
 } from "./types";
 
@@ -148,9 +155,14 @@ export async function getOrder(documentId: string): Promise<Order | null> {
 
 export async function updateOrderStatus(
   documentId: string,
-  status: OrderStatus
+  status: OrderStatus,
+  cancellationReason?: string
 ): Promise<void> {
-  await strapiSend("PUT", `/api/orders/${documentId}`, { status });
+  const data: { status: OrderStatus; cancellationReason?: string } = { status };
+  if (cancellationReason !== undefined) {
+    data.cancellationReason = cancellationReason;
+  }
+  await strapiSend("PUT", `/api/orders/${documentId}`, data);
 }
 
 /* ------------------------------ Contenido ----------------------------- */
@@ -177,6 +189,38 @@ export async function updatePaymentInfo(
 ): Promise<void> {
   // Single type: PUT sin documentId.
   await strapiSend("PUT", "/api/payment-info", input);
+}
+
+/**
+ * Actualiza SOLO la imagen QR del single type payment-info. El PUT parcial de
+ * Strapi solo toca los campos enviados, así que no pisa los datos bancarios.
+ */
+export async function updatePaymentQr(qrImageId: number): Promise<void> {
+  await strapiSend("PUT", "/api/payment-info", { qrImage: qrImageId });
+}
+
+/* --------------------- Precios / envío (config) ----------------------- */
+
+const PRICING_DEFAULTS: PricingSetting = {
+  markupPercent: 10,
+  provinceShippingCost: 17,
+  scCenterLat: -17.7833,
+  scCenterLng: -63.1821,
+  scRadiusKm: 15
+};
+
+export async function getPricingSetting(): Promise<PricingSetting> {
+  const res = await strapiGet<SingleResponse<PricingSetting>>(
+    `/api/pricing-setting`
+  );
+  return res.data ?? { ...PRICING_DEFAULTS };
+}
+
+export async function updatePricingSetting(
+  input: PricingSetting
+): Promise<void> {
+  // Single type: PUT sin documentId.
+  await strapiSend("PUT", "/api/pricing-setting", input);
 }
 
 export async function listFaqs(): Promise<Faq[]> {
@@ -238,4 +282,81 @@ export async function getTopPaths(
     `/api/page-visits/top?days=${days}&limit=${limit}`
   );
   return res.data ?? [];
+}
+
+export async function getTrafficSources(days = 30): Promise<TrafficSource[]> {
+  const res = await strapiGet<ListResponse<TrafficSource>>(
+    `/api/page-visits/sources?days=${days}`
+  );
+  return res.data ?? [];
+}
+
+/* --------------------------- Interacciones ---------------------------- */
+
+export async function listStoreEvents(limit = 100): Promise<StoreEvent[]> {
+  const res = await strapiGet<ListResponse<StoreEvent>>(
+    `/api/store-events/recent?limit=${limit}`
+  );
+  return res.data ?? [];
+}
+
+/* ------------------------------- Usuarios ----------------------------- */
+
+// `GET /api/users` (users-permissions) devuelve un array plano, no `{ data }`.
+// Acceso restringido a staff en la extensión del plugin (back/).
+export async function listUsers(): Promise<UserRow[]> {
+  const users = await strapiGet<UserRow[]>(`/api/users?populate=role`);
+  // Ordenar por fecha de alta (desc) en el servidor Next para no depender de
+  // los query params de paginación/orden de users-permissions.
+  return (users ?? [])
+    .slice()
+    .sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1));
+}
+
+// Roles de users-permissions. La ruta NO fija prefix vacío, así que usa el
+// prefijo del plugin: `/api/users-permissions/roles`. Devuelve `{ roles: [] }`.
+export async function listRoles(): Promise<AppRole[]> {
+  const res = await strapiGet<{ roles: AppRole[] }>(
+    `/api/users-permissions/roles`
+  );
+  return res.roles ?? [];
+}
+
+export interface CreateUserInput {
+  username: string;
+  email: string;
+  password: string;
+  role: number;
+}
+
+export async function createUser(input: CreateUserInput): Promise<UserRow> {
+  // El body va sin envoltorio `{ data }`; `confirmed` lo fuerza además la
+  // extensión del backend por si acaso.
+  return await strapiPostRaw<UserRow>("/api/users", {
+    ...input,
+    confirmed: true
+  });
+}
+
+/** Setea la contraseña de un usuario (users-permissions la hashea). */
+export async function setUserPassword(
+  id: number,
+  password: string
+): Promise<void> {
+  await strapiPutRaw(`/api/users/${id}`, { password });
+}
+
+/** Cambia el rol de un usuario. */
+export async function setUserRole(id: number, role: number): Promise<void> {
+  await strapiPutRaw(`/api/users/${id}`, { role });
+}
+
+export async function deleteUser(id: number): Promise<void> {
+  await strapiDelete(`/api/users/${id}`);
+}
+
+/** Nº de clientes registrados (rol "client"), excluye staff/admin. */
+export async function countClients(): Promise<number> {
+  const users = await listUsers();
+  return users.filter((u) => u.role?.type === "client").length;
 }

@@ -4,6 +4,7 @@ import { ArrowLeft } from "lucide-react";
 import { getOrder } from "@/lib/data";
 import { formatDate, mediaUrl } from "@/lib/utils";
 import { StatusSelect } from "../status-select";
+import { PaymentVerification } from "../payment-verification";
 
 export const dynamic = "force-dynamic";
 
@@ -12,8 +13,15 @@ const DELIVERY_LABEL: Record<string, string> = {
   pickup: "Recojo en tienda"
 };
 const PAYMENT_LABEL: Record<string, string> = {
-  bank_transfer: "Transferencia bancaria",
-  qr: "Pago QR"
+  cash: "Efectivo",
+  qr: "Pago QR",
+  // Legado: pedidos antiguos creados antes del cambio a efectivo/QR.
+  bank_transfer: "Transferencia bancaria"
+};
+const PAYMENT_BADGE: Record<string, string> = {
+  cash: "bg-green-100 text-green-800",
+  qr: "bg-blue-100 text-blue-800",
+  bank_transfer: "bg-neutral-100 text-neutral-700"
 };
 
 export default async function OrderDetailPage({
@@ -114,8 +122,31 @@ export default async function OrderDetailPage({
 
         {/* Lateral */}
         <div className="space-y-6">
+          <PaymentVerification
+            documentId={order.documentId}
+            status={order.status}
+            cancellationReason={order.cancellationReason}
+          />
+
           <div className="card p-5">
             <StatusSelect documentId={order.documentId} current={order.status} />
+          </div>
+
+          <div className="card p-5">
+            <h2 className="mb-2 font-medium">Pago</h2>
+            <div className="flex flex-wrap items-center gap-2">
+              <span
+                className={`badge text-sm ${
+                  PAYMENT_BADGE[order.paymentMethod] ??
+                  "bg-neutral-100 text-neutral-700"
+                }`}
+              >
+                {PAYMENT_LABEL[order.paymentMethod] ?? order.paymentMethod}
+              </span>
+              <span className="text-sm text-neutral-500">
+                {DELIVERY_LABEL[order.deliveryMethod]}
+              </span>
+            </div>
           </div>
 
           {addr && (
@@ -123,21 +154,61 @@ export default async function OrderDetailPage({
               <h2 className="mb-2 font-medium">Envío</h2>
               <p className="font-medium">{addr.fullName}</p>
               <p className="text-neutral-600">{addr.phone}</p>
-              <p className="mt-1 text-neutral-600">
-                {addr.line1}
-                {addr.line2 ? `, ${addr.line2}` : ""}
-              </p>
-              <p className="text-neutral-600">
-                {addr.city}, {addr.department}
-              </p>
+              {addr.ci && (
+                <p className="text-neutral-600">CI: {addr.ci}</p>
+              )}
+              {addr.line1 && (
+                <p className="mt-1 text-neutral-600">
+                  {addr.line1}
+                  {addr.line2 ? `, ${addr.line2}` : ""}
+                </p>
+              )}
+              {(addr.city || addr.department) && (
+                <p className="text-neutral-600">
+                  {[addr.city, addr.department].filter(Boolean).join(", ")}
+                </p>
+              )}
               {addr.notes && (
                 <p className="mt-1 text-neutral-500">{addr.notes}</p>
               )}
             </div>
           )}
 
+          {order.deliveryMethod === "delivery" &&
+            order.destLat != null &&
+            order.destLng != null && (
+              <div className="card p-5 text-sm">
+                <h2 className="mb-2 font-medium">Ubicación de entrega</h2>
+                <p className="mb-2 font-mono text-neutral-600">
+                  {order.destLat.toFixed(6)}, {order.destLng.toFixed(6)}
+                </p>
+                <div className="overflow-hidden rounded-lg border border-neutral-200">
+                  <iframe
+                    title="Mapa de entrega"
+                    src={`https://maps.google.com/maps?q=${order.destLat},${order.destLng}&z=16&output=embed`}
+                    className="h-56 w-full"
+                    loading="lazy"
+                  />
+                </div>
+                <a
+                  href={`https://www.google.com/maps?q=${order.destLat},${order.destLng}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="mt-2 inline-block text-brand hover:underline"
+                >
+                  Abrir en Google Maps
+                </a>
+              </div>
+            )}
+
           <div className="card p-5">
             <h2 className="mb-2 font-medium">Comprobante de pago</h2>
+            {order.paymentReference && (
+              <p className="mb-3 text-sm">
+                <span className="text-neutral-500">Nº comprobante: </span>
+                <span className="font-mono">{order.paymentReference}</span>
+              </p>
+            )}
             {proof ? (
               <a href={proof} target="_blank" rel="noreferrer">
                 {/* eslint-disable-next-line @next/next/no-img-element */}

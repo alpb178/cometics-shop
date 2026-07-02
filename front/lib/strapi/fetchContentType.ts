@@ -1,5 +1,6 @@
 import { draftMode } from "next/headers";
 import qs from "qs";
+import { applyMarkup, getPricingSettings } from "@/lib/pricing";
 /**
  * Fetches data for a specified Strapi content type.
  *
@@ -59,6 +60,24 @@ export default async function fetchContentType(
       );
     }
     const jsonData: StrapiResponse = await response.json();
+
+    // Markup global invisible: los precios de producto se muestran con el
+    // recargo ya aplicado. El servidor lo re-aplica al crear el pedido, así que
+    // display y cobro coinciden.
+    if (contentType.startsWith("products") && jsonData?.data) {
+      const { markupPercent } = await getPricingSettings();
+      if (markupPercent) {
+        const items = Array.isArray(jsonData.data)
+          ? jsonData.data
+          : [jsonData.data];
+        for (const item of items) {
+          if (item && typeof item.price === "number") {
+            item.price = applyMarkup(item.price, markupPercent);
+          }
+        }
+      }
+    }
+
     return spreadData ? spreadStrapiData(jsonData) : jsonData;
   } catch (error) {
     console.error(`Error fetching ${contentType}:`, error);

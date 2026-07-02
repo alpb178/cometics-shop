@@ -5,6 +5,7 @@ import {
   ShoppingBag,
   FileText,
   Eye,
+  Users,
   type LucideIcon
 } from "lucide-react";
 import { PageHeader } from "@/components/page-header";
@@ -13,7 +14,8 @@ import {
   listProducts,
   listCategories,
   listOrders,
-  getVisitStats
+  getVisitStats,
+  countClients
 } from "@/lib/data";
 import { ORDER_STATUS_META } from "@/lib/utils";
 
@@ -22,11 +24,12 @@ export const dynamic = "force-dynamic";
 export default async function DashboardHome() {
   const user = await getCurrentUser();
 
-  const [products, categories, orders, visits] = await Promise.all([
+  const [products, categories, orders, visits, clients] = await Promise.all([
     listProducts().catch(() => []),
     listCategories().catch(() => []),
     listOrders().catch(() => []),
-    getVisitStats().catch(() => ({ total: 0, today: 0, last7Days: 0 }))
+    getVisitStats().catch(() => ({ total: 0, today: 0, last7Days: 0 })),
+    countClients().catch(() => 0)
   ]);
 
   const pending = orders.filter(
@@ -70,6 +73,13 @@ export default async function DashboardHome() {
       href: "/visits",
       icon: Eye,
       hint: `Hoy ${visits.today} · 7 días ${visits.last7Days}`
+    },
+    {
+      label: "Clientes",
+      value: clients,
+      href: "/users",
+      icon: Users,
+      hint: "Usuarios registrados"
     }
   ];
 
@@ -80,7 +90,7 @@ export default async function DashboardHome() {
         subtitle="Resumen de la tienda"
       />
 
-      <div className="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-5">
+      <div className="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-6">
         {stats.map(({ label, value, href, icon: Icon, hint }) => (
           <Link key={label} href={href} className="card p-5 transition hover:shadow-md">
             <div className="flex items-center justify-between">

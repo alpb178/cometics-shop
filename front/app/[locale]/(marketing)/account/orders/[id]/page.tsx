@@ -13,9 +13,11 @@ const STATUS_LABELS: Record<Order["status"], string> = {
   cancelled: "Cancelado"
 };
 
-const PAYMENT_LABELS: Record<Order["paymentMethod"], string> = {
-  bank_transfer: "Transferencia bancaria",
-  qr: "Pago por QR"
+const PAYMENT_LABELS: Record<string, string> = {
+  cash: "Efectivo",
+  qr: "Pago por QR",
+  // Legado: pedidos anteriores al cambio a efectivo/QR.
+  bank_transfer: "Transferencia bancaria"
 };
 
 const STRAPI_URL = process.env.NEXT_PUBLIC_API_URL;
@@ -121,16 +123,34 @@ export default async function OrderDetailPage({
               <address className="not-italic mt-2 text-sm text-muted-foreground">
                 {order.shippingAddress.fullName}
                 <br />
-                {order.shippingAddress.line1}
-                {order.shippingAddress.line2 && (
+                {order.shippingAddress.line1 && (
                   <>
-                    , {order.shippingAddress.line2}
+                    {order.shippingAddress.line1}
+                    {order.shippingAddress.line2 && (
+                      <>, {order.shippingAddress.line2}</>
+                    )}
+                    <br />
                   </>
                 )}
-                <br />
-                {order.shippingAddress.city}, {order.shippingAddress.department}
-                <br />
+                {(order.shippingAddress.city ||
+                  order.shippingAddress.department) && (
+                  <>
+                    {[
+                      order.shippingAddress.city,
+                      order.shippingAddress.department
+                    ]
+                      .filter(Boolean)
+                      .join(", ")}
+                    <br />
+                  </>
+                )}
                 Tel: {order.shippingAddress.phone}
+                {order.shippingAddress.ci && (
+                  <>
+                    <br />
+                    CI: {order.shippingAddress.ci}
+                  </>
+                )}
               </address>
             )}
           </div>

@@ -50,7 +50,7 @@
     },
     "paymentMethod": {
       "type": "enumeration",
-      "enum": ["bank_transfer", "qr"],
+      "enum": ["cash", "qr"],
       "required": true
     },
     "paymentProof": {
@@ -72,6 +72,19 @@
     },
     "customerNotes": {
       "type": "text"
+    },
+    "paymentReference": {
+      "type": "string",
+      "maxLength": 120
+    },
+    "cancellationReason": {
+      "type": "text"
+    },
+    "destLat": {
+      "type": "decimal"
+    },
+    "destLng": {
+      "type": "decimal"
     }
   }
 }

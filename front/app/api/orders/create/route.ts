@@ -8,15 +8,17 @@ type Payload = {
   address: null | {
     fullName: string;
     phone: string;
-    line1: string;
+    line1?: string;
     line2?: string;
-    city: string;
-    department: string;
+    city?: string;
+    department?: string;
+    ci?: string;
     notes?: string;
   };
   deliveryMethod: "delivery" | "pickup";
-  paymentMethod: "bank_transfer" | "qr";
+  paymentMethod: "cash" | "qr";
   customerNotes?: string;
+  paymentReference?: string;
   items: Array<{
     productId: number;
     name: string;
@@ -27,6 +29,9 @@ type Payload = {
   }>;
   subtotal: number;
   total: number;
+  isProvince?: boolean;
+  destLat?: number | null;
+  destLng?: number | null;
 };
 
 async function uploadProof(token: string, file: File): Promise<number> {
@@ -69,7 +74,7 @@ async function createAddress(
 async function createOrder(
   token: string,
   payload: Payload,
-  proofId: number,
+  proofId: number | null,
   addressId: number | null
 ): Promise<{ id: number; orderNumber?: string }> {
   const body = {
@@ -81,7 +86,12 @@ async function createOrder(
       paymentProof: proofId,
       subtotal: payload.subtotal,
       total: payload.total,
-      customerNotes: payload.customerNotes
+      customerNotes: payload.customerNotes,
+      paymentReference: payload.paymentReference,
+      // Entradas de cálculo de envío; el servidor las verifica y no las persiste.
+      isProvince: payload.isProvince ?? false,
+      destLat: payload.destLat ?? null,
+      destLng: payload.destLng ?? null
     }
   };
   const res = await fetch(`${STRAPI_URL}/api/orders`, {
@@ -96,10 +106,11 @@ async function createOrder(
     const text = await res.text().catch(() => "");
     throw new Error(`order failed: ${res.status} ${text}`);
   }
+  // Strapi v5 devuelve los atributos aplanados (sin envoltorio `attributes`).
   const data = (await res.json()) as {
-    data: { id: number; attributes?: { orderNumber?: string } };
+    data: { id: number; orderNumber?: string };
   };
-  return { id: data.data.id, orderNumber: data.data.attributes?.orderNumber };
+  return { id: data.data.id, orderNumber: data.data.orderNumber };
 }
 
 export async function POST(req: Request) {
@@ -120,9 +131,6 @@ export async function POST(req: Request) {
   if (typeof payloadRaw !== "string") {
     return NextResponse.json({ error: "Missing payload" }, { status: 400 });
   }
-  if (!(proof instanceof File)) {
-    return NextResponse.json({ error: "Missing proof file" }, { status: 400 });
-  }
 
   let payload: Payload;
   try {
@@ -133,6 +141,11 @@ export async function POST(req: Request) {
 
   if (!payload.items?.length) {
     return NextResponse.json({ error: "Carrito vacío" }, { status: 400 });
+  }
+  // El comprobante solo es obligatorio para pago por QR; en efectivo se paga
+  // contra entrega o en tienda.
+  if (payload.paymentMethod === "qr" && !(proof instanceof File)) {
+    return NextResponse.json({ error: "Missing proof file" }, { status: 400 });
   }
   if (
     payload.deliveryMethod === "delivery" &&
@@ -146,7 +159,8 @@ export async function POST(req: Request) {
   }
 
   try {
-    const proofId = await uploadProof(token, proof);
+    const proofId =
+      proof instanceof File ? await uploadProof(token, proof) : null;
     let addressId: number | null = payload.addressId ?? null;
     if (!addressId && payload.address) {
       addressId = await createAddress(token, payload.address);

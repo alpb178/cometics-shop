@@ -5,12 +5,11 @@ import type { Address } from "@/definitions/Address";
 import type { PaymentInfo } from "@/definitions/PaymentInfo";
 
 async function loadPaymentInfo(): Promise<PaymentInfo | null> {
-  const STRAPI_URL = process.env.NEXT_PUBLIC_API_URL;
+  // Con token: `payment-info.find` está concedido a los roles client/admin, no
+  // al rol public. Un fetch anónimo devolvía 403 y el QR/datos bancarios no se
+  // mostraban. El checkout siempre tiene sesión (requireUser).
   try {
-    const res = await fetch(
-      `${STRAPI_URL}/api/payment-info?populate=qrImage`,
-      { cache: "no-store" }
-    );
+    const res = await authFetch("/api/payment-info?populate[qrImage]=true");
     if (!res.ok) return null;
     const { data } = (await res.json()) as { data: PaymentInfo };
     return data ?? null;

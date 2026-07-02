@@ -8,6 +8,7 @@ import { useCart } from "@/context/cart-context";
 import { ShoppingBag } from "lucide-react";
 import Link from "next/link";
 import { useLocale } from "next-intl";
+import { trackEvent } from "@/lib/track-event";
 
 export const ProductItem = ({ product }: { product: Product }) => {
   const { addToCart } = useCart();
@@ -61,6 +62,11 @@ export const ProductItem = ({ product }: { product: Product }) => {
               e.preventDefault();
               e.stopPropagation();
               addToCart(product);
+              trackEvent("add_to_cart", {
+                label: product.name,
+                productSlug: product.slug,
+                quantity: 1
+              });
             }}
             className="pointer-events-auto absolute inset-x-0 bottom-0 flex h-11 items-center justify-center gap-2 bg-foreground text-xs font-semibold uppercase tracking-[0.14em] text-background opacity-0 transition-opacity duration-200 group-hover:opacity-100 group-focus-within:opacity-100"
             aria-label={`Añadir ${product.name} al carrito`}

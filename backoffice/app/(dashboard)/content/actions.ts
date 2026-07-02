@@ -6,6 +6,7 @@ import {
   deleteFaq,
   updateFaq,
   updatePaymentInfo,
+  updatePricingSetting,
   type PaymentInfoInput
 } from "@/lib/data";
 import { uploadFiles } from "@/lib/strapi";
@@ -33,6 +34,22 @@ export async function savePaymentInfoAction(formData: FormData) {
   }
 
   await updatePaymentInfo(input);
+  revalidatePath("/content");
+}
+
+export async function savePricingAction(formData: FormData) {
+  await requireStaff();
+  const num = (key: string, fallback: number) => {
+    const v = Number(formData.get(key));
+    return Number.isFinite(v) ? v : fallback;
+  };
+  await updatePricingSetting({
+    markupPercent: num("markupPercent", 10),
+    provinceShippingCost: num("provinceShippingCost", 17),
+    scCenterLat: num("scCenterLat", -17.7833),
+    scCenterLng: num("scCenterLng", -63.1821),
+    scRadiusKm: num("scRadiusKm", 15)
+  });
   revalidatePath("/content");
 }
 
