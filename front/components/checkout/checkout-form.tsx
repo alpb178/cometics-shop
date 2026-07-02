@@ -26,11 +26,7 @@ import type {
 type FormValues = {
   fullName: string;
   phone: string;
-  line1: string;
-  line2?: string;
-  city: string;
-  department: string;
-  notes?: string;
+  ci?: string;
 };
 
 const STRAPI_URL = process.env.NEXT_PUBLIC_API_URL;
@@ -60,8 +56,7 @@ export function CheckoutForm({
     mode: "onTouched",
     defaultValues: {
       fullName,
-      phone: user.phone ?? "",
-      department: "Santa Cruz"
+      phone: user.phone ?? ""
     }
   });
 
@@ -193,15 +188,13 @@ export function CheckoutForm({
       const useNew =
         deliveryMethod === "delivery" && addressMode === "new";
 
+      // Dentro de Santa Cruz solo pedimos nombre y teléfono; fuera de Santa
+      // Cruz (provincia) además el CI para reclamar el envío en terminal.
       const newAddress = useNew
         ? {
             fullName: values.fullName,
             phone: values.phone,
-            line1: values.line1,
-            line2: values.line2 || undefined,
-            city: values.city,
-            department: values.department,
-            notes: values.notes || undefined
+            ci: isProvince ? values.ci?.trim() || undefined : undefined
           }
         : null;
 
@@ -224,7 +217,7 @@ export function CheckoutForm({
         address: useNew && !finalAddressId ? newAddress : null,
         deliveryMethod,
         paymentMethod,
-        customerNotes: values.notes || undefined,
+        customerNotes: undefined,
         paymentReference: paymentReference.trim() || undefined,
         items: items.map((it) => ({
           productId: it.product.id,
@@ -441,12 +434,28 @@ export function CheckoutForm({
                           />
                           <p className="font-semibold">{addr.fullName}</p>
                           <p className="mt-1 text-xs text-muted-foreground">
-                            {addr.line1}
-                            {addr.line2 && `, ${addr.line2}`}
-                            <br />
-                            {addr.city}, {addr.department}
-                            <br />
+                            {addr.line1 && (
+                              <>
+                                {addr.line1}
+                                {addr.line2 && `, ${addr.line2}`}
+                                <br />
+                              </>
+                            )}
+                            {(addr.city || addr.department) && (
+                              <>
+                                {[addr.city, addr.department]
+                                  .filter(Boolean)
+                                  .join(", ")}
+                                <br />
+                              </>
+                            )}
                             Tel: {addr.phone}
+                            {addr.ci && (
+                              <>
+                                <br />
+                                CI: {addr.ci}
+                              </>
+                            )}
                           </p>
                         </label>
                       </li>
@@ -463,41 +472,22 @@ export function CheckoutForm({
                       />
                       <PhoneInput name="phone" label="Teléfono" required />
                     </div>
-                    <div className="mt-4">
-                      <TextInput
-                        name="line1"
-                        label="Dirección"
-                        required
-                        validation={{ required: "Requerido" }}
-                      />
-                    </div>
-                    <div className="mt-4">
-                      <TextInput
-                        name="line2"
-                        label="Referencia / apartamento (opcional)"
-                      />
-                    </div>
-                    <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
-                      <TextInput
-                        name="city"
-                        label="Ciudad"
-                        required
-                        validation={{ required: "Requerido" }}
-                      />
-                      <TextInput
-                        name="department"
-                        label="Departamento"
-                        required
-                        validation={{ required: "Requerido" }}
-                      />
-                    </div>
-                    <div className="mt-4">
-                      <TextInput
-                        name="notes"
-                        as="textarea"
-                        label="Notas para la entrega (opcional)"
-                      />
-                    </div>
+                    {isProvince && (
+                      <div className="mt-4">
+                        <TextInput
+                          name="ci"
+                          label="Carnet de identidad (CI)"
+                          required
+                          validation={{
+                            required: "Requerido para envíos fuera de Santa Cruz"
+                          }}
+                        />
+                        <p className="mt-1 text-xs text-muted-foreground">
+                          Necesario para reclamar el envío en la
+                          terminal/mensajería.
+                        </p>
+                      </div>
+                    )}
                     <label className="mt-4 flex items-center gap-3 text-sm">
                       <input
                         type="checkbox"

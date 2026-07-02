@@ -68,11 +68,12 @@ export interface Address {
   documentId: string;
   fullName: string;
   phone: string;
-  line1: string;
-  line2?: string;
-  city: string;
-  department: string;
-  notes?: string;
+  line1?: string | null;
+  line2?: string | null;
+  city?: string | null;
+  department?: string | null;
+  ci?: string | null;
+  notes?: string | null;
 }
 
 export interface OrderUser {
