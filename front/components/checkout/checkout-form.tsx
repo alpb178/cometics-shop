@@ -14,6 +14,7 @@ import {
 import { PhoneInput } from "@/components/form/phone-input/PhoneInput";
 import { TextInput } from "@/components/form/text-input/TextInput";
 import { LocationPicker } from "@/components/checkout/location-picker";
+import { ViewMapComponent } from "@/container/products/product/components/map";
 import { useAuth } from "@/context/auth-context";
 import { useCart } from "@/context/cart-context";
 import type { Address } from "@/definitions/Address";
@@ -549,10 +550,14 @@ export function CheckoutForm({
 
                 {deliveryMethod === "pickup" && (
                   <section>
-                    <div className="border border-border bg-secondary/50 px-5 py-4 text-sm text-muted-foreground">
-                      Recoges tu pedido en la tienda. Te avisaremos cuando esté
-                      listo.
-                    </div>
+                    <h2 className="mb-2 text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+                      Recojo en tienda
+                    </h2>
+                    <p className="mb-3 text-sm text-muted-foreground">
+                      Recoges tu pedido en la tienda; te avisaremos cuando esté
+                      listo. Esta es nuestra ubicación:
+                    </p>
+                    <ViewMapComponent />
                   </section>
                 )}
               </>
