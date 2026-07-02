@@ -49,8 +49,7 @@ export default factories.createCoreController(
       // v5 la rechaza: "Invalid key user"). Se crea con el Document Service
       // asignando el dueño server-side. Se toman solo campos permitidos del
       // cliente; los importes vienen de `pricing` (verificados), y el estado y
-      // el usuario se fijan aquí. `destLat`/`destLng`/`isProvince` son entradas
-      // de cálculo (no atributos), así que no se persisten.
+      // el usuario se fijan aquí. `isProvince` es solo entrada de cálculo.
       const ALLOWED = [
         "shippingAddress",
         "deliveryMethod",
@@ -61,6 +60,15 @@ export default factories.createCoreController(
       ];
       const clean: Record<string, unknown> = {};
       for (const key of ALLOWED) if (key in data) clean[key] = data[key];
+
+      // Coordenadas del punto de entrega elegido en el mapa (checkout). Se
+      // persisten para que el backoffice pueda ubicar la entrega.
+      const toCoord = (v: unknown): number | null => {
+        const n = Number(v);
+        return Number.isFinite(n) ? n : null;
+      };
+      const destLat = toCoord(data.destLat);
+      const destLng = toCoord(data.destLng);
 
       // `orderNumber` es un uid sin targetField: no se autogenera al crear vía
       // Document Service, así que lo generamos aquí (legible y único).
@@ -74,6 +82,8 @@ export default factories.createCoreController(
           ...clean,
           ...pricing,
           orderNumber,
+          destLat,
+          destLng,
           user: user.id,
           status: "pending_verification",
         },

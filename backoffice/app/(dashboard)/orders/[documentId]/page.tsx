@@ -18,6 +18,11 @@ const PAYMENT_LABEL: Record<string, string> = {
   // Legado: pedidos antiguos creados antes del cambio a efectivo/QR.
   bank_transfer: "Transferencia bancaria"
 };
+const PAYMENT_BADGE: Record<string, string> = {
+  cash: "bg-green-100 text-green-800",
+  qr: "bg-blue-100 text-blue-800",
+  bank_transfer: "bg-neutral-100 text-neutral-700"
+};
 
 export default async function OrderDetailPage({
   params
@@ -127,6 +132,23 @@ export default async function OrderDetailPage({
             <StatusSelect documentId={order.documentId} current={order.status} />
           </div>
 
+          <div className="card p-5">
+            <h2 className="mb-2 font-medium">Pago</h2>
+            <div className="flex flex-wrap items-center gap-2">
+              <span
+                className={`badge text-sm ${
+                  PAYMENT_BADGE[order.paymentMethod] ??
+                  "bg-neutral-100 text-neutral-700"
+                }`}
+              >
+                {PAYMENT_LABEL[order.paymentMethod] ?? order.paymentMethod}
+              </span>
+              <span className="text-sm text-neutral-500">
+                {DELIVERY_LABEL[order.deliveryMethod]}
+              </span>
+            </div>
+          </div>
+
           {addr && (
             <div className="card p-5 text-sm">
               <h2 className="mb-2 font-medium">Envío</h2>
@@ -151,6 +173,33 @@ export default async function OrderDetailPage({
               )}
             </div>
           )}
+
+          {order.deliveryMethod === "delivery" &&
+            order.destLat != null &&
+            order.destLng != null && (
+              <div className="card p-5 text-sm">
+                <h2 className="mb-2 font-medium">Ubicación de entrega</h2>
+                <p className="mb-2 font-mono text-neutral-600">
+                  {order.destLat.toFixed(6)}, {order.destLng.toFixed(6)}
+                </p>
+                <div className="overflow-hidden rounded-lg border border-neutral-200">
+                  <iframe
+                    title="Mapa de entrega"
+                    src={`https://maps.google.com/maps?q=${order.destLat},${order.destLng}&z=16&output=embed`}
+                    className="h-56 w-full"
+                    loading="lazy"
+                  />
+                </div>
+                <a
+                  href={`https://www.google.com/maps?q=${order.destLat},${order.destLng}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="mt-2 inline-block text-brand hover:underline"
+                >
+                  Abrir en Google Maps
+                </a>
+              </div>
+            )}
 
           <div className="card p-5">
             <h2 className="mb-2 font-medium">Comprobante de pago</h2>

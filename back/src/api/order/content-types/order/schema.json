@@ -79,6 +79,12 @@
     },
     "cancellationReason": {
       "type": "text"
+    },
+    "destLat": {
+      "type": "decimal"
+    },
+    "destLng": {
+      "type": "decimal"
     }
   }
 }
