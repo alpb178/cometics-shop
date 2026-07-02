@@ -101,19 +101,34 @@ export default factories.createCoreController(
     async findOne(ctx) {
       const user = ctx.state.user;
       if (!user) return ctx.unauthorized();
-      if (isStaffUser(user)) {
-        return await super.findOne(ctx);
-      }
+
+      // El backoffice consulta por `documentId` (v5); el storefront usa el `id`
+      // numérico. Aceptamos ambos: si el parámetro es solo dígitos, filtramos
+      // por id; si no, por documentId. Así el detalle funciona en ambos lados.
       const { id } = ctx.params;
-      const entity = await strapi.entityService.findOne(
-        "api::order.order",
-        id,
-        { populate: { user: true } }
-      );
-      if (!entity || (entity as any).user?.id !== user.id) {
+      const filters = /^\d+$/.test(String(id))
+        ? { id: Number(id) }
+        : { documentId: id };
+
+      const [entity] = await strapi.documents("api::order.order").findMany({
+        filters,
+        populate: {
+          items: true,
+          shippingAddress: true,
+          paymentProof: true,
+          user: true,
+        },
+        limit: 1,
+      });
+
+      if (!entity) return ctx.notFound();
+      // No-staff: solo su propio pedido.
+      if (!isStaffUser(user) && (entity as any).user?.id !== user.id) {
         return ctx.notFound();
       }
-      return await super.findOne(ctx);
+
+      const sanitized = await this.sanitizeOutput(entity, ctx);
+      return this.transformResponse(sanitized);
     },
 
     async update(ctx) {
