@@ -1,4 +1,4 @@
-import About from "@/app/ui/about/about";
+import About from "@/app/ui/about";
 
 export default function TabAboutScreen() {
   return <About />;

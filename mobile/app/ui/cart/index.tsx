@@ -1,27 +1,22 @@
 import ParallaxScrollView from "@/components/parallax-scroll-view";
-<<<<<<< HEAD
 import { DeliveryOptions } from "@/components/delivery-options/delivery-options";
-=======
->>>>>>> 862ca06 (feat: implement drawer navigation with tabs and cart functionality)
 import { QuantitySelector } from "@/components/quantity-selector/quantity-selector";
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
 import { Button } from "@/components/ui/button";
-<<<<<<< HEAD
 import { useCart } from "@/contexts/cart-context";
-=======
-import { useCart } from "@/hooks/use-cart";
->>>>>>> 862ca06 (feat: implement drawer navigation with tabs and cart functionality)
 import { router } from "expo-router";
 import { Image, Pressable, StyleSheet, View } from "react-native";
 import Icon from "react-native-vector-icons/Ionicons";
 
 export default function Cart() {
-<<<<<<< HEAD
-  const { cart, removeFromCart, updateQuantity, updateDeliveryOption, clearCart } = useCart();
-=======
-  const { cart, removeFromCart, updateQuantity, clearCart } = useCart();
->>>>>>> 862ca06 (feat: implement drawer navigation with tabs and cart functionality)
+  const {
+    cart,
+    removeFromCart,
+    updateQuantity,
+    updateDeliveryOption,
+    clearCart
+  } = useCart();
 
   if (cart.items.length === 0) {
     return (
@@ -91,15 +86,12 @@ export default function Cart() {
           {cart.items.map((item) => (
             <View key={item.id}>{renderItem({ item })}</View>
           ))}
-<<<<<<< HEAD
           <ThemedView style={styles.deliverySection}>
             <DeliveryOptions
               selected={cart.deliveryOption}
               onChange={updateDeliveryOption}
             />
           </ThemedView>
-=======
->>>>>>> 862ca06 (feat: implement drawer navigation with tabs and cart functionality)
         </View>
         <ThemedView style={styles.footer}>
           <View style={styles.totalRow}>
@@ -160,13 +152,10 @@ const styles = StyleSheet.create({
     paddingBottom: 200,
     flex: 1,
   },
-<<<<<<< HEAD
   deliverySection: {
     marginTop: 16,
     marginBottom: 16,
   },
-=======
->>>>>>> 862ca06 (feat: implement drawer navigation with tabs and cart functionality)
   itemContainer: {
     flexDirection: "row",
     backgroundColor: "#FFFFFF",
