@@ -203,6 +203,10 @@ export function CheckoutForm({
         setError("Marca tu ubicación de entrega en el mapa.");
         return;
       }
+    } else {
+      // Recojo en tienda: pedimos nombre y teléfono de contacto.
+      const ok = await methods.trigger(["fullName", "phone"]);
+      if (!ok) return;
     }
     setError(null);
     setStep(2);
@@ -217,18 +221,21 @@ export function CheckoutForm({
     setError(null);
 
     try {
+      const isPickup = deliveryMethod === "pickup";
       const useSaved =
         deliveryMethod === "delivery" && addressMode === "saved";
       const useNew = deliveryMethod === "delivery" && addressMode === "new";
 
-      // Dentro de Santa Cruz solo pedimos nombre y teléfono; fuera de Santa
-      // Cruz (provincia) además CI, zona y departamento para el envío por
-      // terminal/mensajería. Zona -> `city`, Departamento -> `department`.
-      const newAddress = useNew
+      // Se adjunta un contacto (nombre + teléfono) al pedido tanto para envío a
+      // domicilio (dirección nueva) como para recojo en tienda. Dentro de Santa
+      // Cruz solo nombre y teléfono; fuera de Santa Cruz además CI, zona y
+      // departamento (zona -> `city`, departamento -> `department`).
+      const collectContact = useNew || isPickup;
+      const newAddress = collectContact
         ? {
             fullName: values.fullName,
             phone: values.phone,
-            ...(isProvince
+            ...(useNew && isProvince
               ? {
                   ci: values.ci?.trim() || undefined,
                   city: values.zona?.trim() || undefined,
@@ -254,7 +261,7 @@ export function CheckoutForm({
 
       const payload = {
         addressId: finalAddressId,
-        address: useNew && !finalAddressId ? newAddress : null,
+        address: collectContact && !finalAddressId ? newAddress : null,
         deliveryMethod,
         paymentMethod,
         customerNotes: undefined,
@@ -583,10 +590,19 @@ export function CheckoutForm({
 
                 {deliveryMethod === "pickup" && (
                   <section>
-                    <h2 className="mb-2 text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
-                      Recojo en tienda
+                    <h2 className="mb-4 text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+                      Datos de contacto
                     </h2>
-                    <p className="mb-3 text-sm text-muted-foreground">
+                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                      <TextInput
+                        name="fullName"
+                        label="Nombre completo"
+                        required
+                        validation={{ required: "Requerido" }}
+                      />
+                      <PhoneInput name="phone" label="Teléfono" required />
+                    </div>
+                    <p className="mt-6 mb-3 text-sm text-muted-foreground">
                       Recoges tu pedido en la tienda; te avisaremos cuando esté
                       listo. Esta es nuestra ubicación:
                     </p>
