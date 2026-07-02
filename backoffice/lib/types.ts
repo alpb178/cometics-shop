@@ -98,6 +98,8 @@ export interface Order {
   paymentProof: StrapiMedia | null;
   paymentReference: string | null;
   cancellationReason: string | null;
+  destLat: number | null;
+  destLng: number | null;
   user: OrderUser | null;
   createdAt: string;
   updatedAt: string;
