@@ -27,11 +27,17 @@ const NAV = [
   { href: "/users", label: "Usuarios", icon: Users }
 ];
 
-export function Sidebar({ user }: { user: AuthUser | null }) {
+export function Sidebar({
+  user,
+  onNavigate
+}: {
+  user: AuthUser | null;
+  onNavigate?: () => void;
+}) {
   const pathname = usePathname();
 
   return (
-    <aside className="flex h-screen w-60 flex-col border-r border-neutral-200 bg-white">
+    <aside className="flex h-full w-60 flex-col border-r border-neutral-200 bg-white">
       <div className="border-b border-neutral-200 px-6 py-5">
         <p className="text-lg font-semibold text-brand-dark">Iris Natural</p>
         <p className="text-xs text-neutral-500">Backoffice</p>
@@ -46,6 +52,7 @@ export function Sidebar({ user }: { user: AuthUser | null }) {
             <Link
               key={href}
               href={href}
+              onClick={onNavigate}
               className={cn(
                 "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition",
                 active
