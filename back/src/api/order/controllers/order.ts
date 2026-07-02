@@ -62,10 +62,18 @@ export default factories.createCoreController(
       const clean: Record<string, unknown> = {};
       for (const key of ALLOWED) if (key in data) clean[key] = data[key];
 
+      // `orderNumber` es un uid sin targetField: no se autogenera al crear vía
+      // Document Service, así que lo generamos aquí (legible y único).
+      const orderNumber = `IN-${Date.now().toString(36).toUpperCase()}${Math.random()
+        .toString(36)
+        .slice(2, 5)
+        .toUpperCase()}`;
+
       const entity = await strapi.documents("api::order.order").create({
         data: {
           ...clean,
           ...pricing,
+          orderNumber,
           user: user.id,
           status: "pending_verification",
         },

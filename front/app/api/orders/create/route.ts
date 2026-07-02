@@ -106,10 +106,11 @@ async function createOrder(
     const text = await res.text().catch(() => "");
     throw new Error(`order failed: ${res.status} ${text}`);
   }
+  // Strapi v5 devuelve los atributos aplanados (sin envoltorio `attributes`).
   const data = (await res.json()) as {
-    data: { id: number; attributes?: { orderNumber?: string } };
+    data: { id: number; orderNumber?: string };
   };
-  return { id: data.data.id, orderNumber: data.data.attributes?.orderNumber };
+  return { id: data.data.id, orderNumber: data.data.orderNumber };
 }
 
 export async function POST(req: Request) {

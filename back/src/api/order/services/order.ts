@@ -61,13 +61,15 @@ export default factories.createCoreService("api::order.order", ({ strapi }) => (
       throw new ValidationError("Items de la orden inválidos");
     }
 
-    const products = (await strapi.entityService.findMany(
-      "api::product.product",
-      {
-        filters: { id: { $in: ids }, publishedAt: { $notNull: true } },
-        fields: ["id", "name", "slug", "price", "currency"]
-      }
-    )) as Array<{
+    // Buscar en el scope PUBLICADO. En Strapi v5 borrador y publicado son
+    // entradas con `id` numérico distinto (mismo documentId); el front usa el id
+    // publicado, así que hay que consultar `status: "published"` (el
+    // entityService por defecto resuelve el borrador y no encontraría el id).
+    const products = (await strapi.documents("api::product.product").findMany({
+      status: "published",
+      filters: { id: { $in: ids } },
+      fields: ["id", "name", "slug", "price", "currency"]
+    })) as Array<{
       id: number;
       name: string;
       slug: string | null;
