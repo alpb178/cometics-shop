@@ -110,6 +110,10 @@ const ADMIN_ACTIONS = [
   // Alta de usuarios staff desde el backoffice (POST /api/users). También
   // restringido a staff en la misma extensión.
   "plugin::users-permissions.user.create",
+  // Gestión de usuarios desde el backoffice: setear contraseña/rol (update) y
+  // eliminar (destroy). Restringidos a staff en la misma extensión.
+  "plugin::users-permissions.user.update",
+  "plugin::users-permissions.user.destroy",
   // Necesario para que el backoffice pueda pedir `/api/users/me?populate=role`
   // (requireStaff / login). Popular la relación `role` exige este scope.
   "plugin::users-permissions.role.find",

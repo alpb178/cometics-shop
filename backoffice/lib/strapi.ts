@@ -77,6 +77,19 @@ export async function strapiPostRaw<T>(
   return (await res.json()) as T;
 }
 
+/** PUT con el body JSON tal cual (sin `{ data }`), para el content-api de
+ * users-permissions (`PUT /api/users/:id`). */
+export async function strapiPutRaw<T>(path: string, body: unknown): Promise<T> {
+  const res = await fetch(`${STRAPI_URL}${path}`, {
+    method: "PUT",
+    headers: await authHeaders({ "Content-Type": "application/json" }),
+    body: JSON.stringify(body),
+    cache: "no-store"
+  });
+  if (!res.ok) await parseError(res);
+  return (await res.json()) as T;
+}
+
 export async function strapiDelete(path: string): Promise<void> {
   const res = await fetch(`${STRAPI_URL}${path}`, {
     method: "DELETE",

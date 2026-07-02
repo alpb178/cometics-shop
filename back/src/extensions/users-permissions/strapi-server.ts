@@ -22,6 +22,8 @@ export default (plugin: any) => {
   const originalFind = plugin.controllers.user.find;
   const originalFindOne = plugin.controllers.user.findOne;
   const originalCreate = plugin.controllers.user.create;
+  const originalUpdate = plugin.controllers.user.update;
+  const originalDestroy = plugin.controllers.user.destroy;
 
   plugin.controllers.user.find = async (ctx: any) => {
     if (!ensureStaff(ctx)) return;
@@ -38,6 +40,19 @@ export default (plugin: any) => {
     // `confirmed` por defecto true; el body del backoffice puede sobrescribirlo.
     ctx.request.body = { confirmed: true, ...(ctx.request.body || {}) };
     return originalCreate(ctx);
+  };
+
+  // `update` se usa desde el backoffice para setear contraseña / rol. La
+  // contraseña la hashea users-permissions (getService('user').edit).
+  plugin.controllers.user.update = async (ctx: any) => {
+    if (!ensureStaff(ctx)) return;
+    return originalUpdate(ctx);
+  };
+
+  // `destroy` (DELETE /api/users/:id) para eliminar usuarios desde el backoffice.
+  plugin.controllers.user.destroy = async (ctx: any) => {
+    if (!ensureStaff(ctx)) return;
+    return originalDestroy(ctx);
   };
 
   return plugin;

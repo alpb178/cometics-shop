@@ -3,6 +3,7 @@ import {
   strapiDelete,
   strapiGet,
   strapiPostRaw,
+  strapiPutRaw,
   strapiSend
 } from "./strapi";
 import type {
@@ -335,6 +336,23 @@ export async function createUser(input: CreateUserInput): Promise<UserRow> {
     ...input,
     confirmed: true
   });
+}
+
+/** Setea la contraseña de un usuario (users-permissions la hashea). */
+export async function setUserPassword(
+  id: number,
+  password: string
+): Promise<void> {
+  await strapiPutRaw(`/api/users/${id}`, { password });
+}
+
+/** Cambia el rol de un usuario. */
+export async function setUserRole(id: number, role: number): Promise<void> {
+  await strapiPutRaw(`/api/users/${id}`, { role });
+}
+
+export async function deleteUser(id: number): Promise<void> {
+  await strapiDelete(`/api/users/${id}`);
 }
 
 /** Nº de clientes registrados (rol "client"), excluye staff/admin. */
