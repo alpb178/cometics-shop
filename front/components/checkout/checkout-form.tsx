@@ -300,18 +300,26 @@ export function CheckoutForm({
         throw new Error(data?.error || "No se pudo crear el pedido.");
       }
 
-      clearCart();
-      await refresh();
+      // Éxito: navegamos primero (manteniendo `submitting` en true) para que la
+      // UI no parpadee al estado "carrito vacío" al limpiar el carrito antes de
+      // que complete el redirect. El carrito se vacía y la sesión se refresca
+      // sin bloquear la navegación al detalle del pedido.
       router.push(`/account/orders/${data.orderId}`);
       router.refresh();
+      clearCart();
+      refresh().catch(() => {});
     } catch (err) {
+      // Solo reactivamos el botón en error; en el camino de éxito nos vamos de
+      // la página, así que dejamos `submitting` en true y el loading visible.
       setError(err instanceof Error ? err.message : "Algo salió mal.");
-    } finally {
       setSubmitting(false);
     }
   });
 
-  if (items.length === 0) {
+  // No mostramos "carrito vacío" mientras se envía el pedido: tras confirmar el
+  // pago vaciamos el carrito, y sin este guard la pantalla parpadearía a "vacío"
+  // antes de que complete el redirect al detalle del pedido.
+  if (items.length === 0 && !submitting) {
     return (
       <section className="mx-auto w-full max-w-md px-6 py-24 text-center">
         <h1 className="font-display text-2xl font-semibold">
