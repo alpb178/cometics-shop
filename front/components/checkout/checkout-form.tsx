@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { Fragment, useEffect, useMemo, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { Upload, X, MapPin, ArrowLeft } from "lucide-react";
 import {
@@ -15,7 +15,7 @@ import { PhoneInput } from "@/components/form/phone-input/PhoneInput";
 import { TextInput } from "@/components/form/text-input/TextInput";
 import { LocationPicker } from "@/components/checkout/location-picker";
 import { ShippingNotice } from "@/components/shipping-notice";
-import { ViewMapComponent } from "@/container/products/product/components/map";
+import { StoreMap } from "@/components/checkout/store-map";
 import { useAuth } from "@/context/auth-context";
 import { useCart } from "@/context/cart-context";
 import type { Address } from "@/definitions/Address";
@@ -347,19 +347,34 @@ export function CheckoutForm({
         <h1 className="font-display text-3xl font-semibold tracking-tight">
           Finaliza tu pedido
         </h1>
-        {/* Indicador de pasos */}
+        {/* Indicador de pasos: los pasos ya completados son clickeables para
+            volver atrás; avanzar solo se puede con los botones (validan). */}
         <div className="mt-4 flex items-center gap-3 text-xs font-semibold uppercase tracking-[0.14em]">
-          <span className={step === 1 ? "text-foreground" : "text-muted-foreground"}>
-            1 · Método
-          </span>
-          <span className="h-px w-8 bg-border" />
-          <span className={step === 2 ? "text-foreground" : "text-muted-foreground"}>
-            2 · Entrega
-          </span>
-          <span className="h-px w-8 bg-border" />
-          <span className={step === 3 ? "text-foreground" : "text-muted-foreground"}>
-            3 · Pago
-          </span>
+          {(
+            [
+              { n: 1, label: "Método" },
+              { n: 2, label: "Entrega" },
+              { n: 3, label: "Pago" }
+            ] as const
+          ).map((s, i) => (
+            <Fragment key={s.n}>
+              {i > 0 && <span className="h-px w-8 bg-border" />}
+              <button
+                type="button"
+                onClick={() => goToStep(s.n)}
+                disabled={s.n >= step}
+                className={
+                  s.n === step
+                    ? "text-foreground"
+                    : s.n < step
+                      ? "text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
+                      : "cursor-default text-muted-foreground"
+                }
+              >
+                {s.n} · {s.label}
+              </button>
+            </Fragment>
+          ))}
         </div>
         <ShippingNotice className="mt-6" />
       </header>
@@ -371,6 +386,17 @@ export function CheckoutForm({
           className="grid grid-cols-1 gap-12 lg:grid-cols-[1fr_360px]"
         >
           <div className="space-y-12">
+            {step > 1 && (
+              <button
+                type="button"
+                onClick={() => goToStep(step === 3 ? 2 : 1)}
+                className="-mb-6 flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground hover:text-foreground"
+              >
+                <ArrowLeft className="h-4 w-4" />
+                {step === 3 ? "Volver a entrega" : "Volver al método de entrega"}
+              </button>
+            )}
+
             {/* ==================== PASO 1: MÉTODO DE ENTREGA ==================== */}
             {step === 1 && (
               <section>
@@ -383,13 +409,14 @@ export function CheckoutForm({
                       {
                         value: "delivery",
                         label: "Envío a domicilio",
-                        description: "Te llevamos el pedido hasta donde estés."
+                        description:
+                          "Te llevamos el pedido hasta donde estés. Envío gratuito hasta el 10.º anillo; fuera de esta zona se adiciona Bs. 17."
                       },
                       {
                         value: "pickup",
                         label: "Recoger en tienda",
                         description:
-                          "Pasa por la tienda cuando tu pedido esté listo."
+                          "Pasa por la tienda cuando tu pedido esté listo: luego de 12 horas, entre las 10:00 y las 20:00."
                       }
                     ] as const
                   ).map((opt) => (
@@ -640,7 +667,7 @@ export function CheckoutForm({
                       Recoges tu pedido en la tienda; te avisaremos cuando esté
                       listo. Esta es nuestra ubicación:
                     </p>
-                    <ViewMapComponent />
+                    <StoreMap />
                   </section>
                 )}
               </>
