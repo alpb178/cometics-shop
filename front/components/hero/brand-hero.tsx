@@ -7,14 +7,12 @@ import { useEffect, useState } from "react";
 import { ArrowRight, ChevronLeft, ChevronRight, MapPin } from "lucide-react";
 
 const CAROUSEL_IMAGES = [
-  "/images/carrousel/1.png",
-  "/images/carrousel/2.png",
-  "/images/carrousel/3.png",
-  "/images/carrousel/4.png",
-  "/images/carrousel/5.png",
-  "/images/carrousel/6.png",
-  "/images/carrousel/7.png",
-  "/images/carrousel/8.png"
+  "/images/carrousel/1.jpeg",
+  "/images/carrousel/2.jpeg",
+  "/images/carrousel/4.jpeg",
+  "/images/carrousel/5.jpeg",
+  "/images/carrousel/6.jpeg",
+  "/images/carrousel/8.jpeg"
 ];
 
 const HeroCarousel = ({ images }: { images: string[] }) => {
@@ -53,8 +51,8 @@ const HeroCarousel = ({ images }: { images: string[] }) => {
             src={src}
             alt=""
             fill
-            sizes="(max-width: 1024px) 90vw, 576px"
-            className="object-contain object-center"
+            sizes="(max-width: 1024px) 90vw, 448px"
+            className="object-cover object-center"
             priority={i === 0}
           />
         </div>
@@ -162,7 +160,7 @@ export const BrandHero = () => {
       </div>
 
       <div className="order-1 flex items-center justify-center px-6 py-8 lg:order-2 lg:px-10 lg:py-16">
-        <div className="relative w-full max-w-xl">
+        <div className="relative w-full max-w-md">
           <div
             aria-hidden
             className="absolute -inset-6 -rotate-3 rounded-3xl bg-gradient-to-r from-pink-300/40 to-green-300/40"
@@ -171,7 +169,7 @@ export const BrandHero = () => {
             aria-hidden
             className="absolute -inset-6 rotate-3 rounded-3xl bg-gradient-to-r from-green-300/30 to-yellow-300/30"
           />
-          <div className="relative aspect-[10/3] w-full overflow-hidden rounded-2xl border border-border bg-background shadow-xl">
+          <div className="relative aspect-square w-full overflow-hidden rounded-2xl border border-border bg-background shadow-xl">
             <HeroCarousel images={CAROUSEL_IMAGES} />
           </div>
         </div>
