@@ -1,7 +1,8 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { updateOrderStatus } from "@/lib/data";
+import { redirect } from "next/navigation";
+import { deleteOrder, updateOrderStatus } from "@/lib/data";
 import type { OrderStatus } from "@/lib/types";
 import { requireStaff } from "@/lib/auth-guard";
 
@@ -21,6 +22,21 @@ export async function confirmOrderPaymentAction(documentId: string) {
   await updateOrderStatus(documentId, "confirmed");
   revalidatePath("/orders");
   revalidatePath(`/orders/${documentId}`);
+}
+
+/** Elimina el pedido definitivamente. */
+export async function deleteOrderAction(documentId: string) {
+  await requireStaff();
+  await deleteOrder(documentId);
+  revalidatePath("/orders");
+}
+
+/** Elimina el pedido desde su detalle y vuelve al listado. */
+export async function deleteOrderFromDetailAction(documentId: string) {
+  await requireStaff();
+  await deleteOrder(documentId);
+  revalidatePath("/orders");
+  redirect("/orders");
 }
 
 /** Rechaza el pedido (comprobante inválido) con un motivo. */

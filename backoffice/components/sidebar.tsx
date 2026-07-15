@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -38,9 +39,18 @@ export function Sidebar({
 
   return (
     <aside className="flex h-full w-60 flex-col border-r border-neutral-200 bg-white">
-      <div className="border-b border-neutral-200 px-6 py-5">
-        <p className="text-lg font-semibold text-brand-dark">Iris Natural</p>
-        <p className="text-xs text-neutral-500">Backoffice</p>
+      <div className="flex items-center gap-3 border-b border-neutral-200 px-6 py-5">
+        <Image
+          src="/logo.png"
+          alt="Iris Natural"
+          width={40}
+          height={40}
+          className="shrink-0"
+        />
+        <div>
+          <p className="text-lg font-semibold text-brand-dark">Iris Natural</p>
+          <p className="text-xs text-neutral-500">Backoffice</p>
+        </div>
       </div>
 
       <nav className="flex-1 space-y-1 overflow-y-auto p-3">
