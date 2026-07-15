@@ -1,10 +1,12 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
+import { ConfirmButton } from "@/components/confirm-button";
 import { getOrder } from "@/lib/data";
 import { formatDate, mediaUrl } from "@/lib/utils";
 import { StatusSelect } from "../status-select";
 import { PaymentVerification } from "../payment-verification";
+import { deleteOrderFromDetailAction } from "../actions";
 
 export const dynamic = "force-dynamic";
 
@@ -56,6 +58,15 @@ export default async function OrderDetailPage({
             · {PAYMENT_LABEL[order.paymentMethod]}
           </p>
         </div>
+        <ConfirmButton
+          action={async () => {
+            "use server";
+            await deleteOrderFromDetailAction(order.documentId);
+          }}
+          confirmMessage={`¿Eliminar el pedido ${order.orderNumber}? Esta acción no se puede deshacer.`}
+        >
+          Eliminar pedido
+        </ConfirmButton>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-3">
