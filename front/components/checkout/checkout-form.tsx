@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { Fragment, useEffect, useMemo, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { Upload, X, MapPin, ArrowLeft } from "lucide-react";
 import {
@@ -14,7 +14,8 @@ import {
 import { PhoneInput } from "@/components/form/phone-input/PhoneInput";
 import { TextInput } from "@/components/form/text-input/TextInput";
 import { LocationPicker } from "@/components/checkout/location-picker";
-import { ViewMapComponent } from "@/container/products/product/components/map";
+import { ShippingNotice } from "@/components/shipping-notice";
+import { StoreMap } from "@/components/checkout/store-map";
 import { useAuth } from "@/context/auth-context";
 import { useCart } from "@/context/cart-context";
 import type { Address } from "@/definitions/Address";
@@ -61,8 +62,9 @@ export function CheckoutForm({
     }
   });
 
-  // Paso del wizard: 1 = entrega, 2 = pago. Mejora la experiencia en móvil.
-  const [step, setStep] = useState<1 | 2>(1);
+  // Paso del wizard: 1 = método de entrega, 2 = datos de entrega, 3 = pago.
+  // Mejora la experiencia en móvil.
+  const [step, setStep] = useState<1 | 2 | 3>(1);
 
   const defaultAddress = savedAddresses[0] ?? null;
   const [deliveryMethod, setDeliveryMethod] =
@@ -182,8 +184,14 @@ export function CheckoutForm({
     }
   }
 
-  // Valida el paso 1 (entrega) antes de pasar al pago.
-  async function goToStep2() {
+  function goToStep(next: 1 | 2 | 3) {
+    setError(null);
+    setStep(next);
+    if (typeof window !== "undefined") window.scrollTo({ top: 0 });
+  }
+
+  // Valida el paso 2 (datos de entrega) antes de pasar al pago.
+  async function goToPayment() {
     setError(null);
     if (deliveryMethod === "delivery") {
       const useSaved = addressMode === "saved" && savedAddresses.length > 0;
@@ -208,13 +216,11 @@ export function CheckoutForm({
       const ok = await methods.trigger(["fullName", "phone"]);
       if (!ok) return;
     }
-    setError(null);
-    setStep(2);
-    if (typeof window !== "undefined") window.scrollTo({ top: 0 });
+    goToStep(3);
   }
 
   const onSubmit = methods.handleSubmit(async (values) => {
-    if (step !== 2) return;
+    if (step !== 3) return;
     if (!paymentMethod) return;
     if (proofRequired && !proofFile) return;
     setSubmitting(true);
@@ -300,18 +306,26 @@ export function CheckoutForm({
         throw new Error(data?.error || "No se pudo crear el pedido.");
       }
 
-      clearCart();
-      await refresh();
+      // Éxito: navegamos primero (manteniendo `submitting` en true) para que la
+      // UI no parpadee al estado "carrito vacío" al limpiar el carrito antes de
+      // que complete el redirect. El carrito se vacía y la sesión se refresca
+      // sin bloquear la navegación al detalle del pedido.
       router.push(`/account/orders/${data.orderId}`);
       router.refresh();
+      clearCart();
+      refresh().catch(() => {});
     } catch (err) {
+      // Solo reactivamos el botón en error; en el camino de éxito nos vamos de
+      // la página, así que dejamos `submitting` en true y el loading visible.
       setError(err instanceof Error ? err.message : "Algo salió mal.");
-    } finally {
       setSubmitting(false);
     }
   });
 
-  if (items.length === 0) {
+  // No mostramos "carrito vacío" mientras se envía el pedido: tras confirmar el
+  // pago vaciamos el carrito, y sin este guard la pantalla parpadearía a "vacío"
+  // antes de que complete el redirect al detalle del pedido.
+  if (items.length === 0 && !submitting) {
     return (
       <section className="mx-auto w-full max-w-md px-6 py-24 text-center">
         <h1 className="font-display text-2xl font-semibold">
@@ -333,16 +347,36 @@ export function CheckoutForm({
         <h1 className="font-display text-3xl font-semibold tracking-tight">
           Finaliza tu pedido
         </h1>
-        {/* Indicador de pasos */}
+        {/* Indicador de pasos: los pasos ya completados son clickeables para
+            volver atrás; avanzar solo se puede con los botones (validan). */}
         <div className="mt-4 flex items-center gap-3 text-xs font-semibold uppercase tracking-[0.14em]">
-          <span className={step === 1 ? "text-foreground" : "text-muted-foreground"}>
-            1 · Entrega
-          </span>
-          <span className="h-px w-8 bg-border" />
-          <span className={step === 2 ? "text-foreground" : "text-muted-foreground"}>
-            2 · Pago
-          </span>
+          {(
+            [
+              { n: 1, label: "Método" },
+              { n: 2, label: "Entrega" },
+              { n: 3, label: "Pago" }
+            ] as const
+          ).map((s, i) => (
+            <Fragment key={s.n}>
+              {i > 0 && <span className="h-px w-8 bg-border" />}
+              <button
+                type="button"
+                onClick={() => goToStep(s.n)}
+                disabled={s.n >= step}
+                className={
+                  s.n === step
+                    ? "text-foreground"
+                    : s.n < step
+                      ? "text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
+                      : "cursor-default text-muted-foreground"
+                }
+              >
+                {s.n} · {s.label}
+              </button>
+            </Fragment>
+          ))}
         </div>
+        <ShippingNotice className="mt-6" />
       </header>
 
       <FormProvider {...methods}>
@@ -352,42 +386,69 @@ export function CheckoutForm({
           className="grid grid-cols-1 gap-12 lg:grid-cols-[1fr_360px]"
         >
           <div className="space-y-12">
-            {/* ============================ PASO 1 ============================ */}
-            {step === 1 && (
-              <>
-                <section>
-                  <h2 className="mb-4 text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
-                    Método de entrega
-                  </h2>
-                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                    {(
-                      [
-                        { value: "delivery", label: "Envío a domicilio" },
-                        { value: "pickup", label: "Recoger en tienda" }
-                      ] as const
-                    ).map((opt) => (
-                      <label
-                        key={opt.value}
-                        className={`cursor-pointer border px-4 py-3 text-sm ${
-                          deliveryMethod === opt.value
-                            ? "border-foreground"
-                            : "border-border"
-                        }`}
-                      >
-                        <input
-                          type="radio"
-                          name="deliveryMethod"
-                          value={opt.value}
-                          checked={deliveryMethod === opt.value}
-                          onChange={() => setDeliveryMethod(opt.value)}
-                          className="sr-only"
-                        />
-                        {opt.label}
-                      </label>
-                    ))}
-                  </div>
-                </section>
+            {step > 1 && (
+              <button
+                type="button"
+                onClick={() => goToStep(step === 3 ? 2 : 1)}
+                className="-mb-6 flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground hover:text-foreground"
+              >
+                <ArrowLeft className="h-4 w-4" />
+                {step === 3 ? "Volver a entrega" : "Volver al método de entrega"}
+              </button>
+            )}
 
+            {/* ==================== PASO 1: MÉTODO DE ENTREGA ==================== */}
+            {step === 1 && (
+              <section>
+                <h2 className="mb-4 text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+                  Método de entrega
+                </h2>
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                  {(
+                    [
+                      {
+                        value: "delivery",
+                        label: "Envío a domicilio",
+                        description:
+                          "Te llevamos el pedido hasta donde estés. Envío gratuito hasta el 10.º anillo; fuera de esta zona se adiciona Bs. 17."
+                      },
+                      {
+                        value: "pickup",
+                        label: "Recoger en tienda",
+                        description:
+                          "Pasa por la tienda cuando tu pedido esté listo: luego de 12 horas, entre las 10:00 y las 20:00."
+                      }
+                    ] as const
+                  ).map((opt) => (
+                    <label
+                      key={opt.value}
+                      className={`cursor-pointer border px-4 py-4 text-sm ${
+                        deliveryMethod === opt.value
+                          ? "border-foreground"
+                          : "border-border hover:border-foreground/40"
+                      }`}
+                    >
+                      <input
+                        type="radio"
+                        name="deliveryMethod"
+                        value={opt.value}
+                        checked={deliveryMethod === opt.value}
+                        onChange={() => setDeliveryMethod(opt.value)}
+                        className="sr-only"
+                      />
+                      <span className="block font-semibold">{opt.label}</span>
+                      <span className="mt-1 block text-xs text-muted-foreground">
+                        {opt.description}
+                      </span>
+                    </label>
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {/* ==================== PASO 2: DATOS DE ENTREGA ==================== */}
+            {step === 2 && (
+              <>
                 {deliveryMethod === "delivery" && (
                   <section>
                     <h2 className="mb-4 text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
@@ -606,14 +667,14 @@ export function CheckoutForm({
                       Recoges tu pedido en la tienda; te avisaremos cuando esté
                       listo. Esta es nuestra ubicación:
                     </p>
-                    <ViewMapComponent />
+                    <StoreMap />
                   </section>
                 )}
               </>
             )}
 
-            {/* ============================ PASO 2 ============================ */}
-            {step === 2 && (
+            {/* ======================== PASO 3: PAGO ======================== */}
+            {step === 3 && (
               <section>
                 <h2 className="mb-4 text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
                   Método de pago
@@ -835,15 +896,35 @@ export function CheckoutForm({
                 </div>
               </dl>
 
-              {step === 1 ? (
+              {step === 1 && (
                 <button
                   type="button"
-                  onClick={goToStep2}
+                  onClick={() => goToStep(2)}
                   className="mt-6 w-full bg-foreground px-6 py-4 text-xs font-semibold uppercase tracking-[0.16em] text-background transition-colors hover:bg-foreground/90"
                 >
-                  Continuar al pago
+                  Continuar
                 </button>
-              ) : (
+              )}
+              {step === 2 && (
+                <>
+                  <button
+                    type="button"
+                    onClick={goToPayment}
+                    className="mt-6 w-full bg-foreground px-6 py-4 text-xs font-semibold uppercase tracking-[0.16em] text-background transition-colors hover:bg-foreground/90"
+                  >
+                    Continuar al pago
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => goToStep(1)}
+                    className="mt-3 flex w-full items-center justify-center gap-2 text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground hover:text-foreground"
+                  >
+                    <ArrowLeft className="h-4 w-4" />
+                    Volver al método de entrega
+                  </button>
+                </>
+              )}
+              {step === 3 && (
                 <>
                   <button
                     type="submit"
@@ -854,10 +935,7 @@ export function CheckoutForm({
                   </button>
                   <button
                     type="button"
-                    onClick={() => {
-                      setError(null);
-                      setStep(1);
-                    }}
+                    onClick={() => goToStep(2)}
                     className="mt-3 flex w-full items-center justify-center gap-2 text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground hover:text-foreground"
                   >
                     <ArrowLeft className="h-4 w-4" />

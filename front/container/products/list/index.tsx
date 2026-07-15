@@ -6,6 +6,7 @@ import { ProductShows } from "./components/ProductsShow";
 import { SearchBar } from "./components/Search";
 import { Filter, FilterState } from "./components/Filter";
 import { Grid2X2, Grid3X3, SlidersHorizontal, X } from "lucide-react";
+import { ShippingNotice } from "@/components/shipping-notice";
 import { cn } from "@/lib/utils";
 
 type SortOption = "newest" | "price-asc" | "price-desc" | "name";
@@ -143,6 +144,7 @@ export const ProductList = ({ products }: { products: Product[] }) => {
           </h1>
         </div>
         <SearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
+        <ShippingNotice />
       </header>
 
       <div className="grid grid-cols-1 gap-x-10 lg:grid-cols-[220px_1fr]">

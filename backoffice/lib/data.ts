@@ -165,6 +165,10 @@ export async function updateOrderStatus(
   await strapiSend("PUT", `/api/orders/${documentId}`, data);
 }
 
+export async function deleteOrder(documentId: string): Promise<void> {
+  await strapiDelete(`/api/orders/${documentId}`);
+}
+
 /* ------------------------------ Contenido ----------------------------- */
 
 export async function getPaymentInfo(): Promise<PaymentInfo | null> {

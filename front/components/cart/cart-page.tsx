@@ -9,6 +9,7 @@ import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import { trackEvent } from "@/lib/track-event";
+import { ShippingNotice } from "@/components/shipping-notice";
 
 export function CartPage({ locale }: { locale: string }) {
   const { items, updateQuantity, removeFromCart, getCartTotal, clearCart } =
@@ -92,154 +93,153 @@ export function CartPage({ locale }: { locale: string }) {
           </Link>
         </div>
       ) : (
-        <div className="grid gap-12 lg:grid-cols-[1fr_400px]">
-          <ul className="divide-y divide-border border-y border-border">
-            {items.map((item) => (
-              <motion.li
-                key={item.product.id}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="flex gap-5 py-6"
-              >
-                <Link
-                  href={`/${locale}/products/${item.product.slug}`}
-                  className="relative aspect-[3/4] w-24 shrink-0 overflow-hidden bg-secondary sm:w-32"
-                  aria-label={`Ver ${item.product.name}`}
+        <>
+          <ShippingNotice className="mb-8" />
+          <div className="grid gap-12 lg:grid-cols-[1fr_400px]">
+            <ul className="divide-y divide-border border-y border-border">
+              {items.map((item) => (
+                <motion.li
+                  key={item.product.id}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className="flex gap-5 py-6"
                 >
-                  {item.product.images?.[0] && (
-                    <Image
-                      src={getImageSrc(item.product.images[0].url)}
-                      alt={item.product.name}
-                      fill
-                      sizes="128px"
-                      className="object-cover"
-                    />
-                  )}
-                </Link>
+                  <Link
+                    href={`/${locale}/products/${item.product.slug}`}
+                    className="relative aspect-[3/4] w-24 shrink-0 overflow-hidden bg-secondary sm:w-32"
+                    aria-label={`Ver ${item.product.name}`}
+                  >
+                    {item.product.images?.[0] && (
+                      <Image
+                        src={getImageSrc(item.product.images[0].url)}
+                        alt={item.product.name}
+                        fill
+                        sizes="128px"
+                        className="object-cover"
+                      />
+                    )}
+                  </Link>
 
-                <div className="flex min-w-0 flex-1 flex-col">
-                  <div className="flex items-start justify-between gap-4">
-                    <Link
-                      href={`/${locale}/products/${item.product.slug}`}
-                      className="text-sm font-semibold text-foreground hover:underline"
-                    >
-                      {item.product.name}
-                    </Link>
-                    <button
-                      type="button"
-                      onClick={() =>
-                        setConfirm({ show: true, productId: item.product.id })
-                      }
-                      className="-mr-1 flex h-8 w-8 items-center justify-center text-muted-foreground hover:text-foreground"
-                      aria-label={`Quitar ${item.product.name}`}
-                    >
-                      <X className="h-4 w-4" />
-                    </button>
-                  </div>
-
-                  {item.product.categories?.name && (
-                    <p className="mt-0.5 text-xs uppercase tracking-[0.14em] text-muted-foreground">
-                      {item.product.categories.name}
-                    </p>
-                  )}
-
-                  <p className="mt-3 text-sm font-bold text-foreground">
-                    {formatPrice({
-                      price: item.product.price,
-                      currency: item.product.currency ?? "BOB"
-                    }).toString()}
-                  </p>
-
-                  <div className="mt-auto flex items-center justify-between pt-4">
-                    <div
-                      className="inline-flex items-center border border-border"
-                      role="group"
-                      aria-label="Cantidad"
-                    >
+                  <div className="flex min-w-0 flex-1 flex-col">
+                    <div className="flex items-start justify-between gap-4">
+                      <Link
+                        href={`/${locale}/products/${item.product.slug}`}
+                        className="text-sm font-semibold text-foreground hover:underline"
+                      >
+                        {item.product.name}
+                      </Link>
                       <button
                         type="button"
                         onClick={() =>
-                          handleQuantity(
-                            item.product.id,
-                            item.quantity,
-                            -1
-                          )
+                          setConfirm({ show: true, productId: item.product.id })
                         }
-                        className="flex h-9 w-9 items-center justify-center text-foreground hover:bg-secondary"
-                        aria-label="Reducir"
+                        className="-mr-1 flex h-8 w-8 items-center justify-center text-muted-foreground hover:text-foreground"
+                        aria-label={`Quitar ${item.product.name}`}
                       >
-                        <Minus className="h-3.5 w-3.5" />
-                      </button>
-                      <span className="min-w-[40px] text-center text-sm font-semibold text-foreground">
-                        {item.quantity}
-                      </span>
-                      <button
-                        type="button"
-                        onClick={() =>
-                          handleQuantity(item.product.id, item.quantity, 1)
-                        }
-                        className="flex h-9 w-9 items-center justify-center text-foreground hover:bg-secondary"
-                        aria-label="Aumentar"
-                      >
-                        <Plus className="h-3.5 w-3.5" />
+                        <X className="h-4 w-4" />
                       </button>
                     </div>
-                    <p className="text-sm font-semibold text-foreground">
+
+                    {item.product.categories?.name && (
+                      <p className="mt-0.5 text-xs uppercase tracking-[0.14em] text-muted-foreground">
+                        {item.product.categories.name}
+                      </p>
+                    )}
+
+                    <p className="mt-3 text-sm font-bold text-foreground">
                       {formatPrice({
-                        price: item.product.price * item.quantity,
+                        price: item.product.price,
                         currency: item.product.currency ?? "BOB"
                       }).toString()}
                     </p>
+
+                    <div className="mt-auto flex items-center justify-between pt-4">
+                      <div
+                        className="inline-flex items-center border border-border"
+                        role="group"
+                        aria-label="Cantidad"
+                      >
+                        <button
+                          type="button"
+                          onClick={() =>
+                            handleQuantity(item.product.id, item.quantity, -1)
+                          }
+                          className="flex h-9 w-9 items-center justify-center text-foreground hover:bg-secondary"
+                          aria-label="Reducir"
+                        >
+                          <Minus className="h-3.5 w-3.5" />
+                        </button>
+                        <span className="min-w-[40px] text-center text-sm font-semibold text-foreground">
+                          {item.quantity}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() =>
+                            handleQuantity(item.product.id, item.quantity, 1)
+                          }
+                          className="flex h-9 w-9 items-center justify-center text-foreground hover:bg-secondary"
+                          aria-label="Aumentar"
+                        >
+                          <Plus className="h-3.5 w-3.5" />
+                        </button>
+                      </div>
+                      <p className="text-sm font-semibold text-foreground">
+                        {formatPrice({
+                          price: item.product.price * item.quantity,
+                          currency: item.product.currency ?? "BOB"
+                        }).toString()}
+                      </p>
+                    </div>
                   </div>
-                </div>
-              </motion.li>
-            ))}
-          </ul>
+                </motion.li>
+              ))}
+            </ul>
 
-          <aside className="lg:sticky lg:top-32 lg:h-fit">
-            <div className="border border-border p-6">
-              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-foreground">
-                Resumen
-              </p>
+            <aside className="lg:sticky lg:top-32 lg:h-fit">
+              <div className="border border-border p-6">
+                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-foreground">
+                  Resumen
+                </p>
 
-              <dl className="mt-4 space-y-2 border-t border-border pt-6 text-sm">
-                <div className="flex items-center justify-between">
-                  <dt className="text-muted-foreground">Subtotal</dt>
-                  <dd className="font-medium text-foreground">
-                    {formatPrice({
-                      price: getCartTotal(),
-                      currency
-                    }).toString()}
-                  </dd>
-                </div>
-                <div className="flex items-center justify-between border-t border-border pt-4">
-                  <dt className="text-base font-semibold text-foreground">
-                    Total
-                  </dt>
-                  <dd className="text-base font-bold text-foreground">
-                    {formatPrice({
-                      price: getCartTotal(),
-                      currency
-                    }).toString()}
-                  </dd>
-                </div>
-              </dl>
+                <dl className="mt-4 space-y-2 border-t border-border pt-6 text-sm">
+                  <div className="flex items-center justify-between">
+                    <dt className="text-muted-foreground">Subtotal</dt>
+                    <dd className="font-medium text-foreground">
+                      {formatPrice({
+                        price: getCartTotal(),
+                        currency
+                      }).toString()}
+                    </dd>
+                  </div>
+                  <div className="flex items-center justify-between border-t border-border pt-4">
+                    <dt className="text-base font-semibold text-foreground">
+                      Total
+                    </dt>
+                    <dd className="text-base font-bold text-foreground">
+                      {formatPrice({
+                        price: getCartTotal(),
+                        currency
+                      }).toString()}
+                    </dd>
+                  </div>
+                </dl>
 
-              <div className="mt-6">
-                <Link
-                  href="/checkout"
-                  className="block w-full bg-foreground px-6 py-4 text-center text-xs font-semibold uppercase tracking-[0.16em] text-background transition-colors hover:bg-foreground/90"
-                >
-                  Ir a checkout
-                </Link>
+                <div className="mt-6">
+                  <Link
+                    href="/checkout"
+                    className="block w-full bg-foreground px-6 py-4 text-center text-xs font-semibold uppercase tracking-[0.16em] text-background transition-colors hover:bg-foreground/90"
+                  >
+                    Ir a checkout
+                  </Link>
+                </div>
+
+                <p className="mt-4 text-xs text-muted-foreground">
+                  Elegirás el método de entrega y de pago en el checkout.
+                </p>
               </div>
-
-              <p className="mt-4 text-xs text-muted-foreground">
-                Elegirás el método de entrega y de pago en el checkout.
-              </p>
-            </div>
-          </aside>
-        </div>
+            </aside>
+          </div>
+        </>
       )}
 
       <AnimatePresence>
