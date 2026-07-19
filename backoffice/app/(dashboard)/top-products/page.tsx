@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { PageHeader } from "@/components/page-header";
-import { DataTable } from "@/components/ui";
+import { AdminTable } from "@/components/ui";
 import { getTopProducts, listProducts } from "@/lib/data";
 import { formatPrice, mediaUrl } from "@/lib/utils";
 
@@ -24,9 +24,7 @@ export default async function TopProductsPage() {
         subtitle="Los productos más vistos en la tienda (últimos 30 días)"
       />
 
-      <DataTable
-        minWidth={640}
-        count={top30.length}
+      <AdminTable
         empty="Todavía no hay vistas de producto registradas."
         headers={["#", "Producto", "Precio", "Vistas 30 días", "Vistas 7 días"]}
       >
@@ -72,7 +70,7 @@ export default async function TopProductsPage() {
             </tr>
           );
         })}
-      </DataTable>
+      </AdminTable>
     </div>
   );
 }
