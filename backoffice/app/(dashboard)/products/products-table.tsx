@@ -18,11 +18,7 @@ import {
 import { useSelection } from "@/lib/use-selection";
 import { formatPrice, mediaUrl } from "@/lib/utils";
 import type { Category, Product } from "@/lib/types";
-import {
-  bulkDeleteProductsAction,
-  deleteProductAction,
-  togglePublishAction,
-} from "./actions";
+import { bulkDeleteProductsAction, deleteProductAction } from "./actions";
 
 const PAGE_SIZE = 10;
 
@@ -43,7 +39,6 @@ export function ProductsTable({
   const [page, setPage] = useState(1);
 
   const [toDelete, setToDelete] = useState<Product | null>(null);
-  const [toToggle, setToToggle] = useState<Product | null>(null);
   const [confirmBulk, setConfirmBulk] = useState(false);
 
   const filter = <T,>(setter: (v: T) => void) => (v: T) => {
@@ -199,20 +194,14 @@ export function ProductsTable({
                 </Badge>
               </td>
               <td className="px-4 py-3">
-                <div className="flex items-center justify-end gap-2">
-                  <button
-                    type="button"
-                    className="btn-secondary"
-                    onClick={() => setToToggle(p)}
-                  >
-                    {published ? "Despublicar" : "Publicar"}
-                  </button>
+                <div className="flex items-center justify-end gap-1">
                   <Link
                     href={`/products/${p.documentId}/edit`}
-                    className="btn-secondary"
+                    title={`Editar ${p.name}`}
+                    aria-label={`Editar ${p.name}`}
+                    className="rounded p-1.5 text-neutral-500 transition hover:bg-neutral-100 hover:text-neutral-800 active:scale-95"
                   >
                     <Pencil className="h-4 w-4" />
-                    Editar
                   </Link>
                   <IconButton
                     icon={Trash2}
@@ -233,31 +222,6 @@ export function ProductsTable({
         total={filtered.length}
         limit={PAGE_SIZE}
         onPage={setPage}
-      />
-
-      <ConfirmDialog
-        open={Boolean(toToggle)}
-        title={toToggle?.publishedAt ? "Despublicar producto" : "Publicar producto"}
-        message={
-          toToggle?.publishedAt
-            ? `"${toToggle?.name}" dejará de verse en la tienda.`
-            : `"${toToggle?.name}" pasará a estar visible en la tienda.`
-        }
-        confirmLabel={toToggle?.publishedAt ? "Despublicar" : "Publicar"}
-        pending={pending}
-        error={error}
-        onCancel={() => setToToggle(null)}
-        onConfirm={() => {
-          if (!toToggle) return;
-          run(
-            () =>
-              togglePublishAction(
-                toToggle.documentId,
-                !toToggle.publishedAt,
-              ),
-            () => setToToggle(null),
-          );
-        }}
       />
 
       <ConfirmDialog
