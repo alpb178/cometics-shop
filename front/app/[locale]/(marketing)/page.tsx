@@ -1,5 +1,6 @@
 import { ProductList } from "@/container/products/list";
 import { BrandHero } from "@/components/hero/brand-hero";
+import { GroupCompanies } from "@/components/group-companies/group-companies";
 import fetchContentType from "@/lib/strapi/fetchContentType";
 import type { Metadata } from "next";
 import { siteMetadata } from "@/lib/next-metadata";
@@ -39,6 +40,7 @@ export default async function HomePage() {
       <div id="productos">
         <ProductList products={products.data} />
       </div>
+      <GroupCompanies />
     </>
   );
 }
