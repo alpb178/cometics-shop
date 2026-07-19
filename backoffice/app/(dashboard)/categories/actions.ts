@@ -29,3 +29,12 @@ export async function deleteCategoryAction(documentId: string) {
   await deleteCategory(documentId);
   revalidatePath("/categories");
 }
+
+/** Elimina varias categorías seleccionadas. */
+export async function bulkDeleteCategoriesAction(documentIds: string[]) {
+  await requireStaff();
+  for (const documentId of documentIds) {
+    await deleteCategory(documentId);
+  }
+  revalidatePath("/categories");
+}

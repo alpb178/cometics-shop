@@ -19,7 +19,7 @@ import { formatDate, ORDER_STATUS_META } from "@/lib/utils";
 import type { Order } from "@/lib/types";
 import { bulkDeleteOrdersAction, deleteOrderAction } from "./actions";
 
-const PAGE_SIZE = 20;
+const PAGE_SIZE = 10;
 
 export function OrdersTable({ orders }: { orders: Order[] }) {
   const router = useRouter();
