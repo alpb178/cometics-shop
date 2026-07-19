@@ -25,7 +25,7 @@ import {
   setUserPasswordAction,
 } from "./actions";
 
-const PAGE_SIZE = 20;
+const PAGE_SIZE = 10;
 
 function roleBadge(role: AppRole | null) {
   if (!role) return { label: "—", className: "bg-neutral-100 text-neutral-600" };

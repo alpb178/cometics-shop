@@ -12,10 +12,28 @@ API propia de Iris Natural, destinada a reemplazar por completo al backend Strap
 ## Arranque
 
 ```bash
-cp .env.example .env   # rellenar DATABASE_URL con la cadena de Supabase
+cp .env.example .env   # rellenar DATABASE_URL (ver "BD local" abajo)
 npm install
 npm run start:dev      # http://localhost:4000, docs en http://localhost:4000/docs
 ```
+
+## Base de datos local de desarrollo
+
+Para no desarrollar contra la BD de producción, usa un clon local (Postgres de
+Homebrew, `brew services start postgresql@18`):
+
+```bash
+createdb iris_natural
+pg_dump "<DATABASE_URL de producción>" -n public --no-owner --no-privileges \
+  | psql -d iris_natural
+# en .env:
+# DATABASE_URL=postgresql://<tu-usuario>@localhost:5432/iris_natural
+```
+
+Refresca el clon repitiendo el dump cuando necesites datos recientes
+(`dropdb iris_natural && createdb iris_natural && ...`). En la copia local
+puedes resetear contraseñas de usuarios sin miedo (hash bcrypt con
+`bcryptjs.hashSync(pass, 10)` directo en `up_users.password`).
 
 ## Endpoints
 
