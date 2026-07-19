@@ -8,10 +8,14 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const config = app.get(ConfigService);
 
+  // Mismo prefijo que Strapi: los clientes llaman /api/...
+  app.setGlobalPrefix("api");
+
   app.useGlobalPipes(
     new ValidationPipe({
+      // whitelist sin forbid: los campos no declarados se descartan en
+      // silencio, como hacían las whitelists de los controllers de Strapi
       whitelist: true,
-      forbidNonWhitelisted: true,
       transform: true,
     }),
   );
