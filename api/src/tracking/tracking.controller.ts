@@ -92,6 +92,42 @@ export class TrackingController {
     };
   }
 
+  @Get("page-visits/daily")
+  @UseGuards(JwtAuthGuard, StaffGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: "Visitas por día (solo staff)" })
+  async daily(@Query("days") days?: string) {
+    return {
+      data: await this.trackingService.getDailyVisits(
+        Math.min(Number(days) || 30, 90),
+      ),
+    };
+  }
+
+  @Get("page-visits/hourly")
+  @UseGuards(JwtAuthGuard, StaffGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: "Visitas de hoy por hora (solo staff)" })
+  async hourly() {
+    return { data: await this.trackingService.getHourlyVisits() };
+  }
+
+  @Get("store-events/top-products")
+  @UseGuards(JwtAuthGuard, StaffGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: "Productos más vistos (solo staff)" })
+  async topProducts(
+    @Query("days") days?: string,
+    @Query("limit") limit?: string,
+  ) {
+    return {
+      data: await this.trackingService.getTopProducts({
+        days: Number(days) || 30,
+        limit: Math.min(Number(limit) || 10, 50),
+      }),
+    };
+  }
+
   @Get("store-events/recent")
   @UseGuards(JwtAuthGuard, StaffGuard)
   @ApiBearerAuth()

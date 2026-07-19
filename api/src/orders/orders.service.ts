@@ -12,6 +12,7 @@ import {
   round2,
   toNumber,
 } from "../common/strapi.util";
+import { fillDailySeries } from "../common/time.util";
 import { MediaService } from "../media/media.service";
 import { PricingService } from "../pricing/pricing.service";
 import { PrismaService } from "../prisma/prisma.service";
@@ -192,6 +193,37 @@ export class OrdersService {
       return created;
     });
     return this.serializeById(order.id);
+  }
+
+  /** KPIs de pedidos para el dashboard del backoffice (solo staff). */
+  async getStats(days: number) {
+    const since = new Date(Date.now() - days * 86400000);
+    const [total, pending, rows] = await Promise.all([
+      this.prisma.orders.count(),
+      this.prisma.orders.count({ where: { status: "pending_verification" } }),
+      this.prisma.$queryRaw<
+        { day: Date; count: number; revenue: number | null }[]
+      >`
+        SELECT (created_at AT TIME ZONE 'UTC' AT TIME ZONE 'America/La_Paz')::date AS day,
+               count(*)::int AS count,
+               coalesce(sum(total), 0)::float AS revenue
+        FROM orders
+        WHERE created_at >= ${since} AND status IS DISTINCT FROM 'cancelled'
+        GROUP BY 1
+        ORDER BY 1`,
+    ]);
+    const revenueByDay = new Map(
+      rows.map((r) => [r.day.toISOString().slice(0, 10), r.revenue ?? 0]),
+    );
+    const byDay = fillDailySeries(
+      new Map(rows.map((r) => [r.day.toISOString().slice(0, 10), r.count])),
+      days,
+    ).map((d) => ({
+      ...d,
+      revenue: round2(revenueByDay.get(d.date) ?? 0),
+    }));
+    const revenue = round2(byDay.reduce((acc, d) => acc + d.revenue, 0));
+    return { total, pending, revenue, days, byDay };
   }
 
   async findMany(user: AuthenticatedUser, pageSize: number) {
