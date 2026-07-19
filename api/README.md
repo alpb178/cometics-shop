@@ -47,8 +47,6 @@ Réplica 1:1 del contrato que los clientes ya usan contra Strapi (paths, query p
 3. ~~**Fase 2** — pedidos y checkout (`orders`, `addresses`, `payment-info`, `pricing-setting`)~~ ✅
 4. ~~**Fase 3** — auth compatible con users-permissions (JWT compartido, bcrypt, Google OAuth, reset)~~ ✅
 5. ~~**Fase 4** — catálogo, contenido CMS, uploads a Cloudinary y tracking~~ ✅
-6. **Fase 5** — repuntar clientes y retirar `back/` (Strapi):
-   - `front/`: cambiar `NEXT_PUBLIC_API_URL` a la URL de esta API
-   - `backoffice/`: cambiar `NEXT_PUBLIC_STRAPI_URL` a la URL de esta API
-   - Validar en staging checkout completo, login, panel y subida de fotos
-   - Eliminar `back/` cuando ningún cliente llame a Strapi
+6. ~~**Fase 5** — repuntar clientes y retirar `back/` (Strapi)~~ ✅ (julio 2026)
+
+Esta API es ahora el **único backend** del proyecto. El código de Strapi se eliminó del repo (recuperable en el historial de git, hasta el merge de esta fase). El esquema de la base de datos conserva las convenciones que Strapi generó (tablas `*_lnk`, `*_cmps`, `files_related_mph`, `document_id`); cualquier cambio de esquema a partir de ahora es responsabilidad de este proyecto — antes de la primera migración habrá que hacer un baseline de Prisma (`prisma migrate diff` / `migrate resolve`).
