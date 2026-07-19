@@ -123,6 +123,31 @@ export interface TopPath {
   count: number;
 }
 
+export interface DayPoint {
+  date: string; // YYYY-MM-DD
+  count: number;
+  revenue?: number;
+}
+
+export interface HourPoint {
+  hour: number; // 0–23
+  count: number;
+}
+
+export interface TopProduct {
+  slug: string | null;
+  label: string | null;
+  count: number;
+}
+
+export interface OrderStats {
+  total: number;
+  pending: number;
+  revenue: number;
+  days: number;
+  byDay: DayPoint[];
+}
+
 export interface PricingSetting {
   markupPercent: number;
   provinceShippingCost: number;

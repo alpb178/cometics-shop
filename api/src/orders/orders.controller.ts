@@ -37,6 +37,17 @@ export class OrdersController {
     );
   }
 
+  @Get("stats")
+  @UseGuards(StaffGuard)
+  @ApiOperation({ summary: "KPIs de pedidos: total, pendientes, ingresos y serie diaria (staff)" })
+  async stats(@Query("days") days?: string) {
+    return {
+      data: await this.ordersService.getStats(
+        Math.min(Number(days) || 30, 90),
+      ),
+    };
+  }
+
   @Get(":id")
   @ApiOperation({ summary: "Detalle de pedido (id numérico o documentId)" })
   async findOne(
