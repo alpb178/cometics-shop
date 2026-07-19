@@ -1,17 +1,19 @@
-import { ConfigModule } from "@nestjs/config";
 import { Test } from "@nestjs/testing";
+import { PrismaService } from "../prisma/prisma.service";
 import { HealthController } from "./health.controller";
 import { HealthService } from "./health.service";
 
 describe("HealthController", () => {
   let controller: HealthController;
+  const prismaMock = { $queryRaw: jest.fn() };
 
   beforeEach(async () => {
-    delete process.env.DATABASE_URL;
     const moduleRef = await Test.createTestingModule({
-      imports: [ConfigModule.forRoot({ ignoreEnvFile: true })],
       controllers: [HealthController],
-      providers: [HealthService],
+      providers: [
+        HealthService,
+        { provide: PrismaService, useValue: prismaMock },
+      ],
     }).compile();
 
     controller = moduleRef.get(HealthController);
@@ -23,7 +25,15 @@ describe("HealthController", () => {
     expect(typeof result.uptime).toBe("number");
   });
 
-  it("responde 503 si DATABASE_URL no está configurada", async () => {
+  it("devuelve database up si la query responde", async () => {
+    prismaMock.$queryRaw.mockResolvedValueOnce([{ "?column?": 1 }]);
+    await expect(controller.checkDatabase()).resolves.toEqual({
+      database: "up",
+    });
+  });
+
+  it("responde 503 si la base de datos falla", async () => {
+    prismaMock.$queryRaw.mockRejectedValueOnce(new Error("connection refused"));
     await expect(controller.checkDatabase()).rejects.toMatchObject({
       status: 503,
     });

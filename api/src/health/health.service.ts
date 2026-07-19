@@ -1,16 +1,9 @@
-import {
-  Injectable,
-  OnModuleDestroy,
-  ServiceUnavailableException,
-} from "@nestjs/common";
-import { ConfigService } from "@nestjs/config";
-import { Pool } from "pg";
+import { Injectable, ServiceUnavailableException } from "@nestjs/common";
+import { PrismaService } from "../prisma/prisma.service";
 
 @Injectable()
-export class HealthService implements OnModuleDestroy {
-  private pool: Pool | null = null;
-
-  constructor(private readonly config: ConfigService) {}
+export class HealthService {
+  constructor(private readonly prisma: PrismaService) {}
 
   check() {
     return {
@@ -21,17 +14,8 @@ export class HealthService implements OnModuleDestroy {
   }
 
   async checkDatabase() {
-    const databaseUrl = this.config.get<string>("DATABASE_URL");
-    if (!databaseUrl) {
-      throw new ServiceUnavailableException({
-        database: "not_configured",
-        detail: "Falta la variable de entorno DATABASE_URL",
-      });
-    }
-
     try {
-      const pool = this.getPool(databaseUrl);
-      await pool.query("SELECT 1");
+      await this.prisma.$queryRaw`SELECT 1`;
       return { database: "up" };
     } catch (error) {
       throw new ServiceUnavailableException({
@@ -39,16 +23,5 @@ export class HealthService implements OnModuleDestroy {
         detail: error instanceof Error ? error.message : String(error),
       });
     }
-  }
-
-  private getPool(databaseUrl: string): Pool {
-    if (!this.pool) {
-      this.pool = new Pool({ connectionString: databaseUrl, max: 2 });
-    }
-    return this.pool;
-  }
-
-  async onModuleDestroy() {
-    await this.pool?.end();
   }
 }

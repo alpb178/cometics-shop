@@ -25,7 +25,7 @@ npm run start:dev      # http://localhost:4000, docs en http://localhost:4000/do
 ## Plan de migración
 
 1. ~~**Fase 0** — esqueleto NestJS con health, Swagger y config por env~~ ✅
-2. **Fase 1** — Prisma: introspección del esquema existente de Strapi (`prisma db pull`) y mapeo de sus convenciones (draft & publish, tablas de enlace)
+2. ~~**Fase 1** — Prisma: introspección del esquema existente de Strapi (`prisma db pull` + `prisma/fix-schema.js`, encadenados en `npm run prisma:pull`)~~ ✅
 3. **Fase 2** — pedidos y checkout (`orders`, `payments`)
 4. **Fase 3** — auth con Passport-JWT (los hashes bcrypt de Strapi son compatibles)
 5. **Fase 4** — catálogo, contenido y uploads a Cloudinary
