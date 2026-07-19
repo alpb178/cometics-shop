@@ -32,6 +32,14 @@ Réplica 1:1 del contrato que los clientes ya usan contra Strapi (paths, query p
 - **upload**: `POST /upload` multipart → Cloudinary (compatible con el plugin de Strapi)
 - **tracking**: `/page-visits/{track,stats,top,sources}`, `/store-events/{track,recent}`
 
+## Despliegue (Render)
+
+- **Build command**: `npm install && npm run build` (el `postinstall` ejecuta `prisma generate` automáticamente)
+- **Start command**: `npm run start:prod`
+- **NUNCA ejecutar `prisma migrate deploy`**: no hay migraciones a propósito — el esquema lo gestiona Strapi hasta la fase 5 y la API solo lo introspecciona. Ejecutar migrate falla con P3005 y no debe "arreglarse" con un baseline.
+- `DATABASE_URL`: el pooler de Supabase en puerto 5432 (modo sesión) funciona tal cual; si se usara el puerto 6543 (modo transacción) habría que añadir `?pgbouncer=true&connection_limit=1`.
+- Variables requeridas: ver `.env.example` (`DATABASE_URL`, `JWT_SECRET` — el mismo de Strapi —, `CLOUDINARY_*`, `STAFF_EMAILS`, `CORS_ORIGINS`, `PUBLIC_URL`, `CLIENT_URL`, `GOOGLE_CLIENT_*`, `SMTP_*`).
+
 ## Plan de migración
 
 1. ~~**Fase 0** — esqueleto NestJS con health, Swagger y config por env~~ ✅
