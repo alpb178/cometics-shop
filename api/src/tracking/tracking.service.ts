@@ -1,6 +1,11 @@
 import { Injectable } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { generateDocumentId } from "../common/strapi.util";
+import {
+  fillDailySeries,
+  fillHourlySeries,
+  laPazStartOfToday,
+} from "../common/time.util";
 import { PrismaService } from "../prisma/prisma.service";
 
 export const ALLOWED_EVENT_TYPES = [
@@ -139,6 +144,50 @@ export class TrackingService {
     return [...acc.entries()]
       .map(([source, count]) => ({ source, count }))
       .sort((a, b) => b.count - a.count);
+  }
+
+  /** Visitas por día (hora de La Paz), serie completa con ceros. */
+  async getDailyVisits(days: number) {
+    const since = new Date(Date.now() - days * 86400000);
+    const rows = await this.prisma.$queryRaw<{ day: Date; count: number }[]>`
+      SELECT (created_at AT TIME ZONE 'UTC' AT TIME ZONE 'America/La_Paz')::date AS day,
+             count(*)::int AS count
+      FROM page_visits
+      WHERE created_at >= ${since}
+      GROUP BY 1
+      ORDER BY 1`;
+    const counts = new Map(
+      rows.map((r) => [r.day.toISOString().slice(0, 10), r.count]),
+    );
+    return fillDailySeries(counts, days);
+  }
+
+  /** Visitas de hoy (La Paz) por hora, 0–23 con ceros. */
+  async getHourlyVisits() {
+    const since = laPazStartOfToday();
+    const rows = await this.prisma.$queryRaw<{ hour: number; count: number }[]>`
+      SELECT extract(hour FROM (created_at AT TIME ZONE 'UTC' AT TIME ZONE 'America/La_Paz'))::int AS hour,
+             count(*)::int AS count
+      FROM page_visits
+      WHERE created_at >= ${since}
+      GROUP BY 1
+      ORDER BY 1`;
+    return fillHourlySeries(new Map(rows.map((r) => [r.hour, r.count])));
+  }
+
+  /** Productos más vistos (eventos product_view) en la ventana indicada. */
+  async getTopProducts(opts: { days: number; limit: number }) {
+    const since = new Date(Date.now() - opts.days * 86400000);
+    const rows = await this.prisma.$queryRaw<
+      { slug: string | null; label: string | null; count: number }[]
+    >`
+      SELECT product_slug AS slug, max(label) AS label, count(*)::int AS count
+      FROM store_events
+      WHERE type = 'product_view' AND created_at >= ${since}
+      GROUP BY product_slug
+      ORDER BY count DESC
+      LIMIT ${opts.limit}`;
+    return rows;
   }
 
   async getRecentEvents(opts: { limit: number; type?: string }) {

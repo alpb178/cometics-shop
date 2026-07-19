@@ -12,6 +12,7 @@ import {
   Eye,
   Users,
   QrCode,
+  TrendingUp,
   LogOut
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -25,6 +26,7 @@ const NAV = [
   { href: "/content", label: "Contenido", icon: FileText },
   { href: "/payment-qr", label: "QR de pago", icon: QrCode },
   { href: "/visits", label: "Visitas", icon: Eye },
+  { href: "/top-products", label: "Top productos", icon: TrendingUp },
   { href: "/users", label: "Usuarios", icon: Users }
 ];
 

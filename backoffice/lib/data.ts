@@ -9,8 +9,11 @@ import {
 import type {
   AppRole,
   Category,
+  DayPoint,
   Faq,
+  HourPoint,
   Order,
+  OrderStats,
   OrderStatus,
   PaymentInfo,
   PricingSetting,
@@ -18,6 +21,7 @@ import type {
   SocialNetwork,
   StoreEvent,
   TopPath,
+  TopProduct,
   TrafficSource,
   UserRow,
   VisitStats
@@ -293,6 +297,39 @@ export async function getTrafficSources(days = 30): Promise<TrafficSource[]> {
     `/api/page-visits/sources?days=${days}`
   );
   return res.data ?? [];
+}
+
+export async function getDailyVisits(days = 30): Promise<DayPoint[]> {
+  const res = await strapiGet<ListResponse<DayPoint>>(
+    `/api/page-visits/daily?days=${days}`
+  );
+  return res.data ?? [];
+}
+
+export async function getHourlyVisits(): Promise<HourPoint[]> {
+  const res = await strapiGet<ListResponse<HourPoint>>(
+    `/api/page-visits/hourly`
+  );
+  return res.data ?? [];
+}
+
+export async function getTopProducts(
+  days = 30,
+  limit = 10
+): Promise<TopProduct[]> {
+  const res = await strapiGet<ListResponse<TopProduct>>(
+    `/api/store-events/top-products?days=${days}&limit=${limit}`
+  );
+  return res.data ?? [];
+}
+
+export async function getOrderStats(days = 30): Promise<OrderStats> {
+  const res = await strapiGet<SingleResponse<OrderStats>>(
+    `/api/orders/stats?days=${days}`
+  );
+  return (
+    res.data ?? { total: 0, pending: 0, revenue: 0, days, byDay: [] }
+  );
 }
 
 /* --------------------------- Interacciones ---------------------------- */
