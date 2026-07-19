@@ -1,23 +1,31 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import {
-  Eye,
-  KeyRound,
-  Loader2,
-  Trash2,
-  UserPlus,
-  X
-} from "lucide-react";
+import { Eye, KeyRound, Loader2, Trash2, UserPlus } from "lucide-react";
 import { PageHeader } from "@/components/page-header";
+import { Pagination } from "@/components/pagination";
+import {
+  Badge,
+  ConfirmDialog,
+  DataTable,
+  FilterSelect,
+  IconButton,
+  Modal,
+  SearchInput,
+  SelectCheckbox,
+} from "@/components/ui";
+import { useSelection } from "@/lib/use-selection";
 import { formatDate } from "@/lib/utils";
 import type { AppRole, UserRow } from "@/lib/types";
 import {
+  bulkDeleteUsersAction,
   createUserAction,
   deleteUserAction,
-  setUserPasswordAction
+  setUserPasswordAction,
 } from "./actions";
+
+const PAGE_SIZE = 20;
 
 function roleBadge(role: AppRole | null) {
   if (!role) return { label: "—", className: "bg-neutral-100 text-neutral-600" };
@@ -34,46 +42,10 @@ function roleLabel(role: AppRole): string {
   return role.name;
 }
 
-/** Modal simple (overlay + tarjeta). */
-function Modal({
-  title,
-  onClose,
-  children
-}: {
-  title: string;
-  onClose: () => void;
-  children: React.ReactNode;
-}) {
-  return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
-      onClick={onClose}
-    >
-      <div
-        className="w-full max-w-md rounded-xl bg-white p-6 shadow-xl"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-lg font-semibold">{title}</h2>
-          <button
-            type="button"
-            onClick={onClose}
-            className="text-neutral-400 hover:text-neutral-700"
-            aria-label="Cerrar"
-          >
-            <X className="h-5 w-5" />
-          </button>
-        </div>
-        {children}
-      </div>
-    </div>
-  );
-}
-
 export function UsersManager({
   users,
   roles,
-  currentUserId
+  currentUserId,
 }: {
   users: UserRow[];
   roles: AppRole[];
@@ -81,22 +53,51 @@ export function UsersManager({
 }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
+  const [error, setError] = useState<string | null>(null);
+
+  const [q, setQ] = useState("");
+  const [roleFilter, setRoleFilter] = useState("");
+  const [page, setPage] = useState(1);
 
   const [createOpen, setCreateOpen] = useState(false);
   const [pwdUser, setPwdUser] = useState<UserRow | null>(null);
   const [detailUser, setDetailUser] = useState<UserRow | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<UserRow | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [confirmBulk, setConfirmBulk] = useState(false);
 
-  // Estado del formulario de contraseña.
   const [newPassword, setNewPassword] = useState("");
 
   const selectableRoles = roles.filter(
-    (r) => r.type === "admin" || r.type === "client"
+    (r) => r.type === "admin" || r.type === "client",
   );
   const defaultRole =
     selectableRoles.find((r) => r.type === "admin")?.id ??
     selectableRoles[0]?.id;
+
+  const filter = <T,>(setter: (v: T) => void) => (v: T) => {
+    setter(v);
+    setPage(1);
+  };
+
+  const filtered = useMemo(() => {
+    const term = q.trim().toLowerCase();
+    return users.filter((u) => {
+      if (roleFilter && (u.role?.type ?? "") !== roleFilter) return false;
+      if (!term) return true;
+      return `${u.username ?? ""} ${u.email ?? ""}`
+        .toLowerCase()
+        .includes(term);
+    });
+  }, [users, q, roleFilter]);
+
+  const pageRows = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+  const pageIds = useMemo(
+    () =>
+      pageRows.filter((u) => u.id !== currentUserId).map((u) => String(u.id)),
+    [pageRows, currentUserId],
+  );
+  const { selected, allInPage, toggleOne, togglePage, clear } =
+    useSelection(pageIds);
 
   function run(fn: () => Promise<void>, onDone?: () => void) {
     setError(null);
@@ -131,102 +132,140 @@ export function UsersManager({
         }
       />
 
-      <div className="card overflow-x-auto">
-        <table className="w-full min-w-[720px] text-sm">
-          <thead className="border-b border-neutral-200 bg-neutral-50 text-left text-xs uppercase tracking-wide text-neutral-500">
-            <tr>
-              <th className="px-4 py-3 font-medium">Usuario</th>
-              <th className="px-4 py-3 font-medium">Email</th>
-              <th className="px-4 py-3 font-medium">Rol</th>
-              <th className="px-4 py-3 font-medium">Estado</th>
-              <th className="px-4 py-3 font-medium">Alta</th>
-              <th className="px-4 py-3 text-right font-medium">Acciones</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-neutral-100">
-            {users.map((u) => {
-              const badge = roleBadge(u.role);
-              return (
-                <tr key={u.id} className="hover:bg-neutral-50">
-                  <td className="px-4 py-3 font-medium text-neutral-900">
-                    {u.username}
-                  </td>
-                  <td className="px-4 py-3 text-neutral-600">{u.email}</td>
-                  <td className="px-4 py-3">
-                    <span className={`badge ${badge.className}`}>
-                      {badge.label}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3">
-                    {u.blocked ? (
-                      <span className="badge bg-red-100 text-red-800">
-                        Bloqueado
-                      </span>
-                    ) : u.confirmed ? (
-                      <span className="badge bg-green-100 text-green-800">
-                        Confirmado
-                      </span>
-                    ) : (
-                      <span className="badge bg-amber-100 text-amber-800">
-                        Sin confirmar
-                      </span>
-                    )}
-                  </td>
-                  <td className="px-4 py-3 text-neutral-600">
-                    {formatDate(u.createdAt)}
-                  </td>
-                  <td className="px-4 py-3">
-                    <div className="flex items-center justify-end gap-1">
-                      <button
-                        type="button"
-                        title="Ver detalles"
-                        className="rounded p-1.5 text-neutral-500 hover:bg-neutral-100 hover:text-neutral-800"
-                        onClick={() => setDetailUser(u)}
-                      >
-                        <Eye className="h-4 w-4" />
-                      </button>
-                      <button
-                        type="button"
-                        title="Setear contraseña"
-                        className="rounded p-1.5 text-neutral-500 hover:bg-neutral-100 hover:text-neutral-800"
-                        onClick={() => {
-                          setError(null);
-                          setNewPassword("");
-                          setPwdUser(u);
-                        }}
-                      >
-                        <KeyRound className="h-4 w-4" />
-                      </button>
-                      <button
-                        type="button"
-                        title="Eliminar"
-                        disabled={u.id === currentUserId}
-                        className="rounded p-1.5 text-red-500 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-30"
-                        onClick={() => {
-                          setError(null);
-                          setDeleteTarget(u);
-                        }}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              );
-            })}
-            {users.length === 0 && (
-              <tr>
-                <td
-                  colSpan={6}
-                  className="px-4 py-10 text-center text-neutral-400"
-                >
-                  Aún no hay usuarios.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
+      <div className="mb-4 flex flex-wrap items-center gap-2">
+        <SearchInput
+          value={q}
+          onChange={filter(setQ)}
+          placeholder="Buscar por usuario o email…"
+          className="w-full sm:w-64"
+        />
+        <FilterSelect
+          value={roleFilter}
+          onChange={filter(setRoleFilter)}
+          allLabel="Todos los roles"
+          options={selectableRoles.map((r) => ({
+            value: r.type,
+            label: roleLabel(r),
+          }))}
+        />
+        {selected.size > 0 && (
+          <button
+            type="button"
+            className="btn-danger ml-auto"
+            onClick={() => setConfirmBulk(true)}
+          >
+            <Trash2 className="h-4 w-4" />
+            Eliminar seleccionados ({selected.size})
+          </button>
+        )}
       </div>
+
+      {error && !createOpen && !pwdUser && !deleteTarget && !confirmBulk && (
+        <p className="mb-3 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">
+          {error}
+        </p>
+      )}
+
+      <DataTable
+        minWidth={760}
+        busy={pending}
+        count={pageRows.length}
+        empty={
+          users.length === 0
+            ? "Aún no hay usuarios."
+            : "Ningún usuario coincide con la búsqueda."
+        }
+        headers={[
+          <SelectCheckbox
+            key="all"
+            label="Seleccionar página"
+            checked={allInPage}
+            onChange={togglePage}
+          />,
+          "Usuario",
+          "Email",
+          "Rol",
+          "Estado",
+          "Alta",
+          <span key="acc" className="block text-right">
+            Acciones
+          </span>,
+        ]}
+      >
+        {pageRows.map((u) => {
+          const badge = roleBadge(u.role);
+          return (
+            <tr key={u.id} className="hover:bg-neutral-50">
+              <td className="px-4 py-3">
+                <SelectCheckbox
+                  label={`Seleccionar ${u.username}`}
+                  checked={selected.has(String(u.id))}
+                  disabled={u.id === currentUserId}
+                  onChange={() => toggleOne(String(u.id))}
+                />
+              </td>
+              <td className="px-4 py-3 font-medium text-neutral-900">
+                {u.username}
+              </td>
+              <td className="px-4 py-3 text-neutral-600">{u.email}</td>
+              <td className="px-4 py-3">
+                <Badge className={badge.className}>{badge.label}</Badge>
+              </td>
+              <td className="px-4 py-3">
+                {u.blocked ? (
+                  <Badge className="bg-red-100 text-red-800">Bloqueado</Badge>
+                ) : u.confirmed ? (
+                  <Badge className="bg-green-100 text-green-800">
+                    Confirmado
+                  </Badge>
+                ) : (
+                  <Badge className="bg-amber-100 text-amber-800">
+                    Sin confirmar
+                  </Badge>
+                )}
+              </td>
+              <td className="px-4 py-3 text-neutral-600">
+                {formatDate(u.createdAt)}
+              </td>
+              <td className="px-4 py-3">
+                <div className="flex items-center justify-end gap-1">
+                  <IconButton
+                    icon={Eye}
+                    label="Ver detalles"
+                    onClick={() => setDetailUser(u)}
+                  />
+                  <IconButton
+                    icon={KeyRound}
+                    label="Setear contraseña"
+                    onClick={() => {
+                      setError(null);
+                      setNewPassword("");
+                      setPwdUser(u);
+                    }}
+                  />
+                  <IconButton
+                    icon={Trash2}
+                    label="Eliminar"
+                    variant="danger"
+                    disabled={u.id === currentUserId}
+                    onClick={() => {
+                      setError(null);
+                      setDeleteTarget(u);
+                    }}
+                  />
+                </div>
+              </td>
+            </tr>
+          );
+        })}
+      </DataTable>
+
+      <Pagination
+        page={page}
+        total={filtered.length}
+        limit={PAGE_SIZE}
+        onPage={setPage}
+      />
 
       {/* Crear usuario */}
       {createOpen && (
@@ -237,7 +276,7 @@ export function UsersManager({
               const fd = new FormData(e.currentTarget);
               run(
                 () => createUserAction(fd),
-                () => setCreateOpen(false)
+                () => setCreateOpen(false),
               );
             }}
             className="space-y-4"
@@ -325,7 +364,7 @@ export function UsersManager({
               e.preventDefault();
               run(
                 () => setUserPasswordAction(pwdUser.id, newPassword),
-                () => setPwdUser(null)
+                () => setPwdUser(null),
               );
             }}
             className="space-y-4"
@@ -370,21 +409,12 @@ export function UsersManager({
 
       {/* Ver detalles */}
       {detailUser && (
-        <Modal
-          title="Detalles del usuario"
-          onClose={() => setDetailUser(null)}
-        >
+        <Modal title="Detalles del usuario" onClose={() => setDetailUser(null)}>
           <dl className="space-y-2 text-sm">
             <Detail label="Usuario" value={detailUser.username} />
             <Detail label="Email" value={detailUser.email} />
-            <Detail
-              label="Rol"
-              value={roleBadge(detailUser.role).label}
-            />
-            <Detail
-              label="Proveedor"
-              value={detailUser.provider || "local"}
-            />
+            <Detail label="Rol" value={roleBadge(detailUser.role).label} />
+            <Detail label="Proveedor" value={detailUser.provider || "local"} />
             <Detail
               label="Estado"
               value={
@@ -410,44 +440,49 @@ export function UsersManager({
         </Modal>
       )}
 
-      {/* Eliminar */}
-      {deleteTarget && (
-        <Modal title="Eliminar usuario" onClose={() => setDeleteTarget(null)}>
-          <p className="text-sm text-neutral-600">
+      {/* Eliminar individual */}
+      <ConfirmDialog
+        open={Boolean(deleteTarget)}
+        title="Eliminar usuario"
+        message={
+          <>
             ¿Eliminar a{" "}
-            <span className="font-semibold">{deleteTarget.username}</span> (
-            {deleteTarget.email})? Esta acción no se puede deshacer.
-          </p>
-          {error && (
-            <p className="mt-3 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">
-              {error}
-            </p>
-          )}
-          <div className="mt-5 flex justify-end gap-2">
-            <button
-              type="button"
-              className="btn-secondary"
-              onClick={() => setDeleteTarget(null)}
-            >
-              Cancelar
-            </button>
-            <button
-              type="button"
-              className="btn-danger"
-              disabled={pending}
-              onClick={() =>
-                run(
-                  () => deleteUserAction(deleteTarget.id),
-                  () => setDeleteTarget(null)
-                )
-              }
-            >
-              {pending && <Loader2 className="h-4 w-4 animate-spin" />}
-              Eliminar
-            </button>
-          </div>
-        </Modal>
-      )}
+            <span className="font-semibold">{deleteTarget?.username}</span> (
+            {deleteTarget?.email})? Esta acción no se puede deshacer.
+          </>
+        }
+        confirmLabel="Eliminar"
+        pending={pending}
+        error={error}
+        onCancel={() => setDeleteTarget(null)}
+        onConfirm={() => {
+          if (!deleteTarget) return;
+          run(
+            () => deleteUserAction(deleteTarget.id),
+            () => setDeleteTarget(null),
+          );
+        }}
+      />
+
+      {/* Eliminar seleccionados */}
+      <ConfirmDialog
+        open={confirmBulk}
+        title="Eliminar seleccionados"
+        message={`¿Eliminar ${selected.size} usuario(s)? Esta acción no se puede deshacer.`}
+        confirmLabel="Eliminar todos"
+        pending={pending}
+        error={error}
+        onCancel={() => setConfirmBulk(false)}
+        onConfirm={() =>
+          run(
+            () => bulkDeleteUsersAction([...selected].map(Number)),
+            () => {
+              setConfirmBulk(false);
+              clear();
+            },
+          )
+        }
+      />
     </div>
   );
 }
