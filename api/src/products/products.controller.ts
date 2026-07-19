@@ -78,6 +78,22 @@ export class ProductsController {
     return { data: await this.productsService.unpublish(documentId) };
   }
 
+  @Put(":documentId/visibility")
+  @UseGuards(JwtAuthGuard, StaffGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: "Mostrar/ocultar producto en la tienda (solo staff)" })
+  async setVisibility(
+    @Param("documentId") documentId: string,
+    @Body("data") data: { visible?: boolean },
+  ) {
+    return {
+      data: await this.productsService.setVisible(
+        documentId,
+        data?.visible !== false,
+      ),
+    };
+  }
+
   @Delete(":documentId")
   @UseGuards(JwtAuthGuard, StaffGuard)
   @ApiBearerAuth()

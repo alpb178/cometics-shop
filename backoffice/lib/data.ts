@@ -65,6 +65,7 @@ export interface ProductInput {
   image: number | null;
   images: number[];
   categories: number | null;
+  visible?: boolean;
 }
 
 export async function createProduct(input: ProductInput): Promise<Product> {
@@ -92,11 +93,19 @@ export async function deleteProduct(documentId: string): Promise<void> {
   await strapiDelete(`/api/products/${documentId}`);
 }
 
+export async function setProductVisible(
+  documentId: string,
+  visible: boolean
+): Promise<void> {
+  await strapiSend("PUT", `/api/products/${documentId}/visibility`, {
+    visible,
+  });
+}
+
 export async function setProductPublished(
   documentId: string,
   published: boolean
 ): Promise<void> {
-  // Ruta custom añadida en back/ (Document Service publish/unpublish).
   await strapiSend(
     "POST",
     `/api/products/${documentId}/${published ? "publish" : "unpublish"}`,

@@ -1272,6 +1272,7 @@ model products {
   slug                                                  String?                                                 @db.VarChar(255)
   currency                                              String?                                                 @db.VarChar(255)
   description                                           String?
+  visible                                               Boolean?                                                @default(true)
   created_at                                            DateTime?                                               @db.Timestamp(6)
   updated_at                                            DateTime?                                               @db.Timestamp(6)
   published_at                                          DateTime?                                               @db.Timestamp(6)

@@ -7,7 +7,7 @@ import { ImagePlus, Loader2, X } from "lucide-react";
 import { Badge } from "@/components/ui";
 import type { Category, Product, StrapiMedia } from "@/lib/types";
 import { mediaUrl } from "@/lib/utils";
-import { togglePublishAction } from "./actions";
+import { setProductVisibleAction } from "./actions";
 
 type SaveAction = (formData: FormData) => Promise<void>;
 
@@ -23,17 +23,21 @@ export function ProductForm({
   const router = useRouter();
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [publishing, startPublish] = useTransition();
-  const published = Boolean(product?.publishedAt);
+  const [savingVisible, startVisible] = useTransition();
+  // Estado optimista del flag visible (para que el toggle responda al instante).
+  const [visible, setVisible] = useState(product?.visible ?? true);
 
-  function togglePublish() {
+  function toggleVisible() {
     if (!product) return;
+    const next = !visible;
+    setVisible(next);
     setError(null);
-    startPublish(async () => {
+    startVisible(async () => {
       try {
-        await togglePublishAction(product.documentId, !published);
+        await setProductVisibleAction(product.documentId, next);
         router.refresh();
       } catch (e) {
+        setVisible(!next); // revertir si falla
         setError(e instanceof Error ? e.message : "Error");
       }
     });
@@ -286,32 +290,32 @@ export function ProductForm({
         <div className="card space-y-3 p-5">
           {!product && (
             <label className="flex items-center gap-2 text-sm">
-              <input type="checkbox" name="publish" defaultChecked />
-              Publicar al crear
+              <input type="checkbox" name="visible" defaultChecked />
+              Mostrar en la tienda
             </label>
           )}
           {product && (
             <div className="flex items-center justify-between gap-3 rounded-lg border border-neutral-200 px-3 py-2">
               <span className="flex items-center gap-2 text-sm text-neutral-600">
-                Estado:
+                En tienda:
                 <Badge
                   className={
-                    published
+                    visible
                       ? "bg-green-100 text-green-800"
                       : "bg-neutral-100 text-neutral-600"
                   }
                 >
-                  {published ? "Publicado" : "Borrador"}
+                  {visible ? "Visible" : "Oculto"}
                 </Badge>
               </span>
               <button
                 type="button"
                 className="btn-secondary shrink-0"
-                onClick={togglePublish}
-                disabled={publishing}
+                onClick={toggleVisible}
+                disabled={savingVisible}
               >
-                {publishing && <Loader2 className="h-4 w-4 animate-spin" />}
-                {published ? "Despublicar" : "Publicar"}
+                {savingVisible && <Loader2 className="h-4 w-4 animate-spin" />}
+                {visible ? "Ocultar" : "Mostrar"}
               </button>
             </div>
           )}
