@@ -14,6 +14,7 @@ export interface ProductInput {
   image?: number | null;
   images?: number[];
   categories?: number | number[] | null;
+  visible?: boolean;
 }
 
 type Tx = Parameters<Parameters<PrismaService["$transaction"]>[0]>[0];
@@ -34,6 +35,10 @@ export class ProductsService {
   async findMany(opts: { status: "draft" | "published"; slug?: string; pageSize: number }) {
     const where = {
       published_at: opts.status === "draft" ? null : { not: null as never },
+      // La tienda (status published) solo ve los productos marcados como
+      // visibles; el backoffice (status draft) los ve todos. `not: false`
+      // también deja pasar los `visible = null` heredados.
+      ...(opts.status === "published" ? { visible: { not: false } } : {}),
       ...(opts.slug ? { slug: opts.slug } : {}),
     };
     const [rows, total] = await Promise.all([
@@ -75,6 +80,7 @@ export class ProductsService {
           currency: input.currency ?? "BS",
           description: input.description ?? null,
           slug: input.slug ?? this.slugify(input.name ?? ""),
+          visible: input.visible ?? true,
           created_at: now,
           updated_at: now,
           published_at: null, // se crea como borrador, como Strapi v5
@@ -103,6 +109,14 @@ export class ProductsService {
         },
       });
       await this.applyRelations(tx, target.id, input, { onlyProvided: true });
+      // `visible` se propaga a TODAS las filas del documento (borrador y
+      // publicada) para que la tienda y el backoffice queden consistentes.
+      if (input.visible !== undefined) {
+        await tx.products.updateMany({
+          where: { document_id: documentId },
+          data: { visible: input.visible },
+        });
+      }
       return updated;
     });
     return this.serialize(row);
@@ -123,6 +137,7 @@ export class ProductsService {
           currency: draft.currency,
           description: draft.description,
           slug: draft.slug,
+          visible: draft.visible,
           locale: draft.locale,
           created_at: draft.created_at,
           updated_at: now,
@@ -275,6 +290,19 @@ export class ProductsService {
       .replace(/^-+|-+$/g, "");
   }
 
+  /** Marca el producto como visible/oculto en la tienda (todas sus filas). */
+  async setVisible(documentId: string, visible: boolean) {
+    const rows = await this.prisma.products.findMany({
+      where: { document_id: documentId },
+    });
+    if (!rows.length) throw new NotFoundException();
+    await this.prisma.products.updateMany({
+      where: { document_id: documentId },
+      data: { visible, updated_at: new Date() },
+    });
+    return this.serialize({ ...rows[0], visible });
+  }
+
   async serialize(row: {
     id: number;
     document_id: string | null;
@@ -283,6 +311,7 @@ export class ProductsService {
     slug: string | null;
     currency: string | null;
     description: string | null;
+    visible: boolean | null;
     created_at: Date | null;
     updated_at: Date | null;
     published_at: Date | null;
@@ -308,6 +337,7 @@ export class ProductsService {
       slug: row.slug,
       currency: row.currency,
       description: row.description,
+      visible: row.visible ?? true,
       image,
       images: imagesRel
         .filter((r) => r.files)

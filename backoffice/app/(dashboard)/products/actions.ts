@@ -6,6 +6,7 @@ import {
   createProduct,
   deleteProduct,
   setProductPublished,
+  setProductVisible,
   updateProduct,
   type ProductInput
 } from "@/lib/data";
@@ -48,7 +49,9 @@ async function buildInput(formData: FormData): Promise<ProductInput> {
       | null,
     image: imageId,
     images: galleryIds,
-    categories: parseNumber(formData.get("categoryId"))
+    categories: parseNumber(formData.get("categoryId")),
+    // "on" (checkbox marcado) → visible; ausente → oculto
+    visible: formData.get("visible") === "on"
   };
 }
 
@@ -57,12 +60,23 @@ export async function createProductAction(formData: FormData) {
   const input = await buildInput(formData);
   const product = await createProduct(input);
 
-  if (formData.get("publish") === "on") {
-    await setProductPublished(product.documentId, true).catch(() => {});
-  }
+  // Los productos se publican siempre al crearse; la visibilidad en la
+  // tienda la controla el flag `visible` (checkbox "Mostrar en la tienda").
+  await setProductPublished(product.documentId, true).catch(() => {});
 
   revalidatePath("/products");
   redirect("/products");
+}
+
+/** Muestra u oculta el producto en la tienda. */
+export async function setProductVisibleAction(
+  documentId: string,
+  visible: boolean
+) {
+  await requireStaff();
+  await setProductVisible(documentId, visible);
+  revalidatePath("/products");
+  revalidatePath(`/products/${documentId}/edit`);
 }
 
 export async function updateProductAction(

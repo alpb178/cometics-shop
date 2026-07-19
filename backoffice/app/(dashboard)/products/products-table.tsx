@@ -52,9 +52,8 @@ export function ProductsTable({
       if (term && !(p.name ?? "").toLowerCase().includes(term)) return false;
       if (categoryId && String(p.categories?.id ?? "") !== categoryId)
         return false;
-      const published = Boolean(p.publishedAt);
-      if (status === "published" && !published) return false;
-      if (status === "draft" && published) return false;
+      if (status === "visible" && !p.visible) return false;
+      if (status === "hidden" && p.visible) return false;
       return true;
     });
   }, [products, q, categoryId, status]);
@@ -103,8 +102,8 @@ export function ProductsTable({
           onChange={filter(setStatus)}
           allLabel="Todos los estados"
           options={[
-            { value: "published", label: "Publicado" },
-            { value: "draft", label: "Borrador" },
+            { value: "visible", label: "Visible" },
+            { value: "hidden", label: "Oculto" },
           ]}
         />
         <div className="ml-auto flex items-center gap-2">
@@ -145,13 +144,12 @@ export function ProductsTable({
           "Producto",
           "Categoría",
           "Precio",
-          "Estado",
+          "En tienda",
           "",
         ]}
       >
         {pageRows.map((p) => {
           const thumb = mediaUrl(p.image, "thumbnail");
-          const published = Boolean(p.publishedAt);
           return (
             <tr key={p.documentId} className="hover:bg-neutral-50">
               <td className="px-4 py-3">
@@ -185,12 +183,12 @@ export function ProductsTable({
               <td className="px-4 py-3">
                 <Badge
                   className={
-                    published
+                    p.visible
                       ? "bg-green-100 text-green-800"
                       : "bg-neutral-100 text-neutral-600"
                   }
                 >
-                  {published ? "Publicado" : "Borrador"}
+                  {p.visible ? "Visible" : "Oculto"}
                 </Badge>
               </td>
               <td className="px-4 py-3">
