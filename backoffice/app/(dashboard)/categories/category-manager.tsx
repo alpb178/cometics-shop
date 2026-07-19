@@ -2,13 +2,15 @@
 
 import { useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { Check, Loader2, Pencil, Plus, Trash2, X } from "lucide-react";
+import { Loader2, Pencil, Plus, Trash2 } from "lucide-react";
+import { PageHeader } from "@/components/page-header";
 import { Pagination } from "@/components/pagination";
 import { RefreshButton } from "@/components/refresh-button";
 import {
   AdminTable,
   ConfirmDialog,
   IconButton,
+  Modal,
   SearchInput,
   SelectCheckbox,
 } from "@/components/ui";
@@ -29,12 +31,12 @@ export function CategoryManager({ categories }: { categories: Category[] }) {
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
 
-  const [newName, setNewName] = useState("");
   const [q, setQ] = useState("");
   const [page, setPage] = useState(1);
 
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [editName, setEditName] = useState("");
+  const [createOpen, setCreateOpen] = useState(false);
+  const [editTarget, setEditTarget] = useState<Category | null>(null);
+  const [name, setName] = useState("");
   const [toDelete, setToDelete] = useState<Category | null>(null);
   const [confirmBulk, setConfirmBulk] = useState(false);
 
@@ -47,10 +49,7 @@ export function CategoryManager({ categories }: { categories: Category[] }) {
   }, [categories, q]);
 
   const pageRows = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
-  const pageIds = useMemo(
-    () => pageRows.map((c) => c.documentId),
-    [pageRows],
-  );
+  const pageIds = useMemo(() => pageRows.map((c) => c.documentId), [pageRows]);
   const { selected, allInPage, toggleOne, togglePage, clear } =
     useSelection(pageIds);
 
@@ -69,34 +68,26 @@ export function CategoryManager({ categories }: { categories: Category[] }) {
 
   return (
     <div>
-      {/* Crear + buscar */}
-      <div className="mb-4 flex flex-wrap items-center gap-2">
-        <form
-          className="flex gap-2"
-          onSubmit={(e) => {
-            e.preventDefault();
-            if (!newName.trim()) return;
-            run(async () => {
-              await createCategoryAction(newName);
-              setNewName("");
-            });
-          }}
-        >
-          <input
-            className="input w-56"
-            placeholder="Nueva categoría…"
-            value={newName}
-            onChange={(e) => setNewName(e.target.value)}
-          />
-          <button type="submit" className="btn-primary shrink-0" disabled={pending}>
-            {pending ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <Plus className="h-4 w-4" />
-            )}
-            Añadir
+      <PageHeader
+        title="Categorías"
+        subtitle="Organiza los productos por categoría"
+        action={
+          <button
+            type="button"
+            className="btn-primary"
+            onClick={() => {
+              setError(null);
+              setName("");
+              setCreateOpen(true);
+            }}
+          >
+            <Plus className="h-4 w-4" />
+            Nueva categoría
           </button>
-        </form>
+        }
+      />
+
+      <div className="mb-4 flex flex-wrap items-center gap-2">
         <SearchInput
           value={q}
           onChange={(v) => {
@@ -104,7 +95,7 @@ export function CategoryManager({ categories }: { categories: Category[] }) {
             setPage(1);
           }}
           placeholder="Buscar categoría…"
-          className="w-full sm:w-56"
+          className="w-full sm:w-64"
         />
         <div className="ml-auto flex items-center gap-2">
           {selected.size > 0 && (
@@ -121,7 +112,7 @@ export function CategoryManager({ categories }: { categories: Category[] }) {
         </div>
       </div>
 
-      {error && (
+      {error && !createOpen && !editTarget && !toDelete && !confirmBulk && (
         <p className="mb-3 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">
           {error}
         </p>
@@ -157,36 +148,7 @@ export function CategoryManager({ categories }: { categories: Category[] }) {
                 onChange={() => toggleOne(c.documentId)}
               />
             </td>
-            <td className="px-4 py-3">
-              {editingId === c.documentId ? (
-                <div className="flex items-center gap-2">
-                  <input
-                    className="input max-w-xs"
-                    value={editName}
-                    onChange={(e) => setEditName(e.target.value)}
-                    autoFocus
-                  />
-                  <IconButton
-                    icon={Check}
-                    label="Guardar"
-                    disabled={pending}
-                    onClick={() =>
-                      run(async () => {
-                        await updateCategoryAction(c.documentId, editName);
-                        setEditingId(null);
-                      })
-                    }
-                  />
-                  <IconButton
-                    icon={X}
-                    label="Cancelar"
-                    onClick={() => setEditingId(null)}
-                  />
-                </div>
-              ) : (
-                <span className="font-medium">{c.name}</span>
-              )}
-            </td>
+            <td className="px-4 py-3 font-medium">{c.name}</td>
             <td className="px-4 py-3 text-on-surface-variant">
               {c.createdAt ? formatDate(c.createdAt) : "—"}
             </td>
@@ -196,15 +158,19 @@ export function CategoryManager({ categories }: { categories: Category[] }) {
                   icon={Pencil}
                   label={`Editar ${c.name}`}
                   onClick={() => {
-                    setEditingId(c.documentId);
-                    setEditName(c.name);
+                    setError(null);
+                    setName(c.name);
+                    setEditTarget(c);
                   }}
                 />
                 <IconButton
                   icon={Trash2}
                   label={`Eliminar ${c.name}`}
                   variant="danger"
-                  onClick={() => setToDelete(c)}
+                  onClick={() => {
+                    setError(null);
+                    setToDelete(c);
+                  }}
                 />
               </div>
             </td>
@@ -219,6 +185,106 @@ export function CategoryManager({ categories }: { categories: Category[] }) {
         limit={PAGE_SIZE}
         onPage={setPage}
       />
+
+      {/* Crear */}
+      {createOpen && (
+        <Modal title="Nueva categoría" onClose={() => setCreateOpen(false)}>
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              run(
+                () => createCategoryAction(name),
+                () => setCreateOpen(false),
+              );
+            }}
+            className="space-y-4"
+          >
+            <div>
+              <label className="label" htmlFor="cat-name">
+                Nombre
+              </label>
+              <input
+                id="cat-name"
+                className="input"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="p. ej. Cuidado facial"
+                required
+                autoFocus
+              />
+            </div>
+            {error && (
+              <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">
+                {error}
+              </p>
+            )}
+            <div className="flex justify-end gap-2">
+              <button
+                type="button"
+                className="btn-secondary"
+                onClick={() => setCreateOpen(false)}
+              >
+                Cancelar
+              </button>
+              <button type="submit" className="btn-primary" disabled={pending}>
+                {pending && <Loader2 className="h-4 w-4 animate-spin" />}
+                Crear categoría
+              </button>
+            </div>
+          </form>
+        </Modal>
+      )}
+
+      {/* Editar */}
+      {editTarget && (
+        <Modal
+          title={`Editar · ${editTarget.name}`}
+          onClose={() => setEditTarget(null)}
+        >
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              run(
+                () => updateCategoryAction(editTarget.documentId, name),
+                () => setEditTarget(null),
+              );
+            }}
+            className="space-y-4"
+          >
+            <div>
+              <label className="label" htmlFor="cat-edit-name">
+                Nombre
+              </label>
+              <input
+                id="cat-edit-name"
+                className="input"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                required
+                autoFocus
+              />
+            </div>
+            {error && (
+              <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">
+                {error}
+              </p>
+            )}
+            <div className="flex justify-end gap-2">
+              <button
+                type="button"
+                className="btn-secondary"
+                onClick={() => setEditTarget(null)}
+              >
+                Cancelar
+              </button>
+              <button type="submit" className="btn-primary" disabled={pending}>
+                {pending && <Loader2 className="h-4 w-4 animate-spin" />}
+                Guardar cambios
+              </button>
+            </div>
+          </form>
+        </Modal>
+      )}
 
       <ConfirmDialog
         open={Boolean(toDelete)}
