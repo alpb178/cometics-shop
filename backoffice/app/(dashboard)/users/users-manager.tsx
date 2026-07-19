@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Eye, KeyRound, Loader2, Trash2, UserPlus } from "lucide-react";
 import { PageHeader } from "@/components/page-header";
 import { Pagination } from "@/components/pagination";
+import { PasswordInput } from "@/components/password-input";
 import { RefreshButton } from "@/components/refresh-button";
 import {
   AdminTable,
@@ -306,11 +307,9 @@ export function UsersManager({
               <label className="label" htmlFor="password">
                 Contraseña
               </label>
-              <input
+              <PasswordInput
                 id="password"
                 name="password"
-                type="password"
-                className="input"
                 minLength={8}
                 required
               />
@@ -376,10 +375,8 @@ export function UsersManager({
               <label className="label" htmlFor="newpwd">
                 Nueva contraseña
               </label>
-              <input
+              <PasswordInput
                 id="newpwd"
-                type="password"
-                className="input"
                 minLength={8}
                 required
                 value={newPassword}

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Loader2 } from "lucide-react";
+import { PasswordInput } from "@/components/password-input";
 
 export function LoginForm() {
   const router = useRouter();
@@ -42,11 +43,11 @@ export function LoginForm() {
     <form onSubmit={onSubmit} className="space-y-4">
       <div>
         <label className="label" htmlFor="identifier">
-          Email
+          Usuario o email
         </label>
         <input
           id="identifier"
-          type="email"
+          type="text"
           autoComplete="username"
           className="input"
           value={identifier}
@@ -58,11 +59,9 @@ export function LoginForm() {
         <label className="label" htmlFor="password">
           Contraseña
         </label>
-        <input
+        <PasswordInput
           id="password"
-          type="password"
           autoComplete="current-password"
-          className="input"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
