@@ -4,6 +4,7 @@ import { useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Check, Loader2, Pencil, Plus, Trash2, X } from "lucide-react";
 import { Pagination } from "@/components/pagination";
+import { RefreshButton } from "@/components/refresh-button";
 import {
   AdminTable,
   ConfirmDialog,
@@ -105,16 +106,19 @@ export function CategoryManager({ categories }: { categories: Category[] }) {
           placeholder="Buscar categoría…"
           className="w-full sm:w-56"
         />
-        {selected.size > 0 && (
-          <button
-            type="button"
-            className="btn-danger ml-auto"
-            onClick={() => setConfirmBulk(true)}
-          >
-            <Trash2 className="h-4 w-4" />
-            Eliminar seleccionadas ({selected.size})
-          </button>
-        )}
+        <div className="ml-auto flex items-center gap-2">
+          {selected.size > 0 && (
+            <button
+              type="button"
+              className="btn-danger"
+              onClick={() => setConfirmBulk(true)}
+            >
+              <Trash2 className="h-4 w-4" />
+              Eliminar seleccionadas ({selected.size})
+            </button>
+          )}
+          <RefreshButton />
+        </div>
       </div>
 
       {error && (

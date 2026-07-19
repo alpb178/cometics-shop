@@ -35,15 +35,19 @@ export function formatPrice(
   return `${CURRENCY_LABEL[currency] ?? ""} ${value.toLocaleString("es-BO")}`.trim();
 }
 
+/**
+ * Fecha dd/mm/aaaa hh:mm en hora de Bolivia (UTC-4 fijo), construida a mano.
+ * No usar toLocaleString aquí: Node y el navegador formatean distinto
+ * (espacios invisibles de ICU) y rompe la hidratación de React en las
+ * tablas cliente.
+ */
 export function formatDate(value: string | null | undefined): string {
   if (!value) return "—";
-  return new Date(value).toLocaleString("es-BO", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit"
-  });
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) return "—";
+  const d = new Date(parsed.getTime() - 4 * 60 * 60 * 1000);
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${pad(d.getUTCDate())}/${pad(d.getUTCMonth() + 1)}/${d.getUTCFullYear()} ${pad(d.getUTCHours())}:${pad(d.getUTCMinutes())}`;
 }
 
 export const ORDER_STATUS_META: Record<

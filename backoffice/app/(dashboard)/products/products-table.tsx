@@ -5,6 +5,7 @@ import { useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Pencil, Trash2 } from "lucide-react";
 import { Pagination } from "@/components/pagination";
+import { RefreshButton } from "@/components/refresh-button";
 import {
   AdminTable,
   Badge,
@@ -111,16 +112,19 @@ export function ProductsTable({
             { value: "draft", label: "Borrador" },
           ]}
         />
-        {selected.size > 0 && (
-          <button
-            type="button"
-            className="btn-danger ml-auto"
-            onClick={() => setConfirmBulk(true)}
-          >
-            <Trash2 className="h-4 w-4" />
-            Eliminar seleccionados ({selected.size})
-          </button>
-        )}
+        <div className="ml-auto flex items-center gap-2">
+          {selected.size > 0 && (
+            <button
+              type="button"
+              className="btn-danger"
+              onClick={() => setConfirmBulk(true)}
+            >
+              <Trash2 className="h-4 w-4" />
+              Eliminar seleccionados ({selected.size})
+            </button>
+          )}
+          <RefreshButton />
+        </div>
       </div>
 
       {error && (

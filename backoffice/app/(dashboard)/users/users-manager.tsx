@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Eye, KeyRound, Loader2, Trash2, UserPlus } from "lucide-react";
 import { PageHeader } from "@/components/page-header";
 import { Pagination } from "@/components/pagination";
+import { RefreshButton } from "@/components/refresh-button";
 import {
   AdminTable,
   Badge,
@@ -148,16 +149,19 @@ export function UsersManager({
             label: roleLabel(r),
           }))}
         />
-        {selected.size > 0 && (
-          <button
-            type="button"
-            className="btn-danger ml-auto"
-            onClick={() => setConfirmBulk(true)}
-          >
-            <Trash2 className="h-4 w-4" />
-            Eliminar seleccionados ({selected.size})
-          </button>
-        )}
+        <div className="ml-auto flex items-center gap-2">
+          {selected.size > 0 && (
+            <button
+              type="button"
+              className="btn-danger"
+              onClick={() => setConfirmBulk(true)}
+            >
+              <Trash2 className="h-4 w-4" />
+              Eliminar seleccionados ({selected.size})
+            </button>
+          )}
+          <RefreshButton />
+        </div>
       </div>
 
       {error && !createOpen && !pwdUser && !deleteTarget && !confirmBulk && (
