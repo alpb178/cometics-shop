@@ -48,3 +48,23 @@ export function parsePageSize(raw: unknown, fallback = 50, max = 200): number {
 export function isNumericId(value: string): boolean {
   return /^\d+$/.test(value);
 }
+
+/**
+ * Lee un query param estilo Strapi (`filters[slug]=x`), que Express puede
+ * entregar como clave plana o como objeto anidado según el parser.
+ */
+export function nestedQuery(
+  query: Record<string, unknown> | undefined,
+  group: string,
+  key: string,
+): string | undefined {
+  if (!query) return undefined;
+  const flat = query[`${group}[${key}]`];
+  if (typeof flat === "string") return flat;
+  const nested = query[group];
+  if (nested && typeof nested === "object") {
+    const value = (nested as Record<string, unknown>)[key];
+    if (typeof value === "string") return value;
+  }
+  return undefined;
+}

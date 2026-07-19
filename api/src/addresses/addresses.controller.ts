@@ -14,7 +14,7 @@ import { ApiBearerAuth, ApiOperation, ApiTags } from "@nestjs/swagger";
 import { JwtAuthGuard } from "../auth/jwt-auth.guard";
 import { CurrentUser } from "../common/current-user.decorator";
 import { AuthenticatedUser } from "../common/staff.util";
-import { parsePageSize } from "../common/strapi.util";
+import { nestedQuery, parsePageSize } from "../common/strapi.util";
 import { AddressDto } from "./address.dto";
 import { AddressesService } from "./addresses.service";
 
@@ -29,11 +29,11 @@ export class AddressesController {
   @ApiOperation({ summary: "Direcciones del usuario autenticado" })
   async find(
     @CurrentUser() user: AuthenticatedUser,
-    @Query("pagination[pageSize]") pageSize?: string,
+    @Query() query: Record<string, unknown>,
   ) {
     const data = await this.addressesService.findAllForUser(
       user.id,
-      parsePageSize(pageSize),
+      parsePageSize(nestedQuery(query, "pagination", "pageSize")),
     );
     return { data };
   }

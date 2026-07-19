@@ -14,7 +14,7 @@ import { JwtAuthGuard } from "../auth/jwt-auth.guard";
 import { StaffGuard } from "../auth/staff.guard";
 import { CurrentUser } from "../common/current-user.decorator";
 import { AuthenticatedUser } from "../common/staff.util";
-import { parsePageSize } from "../common/strapi.util";
+import { nestedQuery, parsePageSize } from "../common/strapi.util";
 import { CreateOrderDto, UpdateOrderDto } from "./order.dto";
 import { OrdersService } from "./orders.service";
 
@@ -29,9 +29,12 @@ export class OrdersController {
   @ApiOperation({ summary: "Pedidos (staff: todos, cliente: los suyos)" })
   find(
     @CurrentUser() user: AuthenticatedUser,
-    @Query("pagination[pageSize]") pageSize?: string,
+    @Query() query: Record<string, unknown>,
   ) {
-    return this.ordersService.findMany(user, parsePageSize(pageSize));
+    return this.ordersService.findMany(
+      user,
+      parsePageSize(nestedQuery(query, "pagination", "pageSize")),
+    );
   }
 
   @Get(":id")
