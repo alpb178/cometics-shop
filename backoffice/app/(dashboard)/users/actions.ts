@@ -1,7 +1,12 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { createUser, deleteUser, setUserPassword } from "@/lib/data";
+import {
+  createUser,
+  deleteUser,
+  setUserPassword,
+  updateUser
+} from "@/lib/data";
 import { requireStaff } from "@/lib/auth-guard";
 
 export async function createUserAction(formData: FormData) {
@@ -25,6 +30,23 @@ export async function createUserAction(formData: FormData) {
   }
 
   await createUser({ username, email, password, role });
+  revalidatePath("/users");
+}
+
+export async function updateUserAction(
+  id: number,
+  input: { username: string; email: string; role: number }
+) {
+  await requireStaff();
+  const username = input.username.trim();
+  const email = input.email.trim().toLowerCase();
+  if (!username || !email) {
+    throw new Error("Usuario y email son obligatorios.");
+  }
+  if (!Number.isFinite(input.role) || input.role <= 0) {
+    throw new Error("Selecciona un rol válido.");
+  }
+  await updateUser(id, { username, email, role: input.role });
   revalidatePath("/users");
 }
 

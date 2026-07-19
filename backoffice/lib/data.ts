@@ -393,6 +393,14 @@ export async function setUserRole(id: number, role: number): Promise<void> {
   await strapiPutRaw(`/api/users/${id}`, { role });
 }
 
+/** Actualiza usuario, email y/o rol (users-permissions, body plano). */
+export async function updateUser(
+  id: number,
+  input: { username?: string; email?: string; role?: number }
+): Promise<UserRow> {
+  return await strapiPutRaw<UserRow>(`/api/users/${id}`, input);
+}
+
 export async function deleteUser(id: number): Promise<void> {
   await strapiDelete(`/api/users/${id}`);
 }
