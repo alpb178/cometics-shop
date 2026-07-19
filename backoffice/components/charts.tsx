@@ -1,12 +1,15 @@
+"use client";
+
 import Link from "next/link";
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import { cn } from "@/lib/utils";
 import type { DayPoint, HourPoint } from "@/lib/types";
 
 /**
  * Gráficos propios sin librerías (portados del admin de Tu Chamba):
  * columnas por día, columnas por hora, línea SVG y barras horizontales.
- * Tooltips solo con CSS (group-hover), aptos para Server Components.
+ * Tooltips por hover (CSS) en escritorio; la línea además responde al
+ * toque, mostrando la info del día seleccionado.
  */
 
 const DAY_LABEL = new Intl.DateTimeFormat("es-BO", {
@@ -120,7 +123,11 @@ export function HourlyColumns({
   );
 }
 
-/** Línea + área en SVG (escala a cualquier ancho). */
+/**
+ * Línea + área en SVG (escala a cualquier ancho). Hover muestra el tooltip
+ * en escritorio; al tocar/clicar se fija el día más cercano (tocar de nuevo
+ * el mismo lo oculta) sin activar el enlace de la tarjeta contenedora.
+ */
 export function DailyLine({
   data,
   unit = "visitas",
@@ -128,6 +135,7 @@ export function DailyLine({
   data: DayPoint[];
   unit?: string;
 }) {
+  const [active, setActive] = useState<number | null>(null);
   const max = Math.max(1, ...data.map((d) => d.count));
   const points = data.map((d, i) => ({
     x: data.length > 1 ? (i / (data.length - 1)) * 100 : 50,
@@ -137,8 +145,29 @@ export function DailyLine({
   const path = points
     .map((p, i) => `${i === 0 ? "M" : "L"}${p.x},${p.y}`)
     .join(" ");
+
+  function handleTap(e: React.MouseEvent<HTMLDivElement>) {
+    // No navegar cuando el gráfico vive dentro de una ChartCard con href.
+    e.preventDefault();
+    e.stopPropagation();
+    if (points.length === 0) return;
+    const rect = e.currentTarget.getBoundingClientRect();
+    const xPct = ((e.clientX - rect.left) / rect.width) * 100;
+    let nearest = 0;
+    for (let i = 1; i < points.length; i += 1) {
+      if (Math.abs(points[i].x - xPct) < Math.abs(points[nearest].x - xPct)) {
+        nearest = i;
+      }
+    }
+    setActive((prev) => (prev === nearest ? null : nearest));
+  }
+
   return (
-    <div className="relative h-36">
+    <div
+      className="relative h-36 cursor-pointer touch-manipulation"
+      onClick={handleTap}
+      onMouseLeave={() => setActive(null)}
+    >
       <svg
         viewBox="0 0 100 100"
         preserveAspectRatio="none"
@@ -159,17 +188,25 @@ export function DailyLine({
           strokeLinejoin="round"
         />
       </svg>
-      {points.map((p) => (
+      {points.map((p, i) => (
         <div
           key={p.date}
-          className="group absolute h-full w-4 -translate-x-1/2"
+          className="group pointer-events-none absolute h-full w-4 -translate-x-1/2 sm:pointer-events-auto"
           style={{ left: `${p.x}%` }}
         >
           <div
-            className="absolute left-1/2 h-2 w-2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-brand opacity-0 transition-opacity group-hover:opacity-100"
+            className={cn(
+              "absolute left-1/2 h-2 w-2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-brand transition-opacity group-hover:opacity-100",
+              active === i ? "opacity-100" : "opacity-0",
+            )}
             style={{ top: `${p.y}%` }}
           />
-          <div className="pointer-events-none absolute left-1/2 top-0 z-10 hidden -translate-x-1/2 -translate-y-full whitespace-nowrap rounded-lg bg-neutral-800 px-2 py-1 text-xs text-white group-hover:block">
+          <div
+            className={cn(
+              "pointer-events-none absolute left-1/2 top-0 z-10 -translate-x-1/2 -translate-y-full whitespace-nowrap rounded-lg bg-neutral-800 px-2 py-1 text-xs text-white group-hover:block",
+              active === i ? "block" : "hidden",
+            )}
+          >
             {dayLabel(p.date)}: {p.count} {unit}
           </div>
         </div>
