@@ -1,11 +1,13 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState, useTransition } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { ImagePlus, Loader2, X } from "lucide-react";
+import { Badge } from "@/components/ui";
 import type { Category, Product, StrapiMedia } from "@/lib/types";
 import { mediaUrl } from "@/lib/utils";
+import { togglePublishAction } from "./actions";
 
 type SaveAction = (formData: FormData) => Promise<void>;
 
@@ -21,6 +23,21 @@ export function ProductForm({
   const router = useRouter();
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [publishing, startPublish] = useTransition();
+  const published = Boolean(product?.publishedAt);
+
+  function togglePublish() {
+    if (!product) return;
+    setError(null);
+    startPublish(async () => {
+      try {
+        await togglePublishAction(product.documentId, !published);
+        router.refresh();
+      } catch (e) {
+        setError(e instanceof Error ? e.message : "Error");
+      }
+    });
+  }
 
   // Imagen principal
   const [keepImageId, setKeepImageId] = useState<number | null>(
@@ -272,6 +289,31 @@ export function ProductForm({
               <input type="checkbox" name="publish" defaultChecked />
               Publicar al crear
             </label>
+          )}
+          {product && (
+            <div className="flex items-center justify-between gap-3 rounded-lg border border-neutral-200 px-3 py-2">
+              <span className="flex items-center gap-2 text-sm text-neutral-600">
+                Estado:
+                <Badge
+                  className={
+                    published
+                      ? "bg-green-100 text-green-800"
+                      : "bg-neutral-100 text-neutral-600"
+                  }
+                >
+                  {published ? "Publicado" : "Borrador"}
+                </Badge>
+              </span>
+              <button
+                type="button"
+                className="btn-secondary shrink-0"
+                onClick={togglePublish}
+                disabled={publishing}
+              >
+                {publishing && <Loader2 className="h-4 w-4 animate-spin" />}
+                {published ? "Despublicar" : "Publicar"}
+              </button>
+            </div>
           )}
           {error && (
             <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">
