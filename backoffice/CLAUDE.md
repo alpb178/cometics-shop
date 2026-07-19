@@ -1,7 +1,8 @@
 # CLAUDE.md — backoffice
 
 Panel de administración (Next.js 15 App Router + TS + Tailwind) que consume la
-API REST del Strapi en `../back`. Sigue el flujo de trabajo del `CLAUDE.md` raíz.
+API NestJS en `../api` (compatible con el contrato Strapi v5 que este panel
+siempre usó). Sigue el flujo de trabajo del `CLAUDE.md` raíz.
 
 ## Comandos
 
@@ -22,10 +23,19 @@ npm run lint
   cookie de sesión (`lib/session.ts`).
 - Las subidas de ficheros usan `uploadFiles()` → `/api/upload`, y luego se pasan
   los ids de media al crear/actualizar la entidad.
-- Strapi v5: las escrituras afectan al **borrador**. Para publicar productos se
-  usan rutas custom (`/products/:documentId/publish|unpublish`) definidas en
-  `../back/src/api/product`.
+- Draft & publish: las escrituras de productos afectan al **borrador**. Para
+  publicar se usan las rutas `/products/:documentId/publish|unpublish` de la API
+  (`../api/src/products`).
 - Las rutas están protegidas por `middleware.ts` (redirige a `/login` sin sesión).
+- **Kit de UI compartido** (usar siempre en listados, no reinventar):
+  `components/ui.tsx` (`DataTable`, `Badge`, `IconButton`, `SelectCheckbox`,
+  `SearchInput`, `FilterSelect`, `Modal`, `ConfirmDialog`),
+  `components/pagination.tsx` y el hook `lib/use-selection.ts` (selección por
+  lotes que persiste entre páginas/filtros). Patrón de referencia:
+  `app/(dashboard)/products/products-table.tsx` — búsqueda + filtros +
+  paginación client-side sobre datos cargados por el Server Component,
+  mutaciones vía Server Actions con `useTransition` + `router.refresh()`,
+  confirmaciones con `ConfirmDialog` (nunca `window.confirm`).
 
 ## Datos / tipos
 
