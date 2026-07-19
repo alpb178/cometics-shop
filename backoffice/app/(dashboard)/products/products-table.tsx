@@ -6,9 +6,9 @@ import { useRouter } from "next/navigation";
 import { Pencil, Trash2 } from "lucide-react";
 import { Pagination } from "@/components/pagination";
 import {
+  AdminTable,
   Badge,
   ConfirmDialog,
-  DataTable,
   FilterSelect,
   IconButton,
   SearchInput,
@@ -129,10 +129,8 @@ export function ProductsTable({
         </p>
       )}
 
-      <DataTable
-        minWidth={720}
-        busy={pending}
-        count={pageRows.length}
+      <AdminTable
+        loading={pending}
         empty={
           products.length === 0
             ? "Aún no hay productos. Crea el primero."
@@ -223,10 +221,11 @@ export function ProductsTable({
             </tr>
           );
         })}
-      </DataTable>
+      </AdminTable>
 
       <Pagination
         page={page}
+        totalPages={Math.max(1, Math.ceil(filtered.length / PAGE_SIZE))}
         total={filtered.length}
         limit={PAGE_SIZE}
         onPage={setPage}

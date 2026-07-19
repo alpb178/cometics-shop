@@ -1,43 +1,28 @@
 "use client";
 
+import { Children, type ReactNode } from "react";
 import { Loader2, Search, X } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
-import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
 /**
- * Kit de UI del backoffice (tabla, badges, diálogos, filtros).
- * Misma experiencia que el admin de Tu Chamba, con el estilo de Iris:
- * clases .card/.btn/.input/.badge de globals.css y paleta brand.
+ * Kit de UI del backoffice. La familia de tabla (DataTable, AdminTable,
+ * TableSkeleton, Skeleton) es la MISMA del admin de Tu Chamba, copiada
+ * verbatim — sus tokens de color (surface/outline/primary) están mapeados
+ * a la paleta de Iris en tailwind.config.ts.
  */
 
-/** Chrome de tabla: contenedor con scroll, cabecera y estado vacío. */
 export function DataTable({
   headers,
-  count,
-  empty = "No hay datos.",
-  minWidth = 640,
-  busy = false,
   children,
 }: {
   headers: ReactNode[];
-  count: number;
-  empty?: string;
-  minWidth?: number;
-  busy?: boolean;
-  children?: ReactNode;
+  children: ReactNode;
 }) {
   return (
-    <div className="card overflow-x-auto">
-      <table
-        className={cn(
-          "w-full text-sm transition-opacity duration-300",
-          busy && "pointer-events-none opacity-50",
-        )}
-        style={{ minWidth }}
-        aria-busy={busy}
-      >
-        <thead className="border-b border-neutral-200 bg-neutral-50 text-left text-xs uppercase tracking-wide text-neutral-500">
+    <div className="overflow-x-auto rounded-xl border border-outline-variant bg-surface-container-lowest shadow-sm">
+      <table className="w-full text-left text-sm">
+        <thead className="border-b border-outline-variant bg-surface-container-low text-on-surface-variant">
           <tr>
             {headers.map((h, i) => (
               <th key={i} className="px-4 py-3 font-medium">
@@ -46,20 +31,87 @@ export function DataTable({
             ))}
           </tr>
         </thead>
-        <tbody className="divide-y divide-neutral-100">
-          {children}
-          {count === 0 && (
-            <tr>
-              <td
-                colSpan={headers.length}
-                className="px-4 py-10 text-center text-neutral-400"
-              >
-                {empty}
-              </td>
-            </tr>
-          )}
-        </tbody>
+        <tbody className="divide-y divide-outline-variant/60">{children}</tbody>
       </table>
+    </div>
+  );
+}
+
+export function Skeleton({ className = "" }: { className?: string }) {
+  return (
+    <div className={`animate-pulse rounded bg-surface-container-high ${className}`} />
+  );
+}
+
+export function TableSkeleton({
+  headers,
+  rows = 6,
+}: {
+  headers: ReactNode[];
+  rows?: number;
+}) {
+  return (
+    <div aria-hidden="true">
+      <DataTable headers={headers}>
+        {Array.from({ length: rows }, (_, r) => (
+          <tr key={r}>
+            {headers.map((_, c) => (
+              <td key={c} className="px-4 py-3">
+                <Skeleton className={`h-4 ${c === 0 ? "w-32" : "w-20"}`} />
+              </td>
+            ))}
+          </tr>
+        ))}
+      </DataTable>
+    </div>
+  );
+}
+
+// Tabla estándar del panel: encapsula los cuatro estados de una tabla con
+// datos remotos. Primera carga -> skeleton; recarga con datos previos ->
+// tabla atenuada (transición suave, sin parpadeo); error -> mensaje; sin
+// filas -> una fila de "sin datos" dentro de la propia tabla.
+export function AdminTable({
+  headers,
+  loading = false,
+  error = null,
+  empty = "No hay datos.",
+  skeletonRows = 8,
+  children,
+}: {
+  headers: ReactNode[];
+  loading?: boolean;
+  error?: string | null;
+  empty?: string;
+  skeletonRows?: number;
+  children?: ReactNode;
+}) {
+  const rows = Children.toArray(children);
+  if (error) return <p className="text-sm text-error">{error}</p>;
+  if (loading && rows.length === 0) {
+    return <TableSkeleton headers={headers} rows={skeletonRows} />;
+  }
+  return (
+    <div
+      aria-busy={loading}
+      className={`transition-opacity duration-300 ${
+        loading ? "pointer-events-none opacity-50" : ""
+      }`}
+    >
+      <DataTable headers={headers}>
+        {rows.length > 0 ? (
+          rows
+        ) : (
+          <tr>
+            <td
+              colSpan={headers.length}
+              className="px-4 py-10 text-center text-sm text-on-surface-variant"
+            >
+              {empty}
+            </td>
+          </tr>
+        )}
+      </DataTable>
     </div>
   );
 }
