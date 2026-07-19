@@ -31,6 +31,15 @@ export async function deleteOrderAction(documentId: string) {
   revalidatePath("/orders");
 }
 
+/** Elimina varios pedidos seleccionados. */
+export async function bulkDeleteOrdersAction(documentIds: string[]) {
+  await requireStaff();
+  for (const documentId of documentIds) {
+    await deleteOrder(documentId);
+  }
+  revalidatePath("/orders");
+}
+
 /** Elimina el pedido desde su detalle y vuelve al listado. */
 export async function deleteOrderFromDetailAction(documentId: string) {
   await requireStaff();

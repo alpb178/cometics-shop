@@ -91,3 +91,12 @@ export async function togglePublishAction(
   await setProductPublished(documentId, publish);
   revalidatePath("/products");
 }
+
+/** Elimina varios productos seleccionados. */
+export async function bulkDeleteProductsAction(documentIds: string[]) {
+  await requireStaff();
+  for (const documentId of documentIds) {
+    await deleteProduct(documentId);
+  }
+  revalidatePath("/products");
+}
