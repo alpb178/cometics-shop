@@ -6,9 +6,9 @@ import { Eye, KeyRound, Loader2, Trash2, UserPlus } from "lucide-react";
 import { PageHeader } from "@/components/page-header";
 import { Pagination } from "@/components/pagination";
 import {
+  AdminTable,
   Badge,
   ConfirmDialog,
-  DataTable,
   FilterSelect,
   IconButton,
   Modal,
@@ -166,10 +166,8 @@ export function UsersManager({
         </p>
       )}
 
-      <DataTable
-        minWidth={760}
-        busy={pending}
-        count={pageRows.length}
+      <AdminTable
+        loading={pending}
         empty={
           users.length === 0
             ? "Aún no hay usuarios."
@@ -258,10 +256,11 @@ export function UsersManager({
             </tr>
           );
         })}
-      </DataTable>
+      </AdminTable>
 
       <Pagination
         page={page}
+        totalPages={Math.max(1, Math.ceil(filtered.length / PAGE_SIZE))}
         total={filtered.length}
         limit={PAGE_SIZE}
         onPage={setPage}

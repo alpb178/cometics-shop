@@ -6,9 +6,9 @@ import { useRouter } from "next/navigation";
 import { Trash2 } from "lucide-react";
 import { Pagination } from "@/components/pagination";
 import {
+  AdminTable,
   Badge,
   ConfirmDialog,
-  DataTable,
   FilterSelect,
   IconButton,
   SearchInput,
@@ -113,10 +113,8 @@ export function OrdersTable({ orders }: { orders: Order[] }) {
         </p>
       )}
 
-      <DataTable
-        minWidth={720}
-        busy={pending}
-        count={pageRows.length}
+      <AdminTable
+        loading={pending}
         empty={
           orders.length === 0
             ? "Aún no hay pedidos."
@@ -181,10 +179,11 @@ export function OrdersTable({ orders }: { orders: Order[] }) {
             </tr>
           );
         })}
-      </DataTable>
+      </AdminTable>
 
       <Pagination
         page={page}
+        totalPages={Math.max(1, Math.ceil(filtered.length / PAGE_SIZE))}
         total={filtered.length}
         limit={PAGE_SIZE}
         onPage={setPage}
