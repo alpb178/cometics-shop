@@ -199,14 +199,6 @@ export async function updatePaymentInfo(
   await strapiSend("PUT", "/api/payment-info", input);
 }
 
-/**
- * Actualiza SOLO la imagen QR del single type payment-info. El PUT parcial de
- * Strapi solo toca los campos enviados, así que no pisa los datos bancarios.
- */
-export async function updatePaymentQr(qrImageId: number): Promise<void> {
-  await strapiSend("PUT", "/api/payment-info", { qrImage: qrImageId });
-}
-
 /* --------------------- Precios / envío (config) ----------------------- */
 
 const PRICING_DEFAULTS: PricingSetting = {
