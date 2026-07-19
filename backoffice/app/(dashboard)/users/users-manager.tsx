@@ -2,7 +2,7 @@
 
 import { useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { Eye, KeyRound, Loader2, Trash2, UserPlus } from "lucide-react";
+import { Eye, KeyRound, Loader2, Pencil, Trash2, UserPlus } from "lucide-react";
 import { PageHeader } from "@/components/page-header";
 import { Pagination } from "@/components/pagination";
 import { PasswordInput } from "@/components/password-input";
@@ -25,6 +25,7 @@ import {
   createUserAction,
   deleteUserAction,
   setUserPasswordAction,
+  updateUserAction,
 } from "./actions";
 
 const PAGE_SIZE = 10;
@@ -62,12 +63,15 @@ export function UsersManager({
   const [page, setPage] = useState(1);
 
   const [createOpen, setCreateOpen] = useState(false);
+  const [editUser, setEditUser] = useState<UserRow | null>(null);
   const [pwdUser, setPwdUser] = useState<UserRow | null>(null);
   const [detailUser, setDetailUser] = useState<UserRow | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<UserRow | null>(null);
   const [confirmBulk, setConfirmBulk] = useState(false);
 
   const [newPassword, setNewPassword] = useState("");
+  // Estado del formulario de edición (precargado al abrir).
+  const [editForm, setEditForm] = useState({ username: "", email: "", role: 0 });
 
   const selectableRoles = roles.filter(
     (r) => r.type === "admin" || r.type === "client",
@@ -238,6 +242,19 @@ export function UsersManager({
                     onClick={() => setDetailUser(u)}
                   />
                   <IconButton
+                    icon={Pencil}
+                    label="Editar"
+                    onClick={() => {
+                      setError(null);
+                      setEditForm({
+                        username: u.username ?? "",
+                        email: u.email ?? "",
+                        role: u.role?.id ?? defaultRole ?? 0,
+                      });
+                      setEditUser(u);
+                    }}
+                  />
+                  <IconButton
                     icon={KeyRound}
                     label="Setear contraseña"
                     onClick={() => {
@@ -284,33 +301,42 @@ export function UsersManager({
               );
             }}
             className="space-y-4"
+            autoComplete="off"
           >
             <div>
-              <label className="label" htmlFor="username">
+              <label className="label" htmlFor="new-username">
                 Usuario
               </label>
-              <input id="username" name="username" className="input" required />
-            </div>
-            <div>
-              <label className="label" htmlFor="email">
-                Email
-              </label>
               <input
-                id="email"
-                name="email"
-                type="email"
+                id="new-username"
+                name="username"
                 className="input"
+                autoComplete="off"
                 required
               />
             </div>
             <div>
-              <label className="label" htmlFor="password">
+              <label className="label" htmlFor="new-email">
+                Email
+              </label>
+              <input
+                id="new-email"
+                name="email"
+                type="email"
+                className="input"
+                autoComplete="off"
+                required
+              />
+            </div>
+            <div>
+              <label className="label" htmlFor="new-password">
                 Contraseña
               </label>
               <PasswordInput
-                id="password"
+                id="new-password"
                 name="password"
                 minLength={8}
+                autoComplete="new-password"
                 required
               />
               <p className="mt-1 text-xs text-neutral-500">Mínimo 8 caracteres.</p>
@@ -349,6 +375,99 @@ export function UsersManager({
               <button type="submit" className="btn-primary" disabled={pending}>
                 {pending && <Loader2 className="h-4 w-4 animate-spin" />}
                 Crear usuario
+              </button>
+            </div>
+          </form>
+        </Modal>
+      )}
+
+      {/* Editar usuario */}
+      {editUser && (
+        <Modal
+          title={`Editar · ${editUser.username}`}
+          onClose={() => setEditUser(null)}
+        >
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              run(
+                () =>
+                  updateUserAction(editUser.id, {
+                    username: editForm.username,
+                    email: editForm.email,
+                    role: editForm.role,
+                  }),
+                () => setEditUser(null),
+              );
+            }}
+            className="space-y-4"
+          >
+            <div>
+              <label className="label" htmlFor="edit-username">
+                Usuario
+              </label>
+              <input
+                id="edit-username"
+                className="input"
+                value={editForm.username}
+                onChange={(e) =>
+                  setEditForm((f) => ({ ...f, username: e.target.value }))
+                }
+                required
+                autoFocus
+              />
+            </div>
+            <div>
+              <label className="label" htmlFor="edit-email">
+                Email
+              </label>
+              <input
+                id="edit-email"
+                type="email"
+                className="input"
+                value={editForm.email}
+                onChange={(e) =>
+                  setEditForm((f) => ({ ...f, email: e.target.value }))
+                }
+                required
+              />
+            </div>
+            <div>
+              <label className="label" htmlFor="edit-role">
+                Rol
+              </label>
+              <select
+                id="edit-role"
+                className="input"
+                value={editForm.role}
+                onChange={(e) =>
+                  setEditForm((f) => ({ ...f, role: Number(e.target.value) }))
+                }
+                required
+              >
+                {selectableRoles.map((r) => (
+                  <option key={r.id} value={r.id}>
+                    {roleLabel(r)}
+                  </option>
+                ))}
+              </select>
+            </div>
+            {error && (
+              <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">
+                {error}
+              </p>
+            )}
+            <div className="flex justify-end gap-2">
+              <button
+                type="button"
+                className="btn-secondary"
+                onClick={() => setEditUser(null)}
+              >
+                Cancelar
+              </button>
+              <button type="submit" className="btn-primary" disabled={pending}>
+                {pending && <Loader2 className="h-4 w-4 animate-spin" />}
+                Guardar cambios
               </button>
             </div>
           </form>
