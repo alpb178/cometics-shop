@@ -9,6 +9,7 @@
     "start:dev": "nest start --watch",
     "start:prod": "node dist/main",
     "test": "jest",
+    "postinstall": "prisma generate",
     "prisma:pull": "prisma db pull && node prisma/fix-schema.js && prisma generate",
     "prisma:generate": "prisma generate"
   },
