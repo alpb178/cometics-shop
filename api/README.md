@@ -34,7 +34,7 @@ Réplica 1:1 del contrato que los clientes ya usan contra Strapi (paths, query p
 
 ## Despliegue (Render)
 
-- **Build command**: `npm install && npm run build` (el `postinstall` ejecuta `prisma generate` automáticamente)
+- **Build command**: `npm install && npm run build:render` (el `postinstall` ejecuta `prisma generate` automáticamente; `build:render` amplía el heap de Node a 2 GB porque el type-check del cliente Prisma con 121 modelos supera los ~256 MB por defecto del contenedor de build)
 - **Start command**: `npm run start:prod`
 - **NUNCA ejecutar `prisma migrate deploy`**: no hay migraciones a propósito — el esquema lo gestiona Strapi hasta la fase 5 y la API solo lo introspecciona. Ejecutar migrate falla con P3005 y no debe "arreglarse" con un baseline.
 - `DATABASE_URL`: el pooler de Supabase en puerto 5432 (modo sesión) funciona tal cual; si se usara el puerto 6543 (modo transacción) habría que añadir `?pgbouncer=true&connection_limit=1`.
