@@ -16,11 +16,11 @@ const POLICY_LINKS: FooterLink[] = [
   { text: "Política de privacidad", URL: "/policy-privacy" }
 ];
 
-// currentColor: heredan el color del enlace (claro sobre el footer oscuro).
-const SOCIAL_ICON: Record<string, React.ReactNode> = {
-  facebook: <IconBrandFacebook className="size-6" />,
-  instagram: <IconBrandInstagram className="size-6" />,
-  tiktok: <IconBrandTiktok className="size-6" />
+// Iconos con color de marca (heredado vía currentColor con style={{color}}).
+const SOCIAL_ICON: Record<string, { icon: React.ReactNode; color: string }> = {
+  facebook: { icon: <IconBrandFacebook className="size-6" />, color: "#1877F2" },
+  instagram: { icon: <IconBrandInstagram className="size-6" />, color: "#E4405F" },
+  tiktok: { icon: <IconBrandTiktok className="size-6" />, color: "#25F4EE" }
 };
 
 export const Footer = ({ locale }: { locale: string }) => {
@@ -92,9 +92,10 @@ export const Footer = ({ locale }: { locale: string }) => {
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label={s.name}
-                  className="text-background/80 transition-colors hover:text-background"
+                  style={{ color: SOCIAL_ICON[s.name]?.color }}
+                  className="transition-transform hover:-translate-y-0.5 hover:opacity-90"
                 >
-                  {SOCIAL_ICON[s.name]}
+                  {SOCIAL_ICON[s.name]?.icon}
                 </Link>
               ))}
             </div>
