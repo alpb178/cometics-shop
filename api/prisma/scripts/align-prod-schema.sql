@@ -71,3 +71,16 @@ DROP TABLE IF EXISTS
   components_shared_social_media_icon_links_cmps, components_shared_social_media_icon_links,
   components_shared_users
 CASCADE;
+
+-- Retirar la infraestructura legado de Strapi que la API no usa: content-type
+-- product_pages (sin consumidores), i18n_locale, log_products (audit), la
+-- librería de carpetas de media (upload_folders + links; los archivos se sirven
+-- vía files_related_mph, no por carpetas) y los permisos de users-permissions
+-- (up_permissions; el guard de staff va por email, no por estos permisos).
+-- Sin FKs entrantes desde tablas conservadas. Idempotente.
+DROP TABLE IF EXISTS
+  product_pages_cmps, product_pages,
+  i18n_locale, log_products,
+  files_folder_lnk, upload_folders_parent_lnk, upload_folders,
+  up_permissions_role_lnk, up_permissions
+CASCADE;
