@@ -44,3 +44,30 @@ DROP TABLE IF EXISTS
   strapi_workflows_stages_permissions_lnk, strapi_workflows_stages_workflow_lnk,
   strapi_workflows_stages, strapi_workflows
 CASCADE;
+
+-- Retirar los componentes de la plantilla landing de Strapi que la app NUNCA
+-- renderiza (el módulo de contenido solo maneja una lista blanca de tipos y el
+-- front usa UI estática). Vacíos y sin referencias en código. Idempotente.
+-- Se conservan los componentes SÍ usados (shared.section, navbar, footer,
+-- dynamic-zone.faq/how-it-works/story-panel/form-next-to-section, seo, form…).
+DROP TABLE IF EXISTS
+  components_cards_graph_cards_cmps, components_cards_graph_cards,
+  components_cards_ray_cards_cmps, components_cards_ray_cards,
+  components_cards_social_media_cards_logos_lnk, components_cards_social_media_cards,
+  components_cards_globe_cards, components_calendar_events,
+  components_dynamic_zone_brands_logos_lnk, components_dynamic_zone_brands,
+  components_dynamic_zone_ctas_cmps, components_dynamic_zone_ctas,
+  components_dynamic_zone_features_cmps, components_dynamic_zone_features,
+  components_dynamic_zone_heroes_cmps, components_dynamic_zone_heroes,
+  components_dynamic_zone_launches_cmps, components_dynamic_zone_launches,
+  components_dynamic_zone_pricings,
+  components_dynamic_zone_related_products_products_lnk, components_dynamic_zone_related_products,
+  components_dynamic_zone_rich_texts_cmps, components_dynamic_zone_rich_texts,
+  components_dynamic_zone_testimonials,
+  components_items_graph_card_top_items, components_items_left_navbar_items,
+  components_items_ray_items,
+  components_shared_buttons, components_shared_launches, components_shared_perks,
+  components_shared_rich_texts,
+  components_shared_social_media_icon_links_cmps, components_shared_social_media_icon_links,
+  components_shared_users
+CASCADE;
