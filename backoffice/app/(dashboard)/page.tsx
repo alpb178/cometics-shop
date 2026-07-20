@@ -119,11 +119,11 @@ export default async function DashboardHome() {
           hint={`Markup ${orderStats.markupPercent}% · hoy`}
         />
         <StatCard
-          label="Visitas"
-          value={visits.total}
+          label="Visitas hoy"
+          value={visits.today}
           href="/visits"
           icon={Eye}
-          hint={`Hoy ${visits.today} · 7 días ${visits.last7Days}`}
+          hint={`Desde las 00:00 · 7 días ${visits.last7Days}`}
         />
         <StatCard
           label="Clientes"
