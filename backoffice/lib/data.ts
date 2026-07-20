@@ -37,8 +37,9 @@ interface SingleResponse<T> {
 const PRODUCT_POPULATE =
   "populate[image]=true&populate[images]=true&populate[categories]=true";
 
-// `status=draft` en Strapi v5 devuelve la versión borrador de TODOS los
-// documentos (publicados o no), que es justo lo que un panel admin necesita.
+// Vista admin: `status=draft` le pide a la API que NO filtre por visibilidad,
+// es decir, que devuelva TODOS los productos (visibles y ocultos). Ya no hay
+// versiones borrador/publicada: cada producto es una sola fila.
 const ALL = "status=draft";
 
 /* ----------------------------- Productos ----------------------------- */
@@ -52,7 +53,7 @@ export async function listProducts(): Promise<Product[]> {
 
 export async function getProduct(documentId: string): Promise<Product | null> {
   const res = await strapiGet<SingleResponse<Product>>(
-    `/api/products/${documentId}?${ALL}&${PRODUCT_POPULATE}`
+    `/api/products/${documentId}?${PRODUCT_POPULATE}`
   );
   return res.data ?? null;
 }
@@ -100,17 +101,6 @@ export async function setProductVisible(
   await strapiSend("PUT", `/api/products/${documentId}/visibility`, {
     visible,
   });
-}
-
-export async function setProductPublished(
-  documentId: string,
-  published: boolean
-): Promise<void> {
-  await strapiSend(
-    "POST",
-    `/api/products/${documentId}/${published ? "publish" : "unpublish"}`,
-    {}
-  );
 }
 
 /* ----------------------------- Categorías ----------------------------- */
