@@ -1,7 +1,6 @@
 "use client";
 
 import { Footer } from "../components/footer/footer";
-import { useApp } from "@/context/app-context";
 import { HelpButton } from "../components/help/help-button";
 import Navbar from "@/components/navbar";
 
@@ -10,15 +9,13 @@ interface LayoutAppProps {
 }
 
 export default function LayoutApp({ children }: LayoutAppProps) {
-  const { data: pageData } = useApp();
-
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <Navbar locale="en" />
 
       <div className="flex-1">{children}</div>
 
-      <Footer data={pageData?.footer || {}} locale="en" />
+      <Footer locale="en" />
       <HelpButton />
     </div>
   );
