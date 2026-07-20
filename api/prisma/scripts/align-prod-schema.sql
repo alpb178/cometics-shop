@@ -1,0 +1,19 @@
+-- Alinea el esquema de la base de datos con el modelo Prisma.
+-- IDEMPOTENTE: seguro de correr en cada despliegue (no falla si ya está aplicado).
+--
+-- Contexto: `schema.prisma` solo cambió en dos commits desde que se retiró
+-- Strapi: #45 (baseline del `db pull` de Strapi — esas columnas ya existen en
+-- prod) y #73, que añadió `products.visible`. Esa columna se aplicó en la BD de
+-- develop pero nunca en producción, así que la API crasheaba con:
+--   "The column `products.visible` does not exist in the current database".
+--
+-- Por tanto el ÚNICO desfase conocido prod↔esquema es `products.visible`.
+--
+-- Comprobación autoritativa de que no falta nada más (read-only, genera SQL):
+--   cd api && npx prisma migrate diff \
+--     --from-url "$PROD_DATABASE_URL" \
+--     --to-schema-datamodel prisma/schema.prisma --script
+-- Si imprime más sentencias, añádelas aquí (idempotentes).
+
+-- products.visible: Boolean? @default(true)
+ALTER TABLE products ADD COLUMN IF NOT EXISTS visible boolean DEFAULT true;
