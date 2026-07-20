@@ -386,7 +386,6 @@ model files {
   created_by_id     Int?
   updated_by_id     Int?
   locale            String?             @db.VarChar(255)
-  files_folder_lnk  files_folder_lnk[]
   files_related_mph files_related_mph[]
 
   @@index([document_id])
@@ -400,20 +399,6 @@ model files {
   @@index([updated_at], map: "upload_files_updated_at_index")
   @@index([created_by_id], map: "files_created_by_id_fk_idx")
   @@index([updated_by_id], map: "files_updated_by_id_fk_idx")
-}
-
-model files_folder_lnk {
-  id             Int             @id @default(autoincrement())
-  file_id        Int?
-  folder_id      Int?
-  file_ord       Float?
-  files          files?          @relation(fields: [file_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "files_folder_lnk_fk")
-  upload_folders upload_folders? @relation(fields: [folder_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "files_folder_lnk_ifk")
-
-  @@unique([file_id, folder_id], map: "files_folder_lnk_uq")
-  @@index([file_ord], map: "files_folder_lnk_oifk")
-  @@index([file_id], map: "files_folder_lnk_fk_idx")
-  @@index([folder_id], map: "files_folder_lnk_ifk_idx")
 }
 
 model files_related_mph {
@@ -461,43 +446,6 @@ model globals_cmps {
   @@index([component_type], map: "globals_component_type_idx")
   @@index([field], map: "globals_field_idx")
   @@index([entity_id], map: "globals_entity_fk_idx")
-}
-
-model i18n_locale {
-  id            Int       @id @default(autoincrement())
-  document_id   String?   @db.VarChar(255)
-  name          String?   @db.VarChar(255)
-  code          String?   @db.VarChar(255)
-  created_at    DateTime? @db.Timestamp(6)
-  updated_at    DateTime? @db.Timestamp(6)
-  published_at  DateTime? @db.Timestamp(6)
-  created_by_id Int?
-  updated_by_id Int?
-  locale        String?   @db.VarChar(255)
-
-  @@index([document_id])
-  @@index([document_id, locale, published_at])
-  @@index([document_id, locale, published_at], map: "i18n_locale_documents_idx")
-  @@index([created_by_id], map: "i18n_locale_created_by_id_fk_idx")
-  @@index([updated_by_id], map: "i18n_locale_updated_by_id_fk_idx")
-}
-
-model log_products {
-  id            Int       @id @default(autoincrement())
-  document_id   String?   @db.VarChar(255)
-  time          String?   @db.VarChar(255)
-  product       String?   @db.VarChar(255)
-  description   String?
-  created_at    DateTime? @db.Timestamp(6)
-  updated_at    DateTime? @db.Timestamp(6)
-  published_at  DateTime? @db.Timestamp(6)
-  created_by_id Int?
-  updated_by_id Int?
-  locale        String?   @db.VarChar(255)
-
-  @@index([document_id, locale, published_at], map: "log_products_documents_idx")
-  @@index([created_by_id], map: "log_products_created_by_id_fk_idx")
-  @@index([updated_by_id], map: "log_products_updated_by_id_fk_idx")
 }
 
 model logos {
@@ -701,41 +649,6 @@ model pricing_settings {
   @@index([updated_by_id], map: "pricing_settings_updated_by_id_fk_idx")
 }
 
-model product_pages {
-  id                 Int                  @id @default(autoincrement())
-  document_id        String?              @db.VarChar(255)
-  heading            String?              @db.VarChar(255)
-  sub_heading        String?              @db.VarChar(255)
-  created_at         DateTime?            @db.Timestamp(6)
-  updated_at         DateTime?            @db.Timestamp(6)
-  published_at       DateTime?            @db.Timestamp(6)
-  created_by_id      Int?
-  updated_by_id      Int?
-  locale             String?              @db.VarChar(255)
-  product_pages_cmps product_pages_cmps[]
-
-  @@index([document_id])
-  @@index([document_id, locale, published_at])
-  @@index([document_id, locale, published_at], map: "product_pages_documents_idx")
-  @@index([created_by_id], map: "product_pages_created_by_id_fk_idx")
-  @@index([updated_by_id], map: "product_pages_updated_by_id_fk_idx")
-}
-
-model product_pages_cmps {
-  id             Int            @id @default(autoincrement())
-  entity_id      Int?
-  cmp_id         Int?
-  component_type String?        @db.VarChar(255)
-  field          String?        @db.VarChar(255)
-  order          Float?
-  product_pages  product_pages? @relation(fields: [entity_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "product_pages_entity_fk")
-
-  @@unique([entity_id, cmp_id, field, component_type], map: "product_pages_uq")
-  @@index([component_type], map: "product_pages_component_type_idx")
-  @@index([field], map: "product_pages_field_idx")
-  @@index([entity_id], map: "product_pages_entity_fk_idx")
-}
-
 model products {
   id                      Int                       @id @default(autoincrement())
   document_id             String?                   @db.VarChar(255)
@@ -830,53 +743,19 @@ model store_events {
   @@index([updated_by_id], map: "store_events_updated_by_id_fk_idx")
 }
 
-model up_permissions {
-  id                      Int                       @id @default(autoincrement())
-  document_id             String?                   @db.VarChar(255)
-  action                  String?                   @db.VarChar(255)
-  created_at              DateTime?                 @db.Timestamp(6)
-  updated_at              DateTime?                 @db.Timestamp(6)
-  published_at            DateTime?                 @db.Timestamp(6)
-  created_by_id           Int?
-  updated_by_id           Int?
-  locale                  String?                   @db.VarChar(255)
-  up_permissions_role_lnk up_permissions_role_lnk[]
-
-  @@index([document_id])
-  @@index([document_id, locale, published_at])
-  @@index([document_id, locale, published_at], map: "up_permissions_documents_idx")
-  @@index([created_by_id], map: "up_permissions_created_by_id_fk_idx")
-  @@index([updated_by_id], map: "up_permissions_updated_by_id_fk_idx")
-}
-
-model up_permissions_role_lnk {
-  id             Int             @id @default(autoincrement())
-  permission_id  Int?
-  role_id        Int?
-  permission_ord Float?
-  up_permissions up_permissions? @relation(fields: [permission_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "up_permissions_role_lnk_fk")
-  up_roles       up_roles?       @relation(fields: [role_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "up_permissions_role_lnk_ifk")
-
-  @@unique([permission_id, role_id], map: "up_permissions_role_lnk_uq")
-  @@index([permission_ord], map: "up_permissions_role_lnk_oifk")
-  @@index([permission_id], map: "up_permissions_role_lnk_fk_idx")
-  @@index([role_id], map: "up_permissions_role_lnk_ifk_idx")
-}
-
 model up_roles {
-  id                      Int                       @id @default(autoincrement())
-  document_id             String?                   @db.VarChar(255)
-  name                    String?                   @db.VarChar(255)
-  description             String?                   @db.VarChar(255)
-  type                    String?                   @db.VarChar(255)
-  created_at              DateTime?                 @db.Timestamp(6)
-  updated_at              DateTime?                 @db.Timestamp(6)
-  published_at            DateTime?                 @db.Timestamp(6)
-  created_by_id           Int?
-  updated_by_id           Int?
-  locale                  String?                   @db.VarChar(255)
-  up_permissions_role_lnk up_permissions_role_lnk[]
-  up_users_role_lnk       up_users_role_lnk[]
+  id                Int                 @id @default(autoincrement())
+  document_id       String?             @db.VarChar(255)
+  name              String?             @db.VarChar(255)
+  description       String?             @db.VarChar(255)
+  type              String?             @db.VarChar(255)
+  created_at        DateTime?           @db.Timestamp(6)
+  updated_at        DateTime?           @db.Timestamp(6)
+  published_at      DateTime?           @db.Timestamp(6)
+  created_by_id     Int?
+  updated_by_id     Int?
+  locale            String?             @db.VarChar(255)
+  up_users_role_lnk up_users_role_lnk[]
 
   @@index([document_id])
   @@index([document_id, locale, published_at])
@@ -928,41 +807,4 @@ model up_users_role_lnk {
   @@index([user_ord], map: "up_users_role_lnk_oifk")
   @@index([user_id], map: "up_users_role_lnk_fk_idx")
   @@index([role_id], map: "up_users_role_lnk_ifk_idx")
-}
-
-model upload_folders {
-  id                                                                                Int                         @id @default(autoincrement())
-  document_id                                                                       String?                     @db.VarChar(255)
-  name                                                                              String?                     @db.VarChar(255)
-  path_id                                                                           Int?                        @unique(map: "upload_folders_path_id_index")
-  path                                                                              String?                     @unique(map: "upload_folders_path_index") @db.VarChar(255)
-  created_at                                                                        DateTime?                   @db.Timestamp(6)
-  updated_at                                                                        DateTime?                   @db.Timestamp(6)
-  published_at                                                                      DateTime?                   @db.Timestamp(6)
-  created_by_id                                                                     Int?
-  updated_by_id                                                                     Int?
-  locale                                                                            String?                     @db.VarChar(255)
-  files_folder_lnk                                                                  files_folder_lnk[]
-  upload_folders_parent_lnk_upload_folders_parent_lnk_folder_idToupload_folders     upload_folders_parent_lnk[] @relation("upload_folders_parent_lnk_folder_idToupload_folders")
-  upload_folders_parent_lnk_upload_folders_parent_lnk_inv_folder_idToupload_folders upload_folders_parent_lnk[] @relation("upload_folders_parent_lnk_inv_folder_idToupload_folders")
-
-  @@index([document_id])
-  @@index([document_id, locale, published_at])
-  @@index([document_id, locale, published_at], map: "upload_folders_documents_idx")
-  @@index([created_by_id], map: "upload_folders_created_by_id_fk_idx")
-  @@index([updated_by_id], map: "upload_folders_updated_by_id_fk_idx")
-}
-
-model upload_folders_parent_lnk {
-  id                                                                     Int             @id @default(autoincrement())
-  folder_id                                                              Int?
-  inv_folder_id                                                          Int?
-  folder_ord                                                             Float?
-  upload_folders_upload_folders_parent_lnk_folder_idToupload_folders     upload_folders? @relation("upload_folders_parent_lnk_folder_idToupload_folders", fields: [folder_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "upload_folders_parent_lnk_fk")
-  upload_folders_upload_folders_parent_lnk_inv_folder_idToupload_folders upload_folders? @relation("upload_folders_parent_lnk_inv_folder_idToupload_folders", fields: [inv_folder_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "upload_folders_parent_lnk_ifk")
-
-  @@unique([folder_id, inv_folder_id], map: "upload_folders_parent_lnk_uq")
-  @@index([folder_ord], map: "upload_folders_parent_lnk_oifk")
-  @@index([folder_id], map: "upload_folders_parent_lnk_fk_idx")
-  @@index([inv_folder_id], map: "upload_folders_parent_lnk_ifk_idx")
 }
