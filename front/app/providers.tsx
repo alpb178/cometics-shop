@@ -3,7 +3,6 @@
 import { AuthProvider } from "@/context/auth-context";
 import { CartProvider } from "@/context/cart-context";
 import { ThemeProvider } from "@/context/theme-context";
-import { AppProvider } from "@/context/app-context";
 import dayjs from "dayjs";
 import "dayjs/locale/es";
 import localizedFormat from "dayjs/plugin/localizedFormat";
@@ -40,19 +39,17 @@ export function Providers({
       messages={messages}
       timeZone={timeZone}
     >
-      <AppProvider>
-        <SlugProvider>
-          <ViewTransitions>
-            <AuthProvider>
-              <CartProvider>
-                <ThemeProvider>{children}</ThemeProvider>
-                <SpeedInsights />
-                <Analytics />
-              </CartProvider>
-            </AuthProvider>
-          </ViewTransitions>
-        </SlugProvider>
-      </AppProvider>
+      <SlugProvider>
+        <ViewTransitions>
+          <AuthProvider>
+            <CartProvider>
+              <ThemeProvider>{children}</ThemeProvider>
+              <SpeedInsights />
+              <Analytics />
+            </CartProvider>
+          </AuthProvider>
+        </ViewTransitions>
+      </SlugProvider>
     </NextIntlClientProvider>
   );
 }

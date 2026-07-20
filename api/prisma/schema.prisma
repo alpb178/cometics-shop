@@ -66,167 +66,6 @@ model categories {
   @@index([updated_by_id], map: "categories_updated_by_id_fk_idx")
 }
 
-model components_dynamic_zone_faqs {
-  id                                    Int                                     @id @default(autoincrement())
-  heading                               String?                                 @db.VarChar(255)
-  sub_heading                           String?                                 @db.VarChar(255)
-  components_dynamic_zone_faqs_faqs_lnk components_dynamic_zone_faqs_faqs_lnk[]
-}
-
-model components_dynamic_zone_faqs_faqs_lnk {
-  id                           Int                           @id @default(autoincrement())
-  faq_id                       Int?
-  inv_faq_id                   Int?
-  faq_ord                      Float?
-  components_dynamic_zone_faqs components_dynamic_zone_faqs? @relation(fields: [faq_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "components_dynamic_zone_faqs_faqs_lnk_fk")
-  faqs                         faqs?                         @relation(fields: [inv_faq_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "components_dynamic_zone_faqs_faqs_lnk_ifk")
-
-  @@unique([faq_id, inv_faq_id], map: "components_dynamic_zone_faqs_faqs_lnk_uq")
-  @@index([faq_ord], map: "components_dynamic_zone_faqs_faqs_lnk_ofk")
-  @@index([faq_id], map: "components_dynamic_zone_faqs_faqs_lnk_fk_idx")
-  @@index([inv_faq_id], map: "components_dynamic_zone_faqs_faqs_lnk_ifk_idx")
-}
-
-model components_dynamic_zone_form_n2610e_social_networks_lnk {
-  id                                            Int                                            @id @default(autoincrement())
-  form_next_to_section_id                       Int?
-  social_network_id                             Int?
-  social_network_ord                            Float?
-  social_networks                               social_networks?                               @relation(fields: [social_network_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "components_dynamic_zone_form_n2610e_social_net2db5f_ifk")
-  components_dynamic_zone_form_next_to_sections components_dynamic_zone_form_next_to_sections? @relation(fields: [form_next_to_section_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "components_dynamic_zone_form_n2610e_social_netw2db5f_fk")
-
-  @@unique([form_next_to_section_id, social_network_id], map: "components_dynamic_zone_form_n2610e_social_netw2db5f_uq")
-  @@index([social_network_ord], map: "components_dynamic_zone_form_n2610e_social_net2db5f_ofk")
-  @@index([social_network_id], map: "components_dynamic_zone_form_n2610e_social_net2db5f_ifk_idx")
-  @@index([form_next_to_section_id], map: "components_dynamic_zone_form_n2610e_social_netw2db5f_fk_idx")
-}
-
-model components_dynamic_zone_form_next_to_sections {
-  id                                                      Int                                                       @id @default(autoincrement())
-  heading                                                 String?                                                   @db.VarChar(255)
-  sub_heading                                             String?                                                   @db.VarChar(255)
-  components_dynamic_zone_form_n2610e_social_networks_lnk components_dynamic_zone_form_n2610e_social_networks_lnk[]
-  components_dynamic_zone_form_next_to_sections_cmps      components_dynamic_zone_form_next_to_sections_cmps[]
-}
-
-model components_dynamic_zone_form_next_to_sections_cmps {
-  id                                            Int                                            @id @default(autoincrement())
-  entity_id                                     Int?
-  cmp_id                                        Int?
-  component_type                                String?                                        @db.VarChar(255)
-  field                                         String?                                        @db.VarChar(255)
-  order                                         Float?
-  components_dynamic_zone_form_next_to_sections components_dynamic_zone_form_next_to_sections? @relation(fields: [entity_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "components_dynamic_zone_form_next_to_sections_entity_fk")
-
-  @@unique([entity_id, cmp_id, field, component_type], map: "components_dynamic_zone_form_next_to_sections_uq")
-  @@index([component_type], map: "components_dynamic_zone_form_ne2610e_component_type_idx")
-  @@index([field], map: "components_dynamic_zone_form_next_to_sections_field_idx")
-  @@index([entity_id], map: "components_dynamic_zone_form_next_to_sections_entity_fk_idx")
-}
-
-model components_dynamic_zone_how_it_works {
-  id                                        Int                                         @id @default(autoincrement())
-  heading                                   String?                                     @db.VarChar(255)
-  sub_heading                               String?                                     @db.VarChar(255)
-  components_dynamic_zone_how_it_works_cmps components_dynamic_zone_how_it_works_cmps[]
-}
-
-model components_dynamic_zone_how_it_works_cmps {
-  id                                   Int                                   @id @default(autoincrement())
-  entity_id                            Int?
-  cmp_id                               Int?
-  component_type                       String?                               @db.VarChar(255)
-  field                                String?                               @db.VarChar(255)
-  order                                Float?
-  components_dynamic_zone_how_it_works components_dynamic_zone_how_it_works? @relation(fields: [entity_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "components_dynamic_zone_how_it_works_entity_fk")
-
-  @@unique([entity_id, cmp_id, field, component_type], map: "components_dynamic_zone_how_it_works_uq")
-  @@index([component_type], map: "components_dynamic_zone_how_it_works_component_type_idx")
-  @@index([field], map: "components_dynamic_zone_how_it_works_field_idx")
-  @@index([entity_id], map: "components_dynamic_zone_how_it_works_entity_fk_idx")
-}
-
-model components_dynamic_zone_story_panels {
-  id                                        Int                                         @id @default(autoincrement())
-  components_dynamic_zone_story_panels_cmps components_dynamic_zone_story_panels_cmps[]
-}
-
-model components_dynamic_zone_story_panels_cmps {
-  id                                   Int                                   @id @default(autoincrement())
-  entity_id                            Int?
-  cmp_id                               Int?
-  component_type                       String?                               @db.VarChar(255)
-  field                                String?                               @db.VarChar(255)
-  order                                Float?
-  components_dynamic_zone_story_panels components_dynamic_zone_story_panels? @relation(fields: [entity_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "components_dynamic_zone_story_panels_entity_fk")
-
-  @@unique([entity_id, cmp_id, field, component_type], map: "components_dynamic_zone_story_panels_uq")
-  @@index([component_type], map: "components_dynamic_zone_story_panels_component_type_idx")
-  @@index([field], map: "components_dynamic_zone_story_panels_field_idx")
-  @@index([entity_id], map: "components_dynamic_zone_story_panels_entity_fk_idx")
-}
-
-model components_global_footers {
-  id                                            Int                                             @id @default(autoincrement())
-  description                                   String?                                         @db.VarChar(255)
-  copyright                                     String?                                         @db.VarChar(255)
-  designed_developed_by                         String?                                         @db.VarChar(255)
-  built_with                                    String?                                         @db.VarChar(255)
-  components_global_footers_cmps                components_global_footers_cmps[]
-  components_global_footers_logo_lnk            components_global_footers_logo_lnk[]
-  components_global_footers_social_networks_lnk components_global_footers_social_networks_lnk[]
-}
-
-model components_global_footers_cmps {
-  id                        Int                        @id @default(autoincrement())
-  entity_id                 Int?
-  cmp_id                    Int?
-  component_type            String?                    @db.VarChar(255)
-  field                     String?                    @db.VarChar(255)
-  order                     Float?
-  components_global_footers components_global_footers? @relation(fields: [entity_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "components_global_footers_entity_fk")
-
-  @@unique([entity_id, cmp_id, field, component_type], map: "components_global_footers_uq")
-  @@index([component_type], map: "components_global_footers_component_type_idx")
-  @@index([field], map: "components_global_footers_field_idx")
-  @@index([entity_id], map: "components_global_footers_entity_fk_idx")
-}
-
-model components_global_footers_logo_lnk {
-  id                        Int                        @id @default(autoincrement())
-  footer_id                 Int?
-  logo_id                   Int?
-  components_global_footers components_global_footers? @relation(fields: [footer_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "components_global_footers_logo_lnk_fk")
-  logos                     logos?                     @relation(fields: [logo_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "components_global_footers_logo_lnk_ifk")
-
-  @@unique([footer_id, logo_id], map: "components_global_footers_logo_lnk_uq")
-  @@index([footer_id], map: "components_global_footers_logo_lnk_fk_idx")
-  @@index([logo_id], map: "components_global_footers_logo_lnk_ifk_idx")
-}
-
-model components_global_footers_social_networks_lnk {
-  id                        Int                        @id @default(autoincrement())
-  footer_id                 Int?
-  social_network_id         Int?
-  social_network_ord        Float?
-  components_global_footers components_global_footers? @relation(fields: [footer_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "components_global_footers_social_networks_lnk_fk")
-  social_networks           social_networks?           @relation(fields: [social_network_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "components_global_footers_social_networks_lnk_ifk")
-
-  @@unique([footer_id, social_network_id], map: "components_global_footers_social_networks_lnk_uq")
-  @@index([social_network_ord], map: "components_global_footers_social_networks_lnk_ofk")
-  @@index([footer_id], map: "components_global_footers_social_networks_lnk_fk_idx")
-  @@index([social_network_id], map: "components_global_footers_social_networks_lnk_ifk_idx")
-}
-
-model components_items_inputs {
-  id          Int      @id @default(autoincrement())
-  type        String?  @db.VarChar(255)
-  name        String?  @db.VarChar(255)
-  placeholder String?  @db.VarChar(255)
-  label       String?  @db.VarChar(255)
-  required    Boolean?
-}
-
 model components_order_items {
   id         Int      @id @default(autoincrement())
   product_id Int?
@@ -237,26 +76,6 @@ model components_order_items {
   image_url  String?  @db.VarChar(255)
 }
 
-model components_shared_forms {
-  id                           Int                            @id @default(autoincrement())
-  components_shared_forms_cmps components_shared_forms_cmps[]
-}
-
-model components_shared_forms_cmps {
-  id                      Int                      @id @default(autoincrement())
-  entity_id               Int?
-  cmp_id                  Int?
-  component_type          String?                  @db.VarChar(255)
-  field                   String?                  @db.VarChar(255)
-  order                   Float?
-  components_shared_forms components_shared_forms? @relation(fields: [entity_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "components_shared_forms_entity_fk")
-
-  @@unique([entity_id, cmp_id, field, component_type], map: "components_shared_forms_uq")
-  @@index([component_type], map: "components_shared_forms_component_type_idx")
-  @@index([field], map: "components_shared_forms_field_idx")
-  @@index([entity_id], map: "components_shared_forms_entity_fk_idx")
-}
-
 model components_shared_links {
   id     Int     @id @default(autoincrement())
   text   String? @db.VarChar(255)
@@ -264,52 +83,17 @@ model components_shared_links {
   target String? @db.VarChar(255)
 }
 
-model components_shared_sections {
-  id                              Int                               @id @default(autoincrement())
-  heading                         String?                           @db.VarChar(255)
-  sub_heading                     String?                           @db.VarChar(255)
-  components_shared_sections_cmps components_shared_sections_cmps[]
-}
-
-model components_shared_sections_cmps {
-  id                         Int                         @id @default(autoincrement())
-  entity_id                  Int?
-  cmp_id                     Int?
-  component_type             String?                     @db.VarChar(255)
-  field                      String?                     @db.VarChar(255)
-  order                      Float?
-  components_shared_sections components_shared_sections? @relation(fields: [entity_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "components_shared_sections_entity_fk")
-
-  @@unique([entity_id, cmp_id, field, component_type], map: "components_shared_sections_uq")
-  @@index([component_type], map: "components_shared_sections_component_type_idx")
-  @@index([field], map: "components_shared_sections_field_idx")
-  @@index([entity_id], map: "components_shared_sections_entity_fk_idx")
-}
-
-model components_shared_steps {
-  id          Int     @id @default(autoincrement())
-  title       String? @db.VarChar(255)
-  description String? @db.VarChar(255)
-}
-
-model components_shared_story_panel_shareds {
-  id          Int     @id @default(autoincrement())
-  tittle      String? @db.VarChar(255)
-  description String?
-}
-
 model faqs {
-  id                                    Int                                     @id @default(autoincrement())
-  document_id                           String?                                 @db.VarChar(255)
-  question                              String?
-  answer                                String?
-  created_at                            DateTime?                               @db.Timestamp(6)
-  updated_at                            DateTime?                               @db.Timestamp(6)
-  published_at                          DateTime?                               @db.Timestamp(6)
-  created_by_id                         Int?
-  updated_by_id                         Int?
-  locale                                String?                                 @db.VarChar(255)
-  components_dynamic_zone_faqs_faqs_lnk components_dynamic_zone_faqs_faqs_lnk[]
+  id            Int       @id @default(autoincrement())
+  document_id   String?   @db.VarChar(255)
+  question      String?
+  answer        String?
+  created_at    DateTime? @db.Timestamp(6)
+  updated_at    DateTime? @db.Timestamp(6)
+  published_at  DateTime? @db.Timestamp(6)
+  created_by_id Int?
+  updated_by_id Int?
+  locale        String?   @db.VarChar(255)
 
   @@index([document_id])
   @@index([document_id, locale, published_at])
@@ -371,50 +155,16 @@ model files_related_mph {
   @@index([file_id], map: "files_related_mph_fk_idx")
 }
 
-model globals {
-  id            Int            @id @default(autoincrement())
-  document_id   String?        @db.VarChar(255)
-  created_at    DateTime?      @db.Timestamp(6)
-  updated_at    DateTime?      @db.Timestamp(6)
-  published_at  DateTime?      @db.Timestamp(6)
+model logos {
+  id            Int       @id @default(autoincrement())
+  document_id   String?   @db.VarChar(255)
+  company       String?   @db.VarChar(255)
+  created_at    DateTime? @db.Timestamp(6)
+  updated_at    DateTime? @db.Timestamp(6)
+  published_at  DateTime? @db.Timestamp(6)
   created_by_id Int?
   updated_by_id Int?
-  locale        String?        @db.VarChar(255)
-  globals_cmps  globals_cmps[]
-
-  @@index([document_id])
-  @@index([document_id, locale, published_at])
-  @@index([document_id, locale, published_at], map: "globals_documents_idx")
-  @@index([created_by_id], map: "globals_created_by_id_fk_idx")
-  @@index([updated_by_id], map: "globals_updated_by_id_fk_idx")
-}
-
-model globals_cmps {
-  id             Int      @id @default(autoincrement())
-  entity_id      Int?
-  cmp_id         Int?
-  component_type String?  @db.VarChar(255)
-  field          String?  @db.VarChar(255)
-  order          Float?
-  globals        globals? @relation(fields: [entity_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "globals_entity_fk")
-
-  @@unique([entity_id, cmp_id, field, component_type], map: "globals_uq")
-  @@index([component_type], map: "globals_component_type_idx")
-  @@index([field], map: "globals_field_idx")
-  @@index([entity_id], map: "globals_entity_fk_idx")
-}
-
-model logos {
-  id                                 Int                                  @id @default(autoincrement())
-  document_id                        String?                              @db.VarChar(255)
-  company                            String?                              @db.VarChar(255)
-  created_at                         DateTime?                            @db.Timestamp(6)
-  updated_at                         DateTime?                            @db.Timestamp(6)
-  published_at                       DateTime?                            @db.Timestamp(6)
-  created_by_id                      Int?
-  updated_by_id                      Int?
-  locale                             String?                              @db.VarChar(255)
-  components_global_footers_logo_lnk components_global_footers_logo_lnk[]
+  locale        String?   @db.VarChar(255)
 
   @@index([document_id, locale, published_at], map: "logos_documents_idx")
   @@index([created_by_id], map: "logos_created_by_id_fk_idx")
@@ -529,40 +279,6 @@ model page_visits {
   @@index([updated_by_id], map: "page_visits_updated_by_id_fk_idx")
 }
 
-model pages {
-  id            Int          @id @default(autoincrement())
-  document_id   String?      @db.VarChar(255)
-  slug          String?      @db.VarChar(255)
-  created_at    DateTime?    @db.Timestamp(6)
-  updated_at    DateTime?    @db.Timestamp(6)
-  published_at  DateTime?    @db.Timestamp(6)
-  created_by_id Int?
-  updated_by_id Int?
-  locale        String?      @db.VarChar(255)
-  pages_cmps    pages_cmps[]
-
-  @@index([document_id])
-  @@index([document_id, locale, published_at])
-  @@index([document_id, locale, published_at], map: "pages_documents_idx")
-  @@index([created_by_id], map: "pages_created_by_id_fk_idx")
-  @@index([updated_by_id], map: "pages_updated_by_id_fk_idx")
-}
-
-model pages_cmps {
-  id             Int     @id @default(autoincrement())
-  entity_id      Int?
-  cmp_id         Int?
-  component_type String? @db.VarChar(255)
-  field          String? @db.VarChar(255)
-  order          Float?
-  pages          pages?  @relation(fields: [entity_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "pages_entity_fk")
-
-  @@unique([entity_id, cmp_id, field, component_type], map: "pages_uq")
-  @@index([component_type], map: "pages_component_type_idx")
-  @@index([field], map: "pages_field_idx")
-  @@index([entity_id], map: "pages_entity_fk_idx")
-}
-
 model payment_infos {
   id             Int       @id @default(autoincrement())
   document_id    String?   @db.VarChar(255)
@@ -641,19 +357,17 @@ model products_categories_lnk {
 }
 
 model social_networks {
-  id                                                      Int                                                       @id @default(autoincrement())
-  document_id                                             String?                                                   @db.VarChar(255)
-  alias                                                   String?                                                   @db.VarChar(255)
-  name                                                    String?                                                   @db.VarChar(255)
-  created_at                                              DateTime?                                                 @db.Timestamp(6)
-  updated_at                                              DateTime?                                                 @db.Timestamp(6)
-  published_at                                            DateTime?                                                 @db.Timestamp(6)
-  created_by_id                                           Int?
-  updated_by_id                                           Int?
-  locale                                                  String?                                                   @db.VarChar(255)
-  components_dynamic_zone_form_n2610e_social_networks_lnk components_dynamic_zone_form_n2610e_social_networks_lnk[]
-  components_global_footers_social_networks_lnk           components_global_footers_social_networks_lnk[]
-  social_networks_cmps                                    social_networks_cmps[]
+  id                   Int                    @id @default(autoincrement())
+  document_id          String?                @db.VarChar(255)
+  alias                String?                @db.VarChar(255)
+  name                 String?                @db.VarChar(255)
+  created_at           DateTime?              @db.Timestamp(6)
+  updated_at           DateTime?              @db.Timestamp(6)
+  published_at         DateTime?              @db.Timestamp(6)
+  created_by_id        Int?
+  updated_by_id        Int?
+  locale               String?                @db.VarChar(255)
+  social_networks_cmps social_networks_cmps[]
 
   @@index([document_id])
   @@index([document_id, locale, published_at])
