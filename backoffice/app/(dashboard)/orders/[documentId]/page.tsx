@@ -38,6 +38,24 @@ export default async function OrderDetailPage({
   const proof = mediaUrl(order.paymentProof);
   const addr = order.shippingAddress;
 
+  // La API expone el precio original (sin markup) solo a staff. Con él
+  // desglosamos el subtotal en ganancia de productos + ganancia de plataforma.
+  const hasOriginal = order.items?.some((it) => it.originalPrice != null);
+  const originalSubtotal =
+    order.items?.reduce(
+      (acc, it) => acc + (it.originalPrice ?? it.price) * it.quantity,
+      0
+    ) ?? 0;
+  const platformProfit =
+    Math.round((Number(order.subtotal) - originalSubtotal) * 100) / 100;
+  const markupLabel =
+    order.markupPercent != null
+      ? order.markupPercent
+      : originalSubtotal > 0
+        ? Math.round((platformProfit / originalSubtotal) * 100)
+        : 0;
+  const bs = (n: number) => `Bs ${n.toLocaleString("es-BO")}`;
+
   return (
     <div>
       <Link
@@ -70,7 +88,7 @@ export default async function OrderDetailPage({
       </div>
 
       <div className="grid gap-6 lg:grid-cols-3">
-        <div className="space-y-6 lg:col-span-2">
+        <div className="min-w-0 space-y-6 lg:col-span-2">
           {/* Items */}
           <div className="card overflow-hidden">
             <h2 className="border-b border-neutral-100 px-5 py-3 font-medium">
@@ -123,6 +141,86 @@ export default async function OrderDetailPage({
             </div>
           </div>
 
+          {/* Desglose de ganancias (solo staff: la API incluye el precio
+              original únicamente para el backoffice). */}
+          {hasOriginal && (
+            <div className="card overflow-hidden">
+              <div className="flex items-center justify-between border-b border-neutral-100 px-5 py-3">
+                <h2 className="font-medium">Desglose de ganancias</h2>
+                <span className="badge bg-brand-light text-brand">
+                  Markup {markupLabel}%
+                </span>
+              </div>
+
+              <div className="overflow-x-auto">
+                <table className="w-full min-w-[34rem] text-sm">
+                  <thead>
+                    <tr className="border-b border-neutral-100 text-xs uppercase tracking-wide text-neutral-400">
+                      <th className="px-5 py-2 text-left font-medium">Producto</th>
+                      <th className="px-3 py-2 text-center font-medium">Cant.</th>
+                      <th className="px-3 py-2 text-right font-medium">
+                        P. original
+                      </th>
+                      <th className="px-3 py-2 text-right font-medium">P. venta</th>
+                      <th className="px-5 py-2 text-right font-medium">Ganancia</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-neutral-100">
+                    {order.items?.map((it) => {
+                      const orig = it.originalPrice ?? it.price;
+                      const gain = (Number(it.price) - orig) * it.quantity;
+                      return (
+                        <tr key={it.id}>
+                          <td className="px-5 py-2.5">{it.name}</td>
+                          <td className="px-3 py-2.5 text-center text-neutral-500">
+                            {it.quantity}
+                          </td>
+                          <td className="px-3 py-2.5 text-right text-neutral-500">
+                            {bs(orig)}
+                          </td>
+                          <td className="px-3 py-2.5 text-right text-neutral-500">
+                            {bs(Number(it.price))}
+                          </td>
+                          <td className="px-5 py-2.5 text-right font-medium text-brand">
+                            {bs(gain)}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+
+              <div className="grid grid-cols-1 divide-y divide-neutral-100 border-t border-neutral-100 sm:grid-cols-3 sm:divide-x sm:divide-y-0">
+                <div className="px-5 py-4">
+                  <p className="text-xs text-neutral-400">Ganancia productos</p>
+                  <p className="mt-1 text-xl font-semibold text-neutral-900">
+                    {bs(originalSubtotal)}
+                  </p>
+                  <p className="mt-0.5 text-xs text-neutral-400">
+                    A precio original
+                  </p>
+                </div>
+                <div className="bg-brand-light px-5 py-4">
+                  <p className="text-xs text-neutral-500">Ganancia plataforma</p>
+                  <p className="mt-1 text-xl font-semibold text-brand">
+                    {bs(platformProfit)}
+                  </p>
+                  <p className="mt-0.5 text-xs text-neutral-500">
+                    Markup {markupLabel}%
+                  </p>
+                </div>
+                <div className="px-5 py-4">
+                  <p className="text-xs text-neutral-400">Subtotal vendido</p>
+                  <p className="mt-1 text-xl font-semibold text-neutral-900">
+                    {bs(Number(order.subtotal))}
+                  </p>
+                  <p className="mt-0.5 text-xs text-neutral-400">Sin envío</p>
+                </div>
+              </div>
+            </div>
+          )}
+
           {order.customerNotes && (
             <div className="card p-5">
               <h2 className="mb-1 font-medium">Notas del cliente</h2>
@@ -132,7 +230,7 @@ export default async function OrderDetailPage({
         </div>
 
         {/* Lateral */}
-        <div className="space-y-6">
+        <div className="min-w-0 space-y-6">
           <PaymentVerification
             documentId={order.documentId}
             status={order.status}

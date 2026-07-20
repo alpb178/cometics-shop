@@ -54,6 +54,8 @@ export interface OrderItem {
   name: string;
   slug?: string;
   price: number;
+  /** Precio original sin markup. Solo lo devuelve la API a staff. */
+  originalPrice?: number | null;
   quantity: number;
   imageUrl?: string;
 }
@@ -102,6 +104,8 @@ export interface Order {
   cancellationReason: string | null;
   destLat: number | null;
   destLng: number | null;
+  /** Markup de la plataforma en %. Solo lo devuelve la API a staff. */
+  markupPercent?: number | null;
   user: OrderUser | null;
   createdAt: string;
   updatedAt: string;
@@ -146,6 +150,19 @@ export interface OrderStats {
   total: number;
   pending: number;
   revenue: number;
+  /** Ganancia de las ventas a precio original (subtotal sin markup). */
+  productProfit: number;
+  /** Ganancia de la plataforma (el markup añadido sobre el precio original). */
+  platformProfit: number;
+  /** Markup aplicado por la plataforma, en %. */
+  markupPercent: number;
+  /** Totales del día de hoy (desde las 00:00 hora de Bolivia). */
+  today: {
+    orders: number;
+    revenue: number;
+    productProfit: number;
+    platformProfit: number;
+  };
   days: number;
   byDay: DayPoint[];
 }
