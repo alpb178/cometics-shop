@@ -120,7 +120,29 @@ export const CONTACT: {
   heading: string;
   sub_heading: string;
   form: { inputs: FormInput[] };
+  socialNetworks: { name: string; alias: string; link: { URL: string } }[];
 } = {
+  socialNetworks: [
+    {
+      name: "facebook",
+      alias: "facebook",
+      link: { URL: "https://www.facebook.com/share/17TNotEwBn/" }
+    },
+    {
+      name: "instagram",
+      alias: "instagram",
+      link: {
+        URL: "https://www.instagram.com/irisnaturalcosmetica_oficial?igsh=Nm5nOGFvOTFzbjNk"
+      }
+    },
+    {
+      name: "tiktok",
+      alias: "tiktok",
+      link: {
+        URL: "https://www.tiktok.com/@irisnatural_cosmetica?_r=1&_t=ZM-91U9prI2xuC"
+      }
+    }
+  ],
   heading: "Contacténos",
   sub_heading:
     "“Cada producto nace con un propósito claro, inspirado en una investigación dedicada sobre los beneficios que la naturaleza nos ofrece.”",
