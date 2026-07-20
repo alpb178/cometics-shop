@@ -3,12 +3,25 @@
 import { Link } from "next-view-transitions";
 import seoData from "@/lib/next-metadata";
 import { ArrowRight } from "lucide-react";
+import {
+  IconBrandFacebook,
+  IconBrandInstagram,
+  IconBrandTiktok
+} from "@tabler/icons-react";
+import { SOCIAL_LINKS } from "@/lib/static-content";
 
 type FooterLink = { text: string; URL: string };
 
 const POLICY_LINKS: FooterLink[] = [
   { text: "Política de privacidad", URL: "/policy-privacy" }
 ];
+
+// currentColor: heredan el color del enlace (claro sobre el footer oscuro).
+const SOCIAL_ICON: Record<string, React.ReactNode> = {
+  facebook: <IconBrandFacebook className="size-6" />,
+  instagram: <IconBrandInstagram className="size-6" />,
+  tiktok: <IconBrandTiktok className="size-6" />
+};
 
 export const Footer = ({ locale }: { locale: string }) => {
   return (
@@ -70,6 +83,21 @@ export const Footer = ({ locale }: { locale: string }) => {
                 <ArrowRight className="h-4 w-4" />
               </button>
             </form>
+
+            <div className="flex items-center gap-4">
+              {SOCIAL_LINKS.map((s) => (
+                <Link
+                  key={s.name}
+                  href={s.link.URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={s.name}
+                  className="text-background/80 transition-colors hover:text-background"
+                >
+                  {SOCIAL_ICON[s.name]}
+                </Link>
+              ))}
+            </div>
           </div>
         </div>
 
