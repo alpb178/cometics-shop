@@ -18,9 +18,9 @@ const POLICY_LINKS: FooterLink[] = [
 
 // Iconos con color de marca (heredado vía currentColor con style={{color}}).
 const SOCIAL_ICON: Record<string, { icon: React.ReactNode; color: string }> = {
-  facebook: { icon: <IconBrandFacebook className="size-6" />, color: "#1877F2" },
-  instagram: { icon: <IconBrandInstagram className="size-6" />, color: "#E4405F" },
-  tiktok: { icon: <IconBrandTiktok className="size-6" />, color: "#25F4EE" }
+  facebook: { icon: <IconBrandFacebook className="size-5" />, color: "#1877F2" },
+  instagram: { icon: <IconBrandInstagram className="size-5" />, color: "#E4405F" },
+  tiktok: { icon: <IconBrandTiktok className="size-5" />, color: "#010101" }
 };
 
 export const Footer = ({ locale }: { locale: string }) => {
@@ -84,7 +84,7 @@ export const Footer = ({ locale }: { locale: string }) => {
               </button>
             </form>
 
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-3">
               {SOCIAL_LINKS.map((s) => (
                 <Link
                   key={s.name}
@@ -93,7 +93,7 @@ export const Footer = ({ locale }: { locale: string }) => {
                   rel="noopener noreferrer"
                   aria-label={s.name}
                   style={{ color: SOCIAL_ICON[s.name]?.color }}
-                  className="transition-transform hover:-translate-y-0.5 hover:opacity-90"
+                  className="flex h-10 w-10 items-center justify-center rounded-full border border-gray-200 bg-white shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md"
                 >
                   {SOCIAL_ICON[s.name]?.icon}
                 </Link>
