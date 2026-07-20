@@ -84,3 +84,11 @@ DROP TABLE IF EXISTS
   files_folder_lnk, upload_folders_parent_lnk, upload_folders,
   up_permissions_role_lnk, up_permissions
 CASCADE;
+
+-- Retirar navbar y SEO de la BD: el front usa navbar estática
+-- (lib/constants/navbar) y SEO estática (lib/seo-pages), y se quitaron del
+-- content module de la API. El footer sí se conserva (sí se renderiza).
+DROP TABLE IF EXISTS
+  components_global_navbars_cmps, components_global_navbars_logo_lnk,
+  components_global_navbars, components_shared_seos
+CASCADE;

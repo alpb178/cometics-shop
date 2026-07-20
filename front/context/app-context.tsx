@@ -4,8 +4,7 @@ import React, { createContext, useContext, useCallback } from "react";
 import { useStrapiData } from "@/hooks/useStrapiData";
 
 interface AppData {
-  logo: any;
-  navbar: any;
+  // La navbar y el SEO son estáticos en el front; del `global` solo se usa el footer.
   footer: any;
   [key: string]: any;
 }
