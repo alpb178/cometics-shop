@@ -12,6 +12,8 @@
     "test": "jest",
     "postinstall": "prisma generate",
     "db:align": "node prisma/scripts/align-schema.cjs",
+    "db:migrate": "prisma migrate deploy",
+    "db:migrate:status": "prisma migrate status",
     "prisma:pull": "prisma db pull && node prisma/fix-schema.js && prisma generate",
     "prisma:generate": "prisma generate"
   },
