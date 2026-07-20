@@ -29,6 +29,11 @@ interface VerifiedItem {
   imageUrl: string | null;
 }
 
+interface SerializeOpts {
+  /** Incluir el precio original (sin markup) por ítem. Solo para staff. */
+  includeOriginalPrice?: boolean;
+}
+
 @Injectable()
 export class OrdersService {
   constructor(
@@ -198,19 +203,33 @@ export class OrdersService {
   /** KPIs de pedidos para el dashboard del backoffice (solo staff). */
   async getStats(days: number) {
     const since = new Date(Date.now() - days * 86400000);
-    const [total, pending, rows] = await Promise.all([
+    const [total, pending, rows, todayRows, settings] = await Promise.all([
       this.prisma.orders.count(),
       this.prisma.orders.count({ where: { status: "pending_verification" } }),
       this.prisma.$queryRaw<
-        { day: Date; count: number; revenue: number | null }[]
+        { day: Date; count: number; revenue: number | null; subtotal: number | null }[]
       >`
         SELECT (created_at AT TIME ZONE 'UTC' AT TIME ZONE 'America/La_Paz')::date AS day,
                count(*)::int AS count,
-               coalesce(sum(total), 0)::float AS revenue
+               coalesce(sum(total), 0)::float AS revenue,
+               coalesce(sum(subtotal), 0)::float AS subtotal
         FROM orders
         WHERE created_at >= ${since} AND status IS DISTINCT FROM 'cancelled'
         GROUP BY 1
         ORDER BY 1`,
+      // Totales del día de hoy (desde las 00:00 hora de Bolivia) para el
+      // dashboard: mismos filtros que la ventana, acotados al día local.
+      this.prisma.$queryRaw<
+        { count: number; revenue: number | null; subtotal: number | null }[]
+      >`
+        SELECT count(*)::int AS count,
+               coalesce(sum(total), 0)::float AS revenue,
+               coalesce(sum(subtotal), 0)::float AS subtotal
+        FROM orders
+        WHERE (created_at AT TIME ZONE 'UTC' AT TIME ZONE 'America/La_Paz')::date
+              = (now() AT TIME ZONE 'America/La_Paz')::date
+          AND status IS DISTINCT FROM 'cancelled'`,
+      this.pricingService.getSettings(),
     ]);
     const revenueByDay = new Map(
       rows.map((r) => [r.day.toISOString().slice(0, 10), r.revenue ?? 0]),
@@ -223,7 +242,50 @@ export class OrdersService {
       revenue: round2(revenueByDay.get(d.date) ?? 0),
     }));
     const revenue = round2(byDay.reduce((acc, d) => acc + d.revenue, 0));
-    return { total, pending, revenue, days, byDay };
+
+    // El `subtotal` guardado ya incluye el markup de la plataforma (los items
+    // se guardan con `applyMarkup`), así que lo descomponemos en:
+    //   ganancia de productos (precio original) + ganancia de plataforma (markup).
+    const { markupPercent } = settings;
+    const windowSubtotal = rows.reduce((acc, r) => acc + (r.subtotal ?? 0), 0);
+    const { productProfit, platformProfit } = this.splitProfit(
+      windowSubtotal,
+      markupPercent,
+    );
+
+    const todayRow = todayRows[0];
+    const todaySplit = this.splitProfit(todayRow?.subtotal ?? 0, markupPercent);
+    const today = {
+      orders: todayRow?.count ?? 0,
+      revenue: round2(todayRow?.revenue ?? 0),
+      productProfit: todaySplit.productProfit,
+      platformProfit: todaySplit.platformProfit,
+    };
+
+    return {
+      total,
+      pending,
+      revenue,
+      productProfit,
+      platformProfit,
+      markupPercent,
+      today,
+      days,
+      byDay,
+    };
+  }
+
+  /**
+   * Separa un subtotal (que ya incluye el markup) en la ganancia a precio
+   * original y la ganancia de la plataforma. Se revierte con el markup actual:
+   * subtotal = original × (1 + markup/100).
+   */
+  private splitProfit(subtotal: number, markupPercent: number) {
+    const productProfit = round2(subtotal / (1 + markupPercent / 100));
+    return {
+      productProfit,
+      platformProfit: round2(round2(subtotal) - productProfit),
+    };
   }
 
   async findMany(user: AuthenticatedUser, pageSize: number) {
@@ -306,30 +368,33 @@ export class OrdersService {
     return serialized;
   }
 
-  async serializeById(id: number) {
+  async serializeById(id: number, opts?: SerializeOpts) {
     const row = await this.prisma.orders.findUnique({ where: { id } });
     if (!row) throw new NotFoundException();
-    return this.serialize(row);
+    return this.serialize(row, opts);
   }
 
-  private async serialize(row: {
-    id: number;
-    document_id: string | null;
-    order_number: string | null;
-    delivery_method: string | null;
-    payment_method: string | null;
-    subtotal: unknown;
-    shipping_cost: unknown;
-    total: unknown;
-    status: string | null;
-    customer_notes: string | null;
-    payment_reference: string | null;
-    cancellation_reason: string | null;
-    dest_lat: unknown;
-    dest_lng: unknown;
-    created_at: Date | null;
-    updated_at: Date | null;
-  }) {
+  private async serialize(
+    row: {
+      id: number;
+      document_id: string | null;
+      order_number: string | null;
+      delivery_method: string | null;
+      payment_method: string | null;
+      subtotal: unknown;
+      shipping_cost: unknown;
+      total: unknown;
+      status: string | null;
+      customer_notes: string | null;
+      payment_reference: string | null;
+      cancellation_reason: string | null;
+      dest_lat: unknown;
+      dest_lng: unknown;
+      created_at: Date | null;
+      updated_at: Date | null;
+    },
+    opts?: SerializeOpts,
+  ) {
     const [cmps, addressLnk, userLnk, paymentProof] = await Promise.all([
       this.prisma.orders_cmps.findMany({
         where: { entity_id: row.id, field: "items" },
@@ -351,19 +416,33 @@ export class OrdersService {
           where: { id: { in: cmpIds } },
         })
       : [];
+    // El precio original (sin markup) solo se revela a staff: revelarlo al
+    // cliente expondría el margen de la plataforma.
+    const markupPercent = opts?.includeOriginalPrice
+      ? (await this.pricingService.getSettings()).markupPercent
+      : null;
+    const originalOf = (price: number | null): number | null => {
+      if (markupPercent === null || price === null) return null;
+      return round2(price / (1 + markupPercent / 100));
+    };
+
     const itemsById = new Map(itemRows.map((i) => [i.id, i]));
     const items = cmpIds
       .map((id) => itemsById.get(id))
       .filter((i): i is NonNullable<typeof i> => !!i)
-      .map((i) => ({
-        id: i.id,
-        productId: i.product_id,
-        name: i.name,
-        slug: i.slug,
-        price: toNumber(i.price),
-        quantity: i.quantity,
-        imageUrl: i.image_url,
-      }));
+      .map((i) => {
+        const price = toNumber(i.price);
+        return {
+          id: i.id,
+          productId: i.product_id,
+          name: i.name,
+          slug: i.slug,
+          price,
+          originalPrice: originalOf(price),
+          quantity: i.quantity,
+          imageUrl: i.image_url,
+        };
+      });
 
     return {
       id: row.id,
@@ -380,6 +459,7 @@ export class OrdersService {
       cancellationReason: row.cancellation_reason,
       destLat: toNumber(row.dest_lat),
       destLng: toNumber(row.dest_lng),
+      markupPercent,
       items,
       shippingAddress: addressLnk?.addresses
         ? this.addressesService.serialize(addressLnk.addresses)

@@ -325,12 +325,23 @@ export async function getTopProducts(
 }
 
 export async function getOrderStats(days = 30): Promise<OrderStats> {
-  const res = await strapiGet<SingleResponse<OrderStats>>(
+  const res = await strapiGet<SingleResponse<Partial<OrderStats>>>(
     `/api/orders/stats?days=${days}`
   );
-  return (
-    res.data ?? { total: 0, pending: 0, revenue: 0, days, byDay: [] }
-  );
+  // Fusionamos con defaults: una API sin los campos de ganancias (aún no
+  // desplegada) no debe dejar valores `undefined` que rompan el dashboard.
+  return {
+    total: 0,
+    pending: 0,
+    revenue: 0,
+    productProfit: 0,
+    platformProfit: 0,
+    markupPercent: 10,
+    today: { orders: 0, revenue: 0, productProfit: 0, platformProfit: 0 },
+    days,
+    byDay: [],
+    ...res.data,
+  };
 }
 
 /* --------------------------- Interacciones ---------------------------- */
