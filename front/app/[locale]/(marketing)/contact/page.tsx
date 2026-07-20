@@ -13,7 +13,7 @@ export default function ContactPage() {
         sub_heading={CONTACT.sub_heading}
         form={CONTACT.form}
         section={null}
-        social_networks={[]}
+        social_networks={CONTACT.socialNetworks}
       />
     </Container>
   );
