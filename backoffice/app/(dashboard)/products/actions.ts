@@ -80,7 +80,12 @@ export async function updateProductAction(
   formData: FormData
 ) {
   await requireStaff();
-  const input = await buildInput(formData);
+  // La visibilidad de un producto existente se gestiona con el botón
+  // Ocultar/Mostrar (acción aparte). El formulario de edición NO incluye el
+  // check "visible", así que buildInput lo devolvería como `false`; hay que
+  // quitarlo para no ocultar el producto en cada guardado.
+  const input: Partial<ProductInput> = await buildInput(formData);
+  delete input.visible;
   // Se edita en sitio la única fila del producto; la tienda lo refleja al
   // instante (el front lee sin caché).
   await updateProduct(documentId, input);
