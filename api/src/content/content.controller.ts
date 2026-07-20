@@ -5,9 +5,9 @@ import { PrismaService } from "../prisma/prisma.service";
 import { ComponentsService } from "./components.service";
 
 /**
- * Contenido CMS de lectura pública: páginas (dynamic zone) y global
- * (navbar/footer). Mismas rutas y query params que usaba el front
- * contra Strapi.
+ * Contenido CMS de lectura pública: páginas (dynamic zone) y global (footer).
+ * La navbar y el SEO del front son estáticos (lib/constants/navbar y
+ * lib/seo-pages), así que no se sirven desde la BD.
  */
 @ApiTags("content")
 @Controller()
@@ -35,7 +35,7 @@ export class ContentController {
   }
 
   @Get("global")
-  @ApiOperation({ summary: "Global (navbar, footer, seo) — single type" })
+  @ApiOperation({ summary: "Global (footer) — single type" })
   async global(@Query() query: Record<string, unknown>) {
     const locale = nestedQuery(query, "filters", "locale");
     const row = await this.prisma.globals.findFirst({
@@ -46,29 +46,17 @@ export class ContentController {
       orderBy: { id: "asc" },
     });
     if (!row) throw new NotFoundException();
-    const [navbar] = await this.componentsService.serializeMany(
-      "globals_cmps",
-      row.id,
-      "navbar",
-    );
     const [footer] = await this.componentsService.serializeMany(
       "globals_cmps",
       row.id,
       "footer",
-    );
-    const [seo] = await this.componentsService.serializeMany(
-      "globals_cmps",
-      row.id,
-      "seo",
     );
     return {
       data: {
         id: row.id,
         documentId: row.document_id,
         locale: row.locale,
-        navbar: navbar ?? null,
         footer: footer ?? null,
-        seo: seo ?? null,
         createdAt: row.created_at,
         updatedAt: row.updated_at,
         publishedAt: row.published_at,
@@ -86,16 +74,16 @@ export class ContentController {
     updated_at: Date | null;
     published_at: Date | null;
   }) {
-    const [dynamicZone, seo] = await Promise.all([
-      this.componentsService.serializeMany("pages_cmps", row.id, "dynamic_zone"),
-      this.componentsService.serializeMany("pages_cmps", row.id, "seo"),
-    ]);
+    const dynamicZone = await this.componentsService.serializeMany(
+      "pages_cmps",
+      row.id,
+      "dynamic_zone",
+    );
     return {
       id: row.id,
       documentId: row.document_id,
       slug: row.slug,
       locale: row.locale,
-      seo: seo[0] ?? null,
       dynamic_zone: dynamicZone,
       createdAt: row.created_at,
       updatedAt: row.updated_at,

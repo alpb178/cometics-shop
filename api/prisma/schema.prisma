@@ -218,39 +218,6 @@ model components_global_footers_social_networks_lnk {
   @@index([social_network_id], map: "components_global_footers_social_networks_lnk_ifk_idx")
 }
 
-model components_global_navbars {
-  id                                 Int                                  @id @default(autoincrement())
-  components_global_navbars_cmps     components_global_navbars_cmps[]
-  components_global_navbars_logo_lnk components_global_navbars_logo_lnk[]
-}
-
-model components_global_navbars_cmps {
-  id                        Int                        @id @default(autoincrement())
-  entity_id                 Int?
-  cmp_id                    Int?
-  component_type            String?                    @db.VarChar(255)
-  field                     String?                    @db.VarChar(255)
-  order                     Float?
-  components_global_navbars components_global_navbars? @relation(fields: [entity_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "components_global_navbars_entity_fk")
-
-  @@unique([entity_id, cmp_id, field, component_type], map: "components_global_navbars_uq")
-  @@index([component_type], map: "components_global_navbars_component_type_idx")
-  @@index([field], map: "components_global_navbars_field_idx")
-  @@index([entity_id], map: "components_global_navbars_entity_fk_idx")
-}
-
-model components_global_navbars_logo_lnk {
-  id                        Int                        @id @default(autoincrement())
-  navbar_id                 Int?
-  logo_id                   Int?
-  components_global_navbars components_global_navbars? @relation(fields: [navbar_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "components_global_navbars_logo_lnk_fk")
-  logos                     logos?                     @relation(fields: [logo_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "components_global_navbars_logo_lnk_ifk")
-
-  @@unique([navbar_id, logo_id], map: "components_global_navbars_logo_lnk_uq")
-  @@index([navbar_id], map: "components_global_navbars_logo_lnk_fk_idx")
-  @@index([logo_id], map: "components_global_navbars_logo_lnk_ifk_idx")
-}
-
 model components_items_inputs {
   id          Int      @id @default(autoincrement())
   type        String?  @db.VarChar(255)
@@ -317,17 +284,6 @@ model components_shared_sections_cmps {
   @@index([component_type], map: "components_shared_sections_component_type_idx")
   @@index([field], map: "components_shared_sections_field_idx")
   @@index([entity_id], map: "components_shared_sections_entity_fk_idx")
-}
-
-model components_shared_seos {
-  id               Int     @id @default(autoincrement())
-  meta_title       String? @db.VarChar(255)
-  meta_description String? @db.VarChar(255)
-  keywords         String?
-  meta_robots      String? @db.VarChar(255)
-  structured_data  Json?
-  meta_viewport    String? @db.VarChar(255)
-  canonical_url    String? @db.VarChar(255)
 }
 
 model components_shared_steps {
@@ -459,7 +415,6 @@ model logos {
   updated_by_id                      Int?
   locale                             String?                              @db.VarChar(255)
   components_global_footers_logo_lnk components_global_footers_logo_lnk[]
-  components_global_navbars_logo_lnk components_global_navbars_logo_lnk[]
 
   @@index([document_id, locale, published_at], map: "logos_documents_idx")
   @@index([created_by_id], map: "logos_created_by_id_fk_idx")

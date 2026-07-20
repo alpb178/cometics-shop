@@ -50,23 +50,6 @@ export class ComponentsService {
         });
         return r && { id: r.id, text: r.text, URL: r.url, target: r.target };
       }
-      case "shared.seo": {
-        const r = await this.prisma.components_shared_seos.findUnique({
-          where: { id: cmpId },
-        });
-        if (!r) return null;
-        return {
-          id: r.id,
-          metaTitle: r.meta_title,
-          metaDescription: r.meta_description,
-          keywords: r.keywords,
-          metaRobots: r.meta_robots,
-          structuredData: r.structured_data,
-          metaViewport: r.meta_viewport,
-          canonicalURL: r.canonical_url,
-          metaImage: await this.mediaService.findRelatedFile("shared.seo", r.id, "metaImage"),
-        };
-      }
       case "shared.steps": {
         const r = await this.prisma.components_shared_steps.findUnique({
           where: { id: cmpId },
@@ -210,30 +193,6 @@ export class ComponentsService {
             socials
               .filter((s) => s.social_networks)
               .map((s) => this.serializeSocialNetwork(s.social_networks!)),
-          ),
-        };
-      }
-      case "global.navbar": {
-        const r = await this.prisma.components_global_navbars.findUnique({
-          where: { id: cmpId },
-        });
-        if (!r) return null;
-        const logoLnk = await this.prisma.components_global_navbars_logo_lnk.findFirst({
-          where: { navbar_id: r.id },
-          include: { logos: true },
-        });
-        return {
-          id: r.id,
-          logo: logoLnk?.logos ? await this.serializeLogo(logoLnk.logos) : null,
-          left_navbar_items: await this.serializeMany(
-            "components_global_navbars_cmps",
-            r.id,
-            "left_navbar_items",
-          ),
-          right_navbar_items: await this.serializeMany(
-            "components_global_navbars_cmps",
-            r.id,
-            "right_navbar_items",
           ),
         };
       }
