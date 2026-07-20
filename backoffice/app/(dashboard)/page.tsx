@@ -6,6 +6,8 @@ import {
   Eye,
   Users,
   Wallet,
+  Coins,
+  Percent,
 } from "lucide-react";
 import { PageHeader } from "@/components/page-header";
 import { StatCard } from "@/components/stat-card";
@@ -56,6 +58,10 @@ export default async function DashboardHome() {
       total: 0,
       pending: 0,
       revenue: 0,
+      productProfit: 0,
+      platformProfit: 0,
+      markupPercent: 10,
+      today: { orders: 0, revenue: 0, productProfit: 0, platformProfit: 0 },
       days: 30,
       byDay: [],
     })),
@@ -71,7 +77,7 @@ export default async function DashboardHome() {
       />
 
       {/* KPIs */}
-      <div className="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-6">
+      <div className="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-4">
         <StatCard
           label="Productos"
           value={products.length}
@@ -92,11 +98,25 @@ export default async function DashboardHome() {
           hint="Pagos pendientes"
         />
         <StatCard
-          label="Ingresos 30 días"
-          value={`Bs ${orderStats.revenue.toLocaleString("es-BO")}`}
-          href="/orders"
+          label="Ingresos hoy"
+          value={`Bs ${orderStats.today.revenue.toLocaleString("es-BO")}`}
+          href="/sales"
           icon={Wallet}
-          hint="Pedidos no cancelados"
+          hint="Desde las 00:00 · no cancelados"
+        />
+        <StatCard
+          label="Ganancias productos"
+          value={`Bs ${orderStats.today.productProfit.toLocaleString("es-BO")}`}
+          href="/sales"
+          icon={Coins}
+          hint="Precio original · hoy"
+        />
+        <StatCard
+          label="Ganancias plataforma"
+          value={`Bs ${orderStats.today.platformProfit.toLocaleString("es-BO")}`}
+          href="/sales"
+          icon={Percent}
+          hint={`Markup ${orderStats.markupPercent}% · hoy`}
         />
         <StatCard
           label="Visitas"

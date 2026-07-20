@@ -32,21 +32,14 @@ export class ProductsController {
 
   @Get(":documentId")
   @ApiOperation({ summary: "Detalle de producto por documentId" })
-  async findOne(
-    @Param("documentId") documentId: string,
-    @Query("status") status?: string,
-  ) {
-    const data = await this.productsService.findByDocumentId(
-      documentId,
-      status === "draft" ? "draft" : "published",
-    );
-    return { data };
+  async findOne(@Param("documentId") documentId: string) {
+    return { data: await this.productsService.findByDocumentId(documentId) };
   }
 
   @Post()
   @UseGuards(JwtAuthGuard, StaffGuard)
   @ApiBearerAuth()
-  @ApiOperation({ summary: "Crear producto (borrador, solo staff)" })
+  @ApiOperation({ summary: "Crear producto (solo staff)" })
   async create(@Body("data") data: ProductInput) {
     return { data: await this.productsService.create(data ?? {}) };
   }
@@ -54,28 +47,12 @@ export class ProductsController {
   @Put(":documentId")
   @UseGuards(JwtAuthGuard, StaffGuard)
   @ApiBearerAuth()
-  @ApiOperation({ summary: "Actualizar borrador (solo staff)" })
+  @ApiOperation({ summary: "Actualizar producto (solo staff)" })
   async update(
     @Param("documentId") documentId: string,
     @Body("data") data: ProductInput,
   ) {
     return { data: await this.productsService.update(documentId, data ?? {}) };
-  }
-
-  @Post(":documentId/publish")
-  @UseGuards(JwtAuthGuard, StaffGuard)
-  @ApiBearerAuth()
-  @ApiOperation({ summary: "Publicar borrador (solo staff)" })
-  async publish(@Param("documentId") documentId: string) {
-    return { data: await this.productsService.publish(documentId) };
-  }
-
-  @Post(":documentId/unpublish")
-  @UseGuards(JwtAuthGuard, StaffGuard)
-  @ApiBearerAuth()
-  @ApiOperation({ summary: "Despublicar (solo staff)" })
-  async unpublish(@Param("documentId") documentId: string) {
-    return { data: await this.productsService.unpublish(documentId) };
   }
 
   @Put(":documentId/visibility")

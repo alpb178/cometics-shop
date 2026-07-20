@@ -13,7 +13,7 @@ import { ApiBearerAuth, ApiOperation, ApiTags } from "@nestjs/swagger";
 import { JwtAuthGuard } from "../auth/jwt-auth.guard";
 import { StaffGuard } from "../auth/staff.guard";
 import { CurrentUser } from "../common/current-user.decorator";
-import { AuthenticatedUser } from "../common/staff.util";
+import { AuthenticatedUser, isStaffUser } from "../common/staff.util";
 import { nestedQuery, parsePageSize } from "../common/strapi.util";
 import { CreateOrderDto, UpdateOrderDto } from "./order.dto";
 import { OrdersService } from "./orders.service";
@@ -55,7 +55,11 @@ export class OrdersController {
     @Param("id") id: string,
   ) {
     const row = await this.ordersService.findOneOrThrow(id, user);
-    return { data: await this.ordersService.serializeById(row.id) };
+    return {
+      data: await this.ordersService.serializeById(row.id, {
+        includeOriginalPrice: isStaffUser(user),
+      }),
+    };
   }
 
   @Post()

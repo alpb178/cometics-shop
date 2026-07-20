@@ -20,10 +20,13 @@ export interface ProductInput {
 type Tx = Parameters<Parameters<PrismaService["$transaction"]>[0]>[0];
 
 /**
- * Products es draft & publish (como en Strapi v5): cada documento tiene una
- * fila borrador (published_at null) y opcionalmente una publicada, ambas con
- * el mismo document_id. El backoffice edita el borrador y publica; el front
- * solo ve filas publicadas.
+ * Products tiene UNA sola fila por documento (se eliminó el draft & publish
+ * heredado de Strapi): se edita en sitio y la web la ve al instante. La fila
+ * se mantiene siempre con `published_at` no nulo para que el front la lea; la
+ * visibilidad en tienda la controla el flag `visible`. El parámetro `status`
+ * ya no selecciona versión: 'published' = vista pública (solo visibles),
+ * 'draft' = vista admin (todas). El dedupe por `document_id` es defensivo por
+ * si quedaran filas duplicadas heredadas.
  */
 @Injectable()
 export class ProductsService {
@@ -34,22 +37,33 @@ export class ProductsService {
 
   async findMany(opts: { status: "draft" | "published"; slug?: string; pageSize: number }) {
     const where = {
-      published_at: opts.status === "draft" ? null : { not: null as never },
       // La tienda (status published) solo ve los productos marcados como
       // visibles; el backoffice (status draft) los ve todos. `not: false`
       // también deja pasar los `visible = null` heredados.
       ...(opts.status === "published" ? { visible: { not: false } } : {}),
       ...(opts.slug ? { slug: opts.slug } : {}),
     };
-    const [rows, total] = await Promise.all([
-      this.prisma.products.findMany({
-        where,
-        orderBy: { created_at: "desc" },
-        take: opts.pageSize,
-      }),
-      this.prisma.products.count({ where }),
-    ]);
-    const data = await Promise.all(rows.map((r) => this.serialize(r)));
+    // Se pide por updated_at desc para que, ante duplicados heredados, la
+    // primera fila de cada document_id sea la última editada (superviviente).
+    const rows = await this.prisma.products.findMany({
+      where,
+      orderBy: { updated_at: "desc" },
+      take: opts.pageSize,
+    });
+    const seen = new Set<string>();
+    const unique = rows.filter((r) => {
+      if (!r.document_id) return true; // sin documento: se mantiene individual
+      if (seen.has(r.document_id)) return false;
+      seen.add(r.document_id);
+      return true;
+    });
+    // Orden de presentación: por fecha de creación descendente.
+    unique.sort(
+      (a, b) =>
+        (b.created_at?.getTime() ?? 0) - (a.created_at?.getTime() ?? 0),
+    );
+    const data = await Promise.all(unique.map((r) => this.serialize(r)));
+    const total = unique.length;
     return {
       data,
       meta: {
@@ -63,8 +77,8 @@ export class ProductsService {
     };
   }
 
-  async findByDocumentId(documentId: string, status: "draft" | "published") {
-    const row = await this.getRow(documentId, status);
+  async findByDocumentId(documentId: string) {
+    const row = await this.getRow(documentId);
     if (!row) throw new NotFoundException();
     return this.serialize(row);
   }
@@ -83,7 +97,7 @@ export class ProductsService {
           visible: input.visible ?? true,
           created_at: now,
           updated_at: now,
-          published_at: null, // se crea como borrador, como Strapi v5
+          published_at: now, // fila única siempre publicada (sin draft/publish)
         },
       });
       await this.applyRelations(tx, created.id, input);
@@ -93,8 +107,7 @@ export class ProductsService {
   }
 
   async update(documentId: string, input: ProductInput) {
-    const draft = await this.getRow(documentId, "draft");
-    const target = draft ?? (await this.getRow(documentId, "published"));
+    const target = await this.getRow(documentId);
     if (!target) throw new NotFoundException();
     const row = await this.prisma.$transaction(async (tx) => {
       const updated = await tx.products.update({
@@ -106,11 +119,14 @@ export class ProductsService {
           description: input.description,
           slug: input.slug,
           updated_at: new Date(),
+          // Mantiene la fila publicada (por si viniera de datos heredados sin
+          // publicar); la visibilidad en tienda la controla `visible`.
+          published_at: target.published_at ?? new Date(),
         },
       });
       await this.applyRelations(tx, target.id, input, { onlyProvided: true });
-      // `visible` se propaga a TODAS las filas del documento (borrador y
-      // publicada) para que la tienda y el backoffice queden consistentes.
+      // `visible` se propaga a todas las filas del documento (por robustez
+      // ante duplicados heredados; con fila única es un no-op inofensivo).
       if (input.visible !== undefined) {
         await tx.products.updateMany({
           where: { document_id: documentId },
@@ -120,43 +136,6 @@ export class ProductsService {
       return updated;
     });
     return this.serialize(row);
-  }
-
-  /** Publica el borrador: clona la fila (y sus relaciones) como versión publicada. */
-  async publish(documentId: string) {
-    const draft = await this.getRow(documentId, "draft");
-    if (!draft) throw new NotFoundException();
-    const now = new Date();
-    const published = await this.prisma.$transaction(async (tx) => {
-      await this.deletePublishedRows(tx, documentId);
-      const clone = await tx.products.create({
-        data: {
-          document_id: draft.document_id,
-          name: draft.name,
-          price: draft.price,
-          currency: draft.currency,
-          description: draft.description,
-          slug: draft.slug,
-          visible: draft.visible,
-          locale: draft.locale,
-          created_at: draft.created_at,
-          updated_at: now,
-          published_at: now,
-        },
-      });
-      await this.copyRelations(tx, draft.id, clone.id);
-      return clone;
-    });
-    return this.serialize(published);
-  }
-
-  async unpublish(documentId: string) {
-    const draft = await this.getRow(documentId, "draft");
-    if (!draft) throw new NotFoundException();
-    await this.prisma.$transaction(async (tx) => {
-      await this.deletePublishedRows(tx, documentId);
-    });
-    return this.serialize(draft);
   }
 
   async delete(documentId: string) {
@@ -175,26 +154,12 @@ export class ProductsService {
     return serialized;
   }
 
-  private async getRow(documentId: string, status: "draft" | "published") {
+  /** Fila única del documento: ante duplicados heredados, la última editada. */
+  private async getRow(documentId: string) {
     return this.prisma.products.findFirst({
-      where: {
-        document_id: documentId,
-        published_at: status === "draft" ? null : { not: null },
-      },
+      where: { document_id: documentId },
+      orderBy: { updated_at: "desc" },
     });
-  }
-
-  private async deletePublishedRows(tx: Tx, documentId: string) {
-    const olds = await tx.products.findMany({
-      where: { document_id: documentId, published_at: { not: null } },
-      select: { id: true },
-    });
-    const ids = olds.map((o) => o.id);
-    if (!ids.length) return;
-    await tx.files_related_mph.deleteMany({
-      where: { related_type: RELATED_TYPE, related_id: { in: ids } },
-    });
-    await tx.products.deleteMany({ where: { id: { in: ids } } });
   }
 
   private async applyRelations(
@@ -253,31 +218,6 @@ export class ProductsService {
           },
         });
       }
-    }
-  }
-
-  private async copyRelations(tx: Tx, fromId: number, toId: number) {
-    const [cats, media] = await Promise.all([
-      tx.products_categories_lnk.findMany({ where: { product_id: fromId } }),
-      tx.files_related_mph.findMany({
-        where: { related_type: RELATED_TYPE, related_id: fromId },
-      }),
-    ]);
-    for (const c of cats) {
-      await tx.products_categories_lnk.create({
-        data: { product_id: toId, category_id: c.category_id },
-      });
-    }
-    for (const m of media) {
-      await tx.files_related_mph.create({
-        data: {
-          file_id: m.file_id,
-          related_id: toId,
-          related_type: RELATED_TYPE,
-          field: m.field,
-          order: m.order,
-        },
-      });
     }
   }
 

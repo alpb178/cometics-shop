@@ -23,9 +23,10 @@ npm run lint
   cookie de sesión (`lib/session.ts`).
 - Las subidas de ficheros usan `uploadFiles()` → `/api/upload`, y luego se pasan
   los ids de media al crear/actualizar la entidad.
-- Draft & publish: las escrituras de productos afectan al **borrador**. Para
-  publicar se usan las rutas `/products/:documentId/publish|unpublish` de la API
-  (`../api/src/products`).
+- Productos: **una sola versión** por producto (se eliminó el draft & publish
+  heredado de Strapi). Las ediciones se guardan en sitio y la tienda las ve al
+  instante; la visibilidad en tienda la controla el flag `visible` (no hay
+  publicar/despublicar). Ver `../api/src/products`.
 - Las rutas están protegidas por `middleware.ts` (redirige a `/login` sin sesión).
 - **Kit de UI compartido** (usar siempre en listados, no reinventar):
   `components/ui.tsx` (`DataTable`, `Badge`, `IconButton`, `SelectCheckbox`,

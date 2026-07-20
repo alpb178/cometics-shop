@@ -5,7 +5,6 @@ import { redirect } from "next/navigation";
 import {
   createProduct,
   deleteProduct,
-  setProductPublished,
   setProductVisible,
   updateProduct,
   type ProductInput
@@ -58,12 +57,9 @@ async function buildInput(formData: FormData): Promise<ProductInput> {
 export async function createProductAction(formData: FormData) {
   await requireStaff();
   const input = await buildInput(formData);
-  const product = await createProduct(input);
-
-  // Los productos se publican siempre al crearse; la visibilidad en la
-  // tienda la controla el flag `visible` (checkbox "Mostrar en la tienda").
-  await setProductPublished(product.documentId, true).catch(() => {});
-
+  await createProduct(input);
+  // La visibilidad en la tienda la controla el flag `visible` (checkbox
+  // "Mostrar en la tienda"); no hay paso de publicación (fila única).
   revalidatePath("/products");
   redirect("/products");
 }
@@ -84,7 +80,14 @@ export async function updateProductAction(
   formData: FormData
 ) {
   await requireStaff();
-  const input = await buildInput(formData);
+  // La visibilidad de un producto existente se gestiona con el botón
+  // Ocultar/Mostrar (acción aparte). El formulario de edición NO incluye el
+  // check "visible", así que buildInput lo devolvería como `false`; hay que
+  // quitarlo para no ocultar el producto en cada guardado.
+  const input: Partial<ProductInput> = await buildInput(formData);
+  delete input.visible;
+  // Se edita en sitio la única fila del producto; la tienda lo refleja al
+  // instante (el front lee sin caché).
   await updateProduct(documentId, input);
   revalidatePath("/products");
   revalidatePath(`/products/${documentId}/edit`);
@@ -94,15 +97,6 @@ export async function updateProductAction(
 export async function deleteProductAction(documentId: string) {
   await requireStaff();
   await deleteProduct(documentId);
-  revalidatePath("/products");
-}
-
-export async function togglePublishAction(
-  documentId: string,
-  publish: boolean
-) {
-  await requireStaff();
-  await setProductPublished(documentId, publish);
   revalidatePath("/products");
 }
 
