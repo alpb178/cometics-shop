@@ -47,8 +47,7 @@ export const GROUP_COMPANIES: Company[] = [
     description:
       "Portal para generar y gestionar tus facturas de forma rápida y sencilla.",
     url: "https://invoices.corpsc.com/",
-    // Placeholder: reemplazar por una foto real en /public/empresas.
-    image: "/empresas/invoices-destacada.svg",
+    image: "/empresas/invoices-destacada.png",
     background: "#0f766e",
   },
 ];
