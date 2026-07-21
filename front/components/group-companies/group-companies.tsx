@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronLeft, ChevronRight, ExternalLink } from "lucide-react";
+import { ExternalLink } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { Company, GROUP_COMPANIES } from "@/lib/companies";
 import { trackEvent } from "@/lib/track-event";
@@ -67,13 +67,6 @@ export function GroupCompanies() {
   const [active, setActive] = useState(0);
   const count = GROUP_COMPANIES.length;
 
-  const scroll = (dir: 1 | -1) => {
-    const el = scroller.current;
-    if (!el) return;
-    el.scrollBy({ left: dir * el.clientWidth * 0.85, behavior: "smooth" });
-    setBurst((b) => b + 1);
-  };
-
   // Lleva la tarjeta `i` al inicio de la vista (usado por los puntos).
   const goTo = (i: number) => {
     const el = scroller.current;
@@ -136,35 +129,6 @@ export function GroupCompanies() {
       aria-label="Sitios de interés del Grupo CorpSC"
       className="mx-auto w-full max-w-screen-2xl px-4 py-12 sm:px-6 lg:px-10"
     >
-      <div className="mb-8 flex items-end justify-between gap-4">
-        <div>
-          <h2 className="mb-2 font-display text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
-            Sitios de interés
-          </h2>
-          <p className="max-w-2xl text-sm text-muted-foreground">
-            Conoce las demás plataformas del Grupo CorpSC.
-          </p>
-        </div>
-        <div className="hidden shrink-0 items-center gap-2 sm:flex">
-          <button
-            type="button"
-            onClick={() => scroll(-1)}
-            aria-label="Anterior"
-            className="flex h-10 w-10 items-center justify-center rounded-full border border-border bg-card text-foreground shadow-sm transition-colors hover:bg-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-          >
-            <ChevronLeft className="h-5 w-5" />
-          </button>
-          <button
-            type="button"
-            onClick={() => scroll(1)}
-            aria-label="Siguiente"
-            className="flex h-10 w-10 items-center justify-center rounded-full border border-border bg-card text-foreground shadow-sm transition-colors hover:bg-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-          >
-            <ChevronRight className="h-5 w-5" />
-          </button>
-        </div>
-      </div>
-
       <div className="relative">
         <div
           ref={scroller}
