@@ -1,11 +1,14 @@
-import { ExternalLink } from "lucide-react";
+"use client";
+
+import { ChevronLeft, ChevronRight, ExternalLink } from "lucide-react";
+import { useRef } from "react";
 import { Company, GROUP_COMPANIES } from "@/lib/companies";
 
 // Tarjeta de una empresa hermana: imagen destacada con el nombre en overlay,
 // descripción y CTA "Visitar sitio" (enlace externo seguro).
 function CompanyCard({ company }: { company: Company }) {
   return (
-    <article className="flex flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-sm transition-shadow hover:shadow-md">
+    <article className="flex h-full flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-sm transition-shadow hover:shadow-md">
       <a
         href={company.url}
         target="_blank"
@@ -48,22 +51,60 @@ function CompanyCard({ company }: { company: Company }) {
   );
 }
 
-// Sección "Sitios de interés" — las demás empresas del Grupo CorpSC.
+// Sección "Sitios de interés" — carrusel con las demás empresas del Grupo CorpSC.
 export function GroupCompanies() {
+  const scroller = useRef<HTMLDivElement>(null);
+
+  const scroll = (dir: 1 | -1) => {
+    const el = scroller.current;
+    if (el) el.scrollBy({ left: dir * el.clientWidth * 0.85, behavior: "smooth" });
+  };
+
   return (
     <section
       aria-label="Sitios de interés del Grupo CorpSC"
       className="mx-auto w-full max-w-screen-2xl px-4 py-12 sm:px-6 lg:px-10"
     >
-      <h2 className="mb-2 font-display text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
-        Sitios de interés
-      </h2>
-      <p className="mb-8 max-w-2xl text-sm text-muted-foreground">
-        Conoce las demás plataformas del Grupo CorpSC.
-      </p>
-      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="mb-8 flex items-end justify-between gap-4">
+        <div>
+          <h2 className="mb-2 font-display text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
+            Sitios de interés
+          </h2>
+          <p className="max-w-2xl text-sm text-muted-foreground">
+            Conoce las demás plataformas del Grupo CorpSC.
+          </p>
+        </div>
+        <div className="hidden shrink-0 items-center gap-2 sm:flex">
+          <button
+            type="button"
+            onClick={() => scroll(-1)}
+            aria-label="Anterior"
+            className="flex h-10 w-10 items-center justify-center rounded-full border border-border bg-card text-foreground shadow-sm transition-colors hover:bg-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+          >
+            <ChevronLeft className="h-5 w-5" />
+          </button>
+          <button
+            type="button"
+            onClick={() => scroll(1)}
+            aria-label="Siguiente"
+            className="flex h-10 w-10 items-center justify-center rounded-full border border-border bg-card text-foreground shadow-sm transition-colors hover:bg-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+          >
+            <ChevronRight className="h-5 w-5" />
+          </button>
+        </div>
+      </div>
+
+      <div
+        ref={scroller}
+        className="flex snap-x snap-mandatory gap-6 overflow-x-auto scroll-smooth pb-2 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+      >
         {GROUP_COMPANIES.map((c) => (
-          <CompanyCard key={c.slug} company={c} />
+          <div
+            key={c.slug}
+            className="w-[85%] shrink-0 snap-start sm:w-[calc(50%-12px)] lg:w-[calc(33.333%-16px)]"
+          >
+            <CompanyCard company={c} />
+          </div>
         ))}
       </div>
     </section>
