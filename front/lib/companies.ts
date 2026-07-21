@@ -41,4 +41,14 @@ export const GROUP_COMPANIES: Company[] = [
     image: "/empresas/tu-chamba-destacada.jpg",
     background: "#004ac6",
   },
+  {
+    slug: "invoices",
+    name: "Invoices",
+    description:
+      "Portal para generar y gestionar tus facturas de forma rápida y sencilla.",
+    url: "https://invoices.corpsc.com/",
+    // Placeholder: reemplazar por una foto real en /public/empresas.
+    image: "/empresas/invoices-destacada.svg",
+    background: "#0f766e",
+  },
 ];

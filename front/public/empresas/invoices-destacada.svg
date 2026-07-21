@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="400" viewBox="0 0 800 400" role="img" aria-label="Invoices">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0f766e"/>
+      <stop offset="1" stop-color="#0e7490"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="400" fill="url(#bg)"/>
+  <g opacity="0.14" fill="#ffffff">
+    <circle cx="660" cy="70" r="150"/>
+    <circle cx="120" cy="360" r="110"/>
+  </g>
+  <!-- Documento / factura -->
+  <g transform="translate(300,90)" fill="none" stroke="#ffffff" stroke-width="8" stroke-linejoin="round" stroke-linecap="round">
+    <path d="M40 0 h96 l44 44 v176 a12 12 0 0 1 -12 12 H40 a12 12 0 0 1 -12 -12 V12 A12 12 0 0 1 40 0 Z" fill="#ffffff" fill-opacity="0.10"/>
+    <path d="M136 0 v44 h44"/>
+    <line x1="60" y1="96" x2="168" y2="96"/>
+    <line x1="60" y1="132" x2="168" y2="132"/>
+    <line x1="60" y1="168" x2="120" y2="168"/>
+  </g>
+</svg>
