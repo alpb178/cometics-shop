@@ -92,7 +92,7 @@ export const Footer = ({ locale }: { locale: string }) => {
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label={s.name}
-                  className="flex h-10 w-10 items-center justify-center rounded-full border border-gray-200 bg-white text-primary shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md"
+                  className="flex h-10 w-10 items-center justify-center rounded-full border border-gray-200 bg-white text-black shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md"
                 >
                   {SOCIAL_ICON[s.name]}
                 </Link>
