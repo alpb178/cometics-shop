@@ -41,7 +41,7 @@ export interface Product {
   description: string | null;
   image: StrapiMedia | null;
   images: StrapiMedia[] | null;
-  categories: Category | null;
+  categories: Category[];
   visible: boolean;
   publishedAt: string | null;
   createdAt: string;

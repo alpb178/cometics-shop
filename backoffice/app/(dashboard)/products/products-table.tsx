@@ -50,7 +50,10 @@ export function ProductsTable({
     const term = q.trim().toLowerCase();
     return products.filter((p) => {
       if (term && !(p.name ?? "").toLowerCase().includes(term)) return false;
-      if (categoryId && String(p.categories?.id ?? "") !== categoryId)
+      if (
+        categoryId &&
+        !p.categories?.some((c) => String(c.id) === categoryId)
+      )
         return false;
       if (status === "visible" && !p.visible) return false;
       if (status === "hidden" && p.visible) return false;
@@ -175,7 +178,7 @@ export function ProductsTable({
                 </div>
               </td>
               <td className="px-4 py-3 text-neutral-600">
-                {p.categories?.name ?? "—"}
+                {p.categories?.map((c) => c.name).join(", ") || "—"}
               </td>
               <td className="px-4 py-3 text-neutral-600">
                 {formatPrice(p.price, p.currency)}

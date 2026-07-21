@@ -125,9 +125,9 @@ export const SingleProduct = ({ product }: { product: Product }) => {
         </div>
 
         <div className="flex flex-col">
-          {product.categories?.name && (
+          {product.categories?.[0]?.name && (
             <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-              {product.categories.name}
+              {product.categories[0].name}
             </p>
           )}
           <h1 className="mt-2 font-display text-3xl font-semibold leading-tight tracking-tight text-foreground sm:text-4xl">
