@@ -140,9 +140,9 @@ export function CartPage({ locale }: { locale: string }) {
                       </button>
                     </div>
 
-                    {item.product.categories?.name && (
+                    {item.product.categories?.[0]?.name && (
                       <p className="mt-0.5 text-xs uppercase tracking-[0.14em] text-muted-foreground">
-                        {item.product.categories.name}
+                        {item.product.categories[0].name}
                       </p>
                     )}
 

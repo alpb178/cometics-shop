@@ -5,13 +5,18 @@ export const groupProductsByCategory = (products: Product[]) => {
   const withoutCategory: Product[] = [];
 
   products?.forEach((product) => {
-    const categoryName = product?.categories?.name || "";
+    // Un producto puede tener varias categorías; aparece bajo cada una.
+    const names = (product?.categories ?? [])
+      .map((c) => c?.name?.trim())
+      .filter((n): n is string => !!n);
 
-    if (categoryName && categoryName.trim() !== "") {
-      if (!grouped[categoryName]) {
-        grouped[categoryName] = [];
-      }
-      grouped[categoryName].push(product);
+    if (names.length > 0) {
+      names.forEach((categoryName) => {
+        if (!grouped[categoryName]) {
+          grouped[categoryName] = [];
+        }
+        grouped[categoryName].push(product);
+      });
     } else {
       withoutCategory.push(product);
     }

@@ -8,7 +8,7 @@ export interface Product {
   price: number;
   image: any;
   images: any[];
-  categories?: Category;
+  categories?: Category[];
   currency?: string;
   featured?: boolean;
   isNew?: boolean;

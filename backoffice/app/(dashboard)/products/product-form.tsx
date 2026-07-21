@@ -152,7 +152,7 @@ export function ProductForm({
               id="categoryId"
               name="categoryId"
               className="input"
-              defaultValue={product?.categories?.id ?? ""}
+              defaultValue={product?.categories?.[0]?.id ?? ""}
             >
               <option value="">— Sin categoría —</option>
               {categories.map((c) => (

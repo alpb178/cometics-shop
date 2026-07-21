@@ -47,8 +47,8 @@ export const ProductList = ({ products }: { products: Product[] }) => {
     let result = products;
 
     if (filter.category) {
-      result = result.filter(
-        (p) => p.categories?.name === filter.category
+      result = result.filter((p) =>
+        p.categories?.some((c) => c.name === filter.category)
       );
     }
 
