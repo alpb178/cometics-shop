@@ -5,7 +5,7 @@ import { getImageSrc } from "@/lib/strapi/strapiImage";
 import Image from "next/image";
 import { formatPrice } from "@/lib/price";
 import { useCart } from "@/context/cart-context";
-import { ShoppingBag } from "lucide-react";
+import { Eye, ShoppingBag } from "lucide-react";
 import Link from "next/link";
 import { useLocale } from "next-intl";
 import { trackEvent } from "@/lib/track-event";
@@ -55,6 +55,16 @@ export const ProductItem = ({ product }: { product: Product }) => {
               </span>
             )}
           </div>
+
+          {typeof product.views === "number" && product.views > 0 && (
+            <div
+              className="pointer-events-none absolute right-3 top-3 flex items-center gap-1 rounded-full bg-background/85 px-2 py-1 text-[10px] font-medium text-foreground shadow-sm backdrop-blur"
+              title={`${product.views} personas han visto este producto`}
+            >
+              <Eye className="h-3 w-3" strokeWidth={1.75} />
+              {product.views}
+            </div>
+          )}
 
           <button
             type="button"

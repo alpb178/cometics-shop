@@ -34,11 +34,34 @@ export default async function HomePage() {
     );
   }
 
+  // Contador social: personas (sesiones) que han visto el detalle de cada
+  // producto. Best-effort: si falla, las tarjetas simplemente no lo muestran.
+  const viewsBySlug: Record<string, number> = {};
+  try {
+    const res = await fetch(
+      new URL("api/store-events/product-views", process.env.NEXT_PUBLIC_API_URL),
+      { cache: "no-store" }
+    );
+    if (res.ok) {
+      const json = await res.json();
+      for (const r of json?.data ?? []) {
+        if (r?.slug) viewsBySlug[r.slug] = r.count ?? 0;
+      }
+    }
+  } catch {
+    // best-effort
+  }
+
+  const items = (products.data as any[]).map((p) => ({
+    ...p,
+    views: viewsBySlug[p.slug] ?? 0
+  }));
+
   return (
     <>
       <BrandHero />
       <div id="productos">
-        <ProductList products={products.data} />
+        <ProductList products={items} />
       </div>
       <GroupCompanies />
     </>

@@ -191,6 +191,21 @@ export class TrackingService {
     return rows;
   }
 
+  /**
+   * Personas (sesiones distintas) que han entrado al detalle de cada producto.
+   * Público: alimenta el contador social en las tarjetas de la tienda.
+   */
+  async getProductViewCounts() {
+    const rows = await this.prisma.$queryRaw<
+      { slug: string | null; count: number }[]
+    >`
+      SELECT product_slug AS slug, count(DISTINCT session_id)::int AS count
+      FROM store_events
+      WHERE type = 'product_view' AND product_slug IS NOT NULL
+      GROUP BY product_slug`;
+    return rows;
+  }
+
   /** Clics en las tarjetas de "Sitios de interés" (Grupo CorpSC), por sitio. */
   async getGroupClicks(opts: { days: number; limit: number }) {
     const since = new Date(Date.now() - opts.days * 86400000);
