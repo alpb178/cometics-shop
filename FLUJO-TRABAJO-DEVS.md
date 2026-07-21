@@ -1,4 +1,4 @@
-# Flujo de Trabajo para Desarrolladores — EMX Comunicaciones
+# Flujo de Trabajo para Desarrolladores
 
 > Versión 1.0 — Abril 2026
 
@@ -130,15 +130,19 @@ Al abrir un PR se carga automáticamente este template:
 
 ```markdown
 ## ¿Qué hace este PR?
+
 <!-- Descripción breve del cambio -->
 
 ## ¿Por qué?
+
 <!-- Contexto, motivación o issue relacionado. Ej: Closes #123 -->
 
 ## ¿Cómo probarlo?
+
 <!-- Pasos para verificar que funciona correctamente -->
 
 ## Checklist
+
 - [ ] El código funciona en local
 - [ ] Tests añadidos o actualizados
 - [ ] Sin `console.log`, `dd()` o código de debug olvidado
@@ -227,4 +231,4 @@ Cuando el CTO lo decida según el estado de `develop` en staging. No hay un cade
 
 ---
 
-*Documento generado por Pepi 🦞 — para dudas, preguntar en el canal del equipo.*
+_Documento generado por Pepi 🦞 — para dudas, preguntar en el canal del equipo._
