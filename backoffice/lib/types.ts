@@ -146,6 +146,12 @@ export interface TopProduct {
   count: number;
 }
 
+/** Clics en una tarjeta de "Sitios de interés" (label = nombre del sitio). */
+export interface GroupClick {
+  label: string | null;
+  count: number;
+}
+
 export interface OrderStats {
   total: number;
   pending: number;

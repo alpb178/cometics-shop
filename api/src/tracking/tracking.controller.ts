@@ -128,6 +128,22 @@ export class TrackingController {
     };
   }
 
+  @Get("store-events/group-clicks")
+  @UseGuards(JwtAuthGuard, StaffGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: "Clics en 'Sitios de interés' por sitio (solo staff)" })
+  async groupClicks(
+    @Query("days") days?: string,
+    @Query("limit") limit?: string,
+  ) {
+    return {
+      data: await this.trackingService.getGroupClicks({
+        days: Math.min(Number(days) || 30, 90),
+        limit: Math.min(Number(limit) || 20, 50),
+      }),
+    };
+  }
+
   @Get("store-events/recent")
   @UseGuards(JwtAuthGuard, StaffGuard)
   @ApiBearerAuth()

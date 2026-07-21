@@ -12,6 +12,7 @@ export const ALLOWED_EVENT_TYPES = [
   "product_view",
   "add_to_cart",
   "cart_view",
+  "group_click", // clic en una tarjeta de "Sitios de interés" (Grupo CorpSC)
 ] as const;
 
 /** Mismas reglas de clasificación de fuentes que el servicio original. */
@@ -185,6 +186,21 @@ export class TrackingService {
       FROM store_events
       WHERE type = 'product_view' AND created_at >= ${since}
       GROUP BY product_slug
+      ORDER BY count DESC
+      LIMIT ${opts.limit}`;
+    return rows;
+  }
+
+  /** Clics en las tarjetas de "Sitios de interés" (Grupo CorpSC), por sitio. */
+  async getGroupClicks(opts: { days: number; limit: number }) {
+    const since = new Date(Date.now() - opts.days * 86400000);
+    const rows = await this.prisma.$queryRaw<
+      { label: string | null; count: number }[]
+    >`
+      SELECT label, count(*)::int AS count
+      FROM store_events
+      WHERE type = 'group_click' AND created_at >= ${since}
+      GROUP BY label
       ORDER BY count DESC
       LIMIT ${opts.limit}`;
     return rows;

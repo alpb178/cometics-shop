@@ -5,7 +5,12 @@ const STRAPI_URL = process.env.NEXT_PUBLIC_API_URL;
 const SESSION_COOKIE = "iris_sid";
 const ONE_YEAR = 60 * 60 * 24 * 365;
 
-const ALLOWED_TYPES = ["product_view", "add_to_cart", "cart_view"] as const;
+const ALLOWED_TYPES = [
+  "product_view",
+  "add_to_cart",
+  "cart_view",
+  "group_click"
+] as const;
 type EventType = (typeof ALLOWED_TYPES)[number];
 
 /**
