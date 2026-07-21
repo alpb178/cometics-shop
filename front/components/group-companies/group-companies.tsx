@@ -3,16 +3,19 @@
 import { ChevronLeft, ChevronRight, ExternalLink } from "lucide-react";
 import { useEffect, useRef } from "react";
 import { Company, GROUP_COMPANIES } from "@/lib/companies";
+import { trackEvent } from "@/lib/track-event";
 
 // Tarjeta de una empresa hermana: imagen destacada con el nombre en overlay,
 // descripción y CTA "Visitar sitio" (enlace externo seguro).
 function CompanyCard({ company }: { company: Company }) {
+  const track = () => trackEvent("group_click", { label: company.name });
   return (
     <article className="flex h-full flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-sm transition-shadow hover:shadow-md">
       <a
         href={company.url}
         target="_blank"
         rel="noopener noreferrer"
+        onClick={track}
         className="group relative block h-48 overflow-hidden"
         style={{ backgroundColor: company.background }}
         tabIndex={-1}
@@ -40,6 +43,7 @@ function CompanyCard({ company }: { company: Company }) {
           href={company.url}
           target="_blank"
           rel="noopener noreferrer"
+          onClick={track}
           className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground transition-colors hover:opacity-90 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
           aria-label={`Visitar el sitio de ${company.name} (se abre en una pestaña nueva)`}
         >
