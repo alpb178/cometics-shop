@@ -2,51 +2,9 @@
 
 import { ChevronLeft, ChevronRight, ExternalLink } from "lucide-react";
 import { useEffect, useRef } from "react";
-import {
-  motion,
-  useMotionValue,
-  useSpring,
-  useTransform
-} from "framer-motion";
 import { Company, GROUP_COMPANIES } from "@/lib/companies";
 import { trackEvent } from "@/lib/track-event";
-
-// Envoltorio con inclinación 3D al mover el cursor (perspectiva + rotateX/Y),
-// suavizada con springs. En táctil no aplica (no hay hover) y no estorba.
-function Tilt3D({ children }: { children: React.ReactNode }) {
-  const px = useMotionValue(0);
-  const py = useMotionValue(0);
-  const rotateX = useSpring(useTransform(py, [-0.5, 0.5], [9, -9]), {
-    stiffness: 220,
-    damping: 18
-  });
-  const rotateY = useSpring(useTransform(px, [-0.5, 0.5], [-9, 9]), {
-    stiffness: 220,
-    damping: 18
-  });
-
-  const onMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    const r = e.currentTarget.getBoundingClientRect();
-    px.set((e.clientX - r.left) / r.width - 0.5);
-    py.set((e.clientY - r.top) / r.height - 0.5);
-  };
-  const reset = () => {
-    px.set(0);
-    py.set(0);
-  };
-
-  return (
-    <motion.div
-      onMouseMove={onMove}
-      onMouseLeave={reset}
-      whileHover={{ scale: 1.03 }}
-      style={{ rotateX, rotateY, transformPerspective: 900 }}
-      className="h-full [transform-style:preserve-3d]"
-    >
-      {children}
-    </motion.div>
-  );
-}
+import { Tilt3D } from "@/components/ui/tilt-3d";
 
 // Tarjeta de una empresa hermana: imagen destacada con el nombre en overlay,
 // descripción y CTA "Visitar sitio" (enlace externo seguro).
