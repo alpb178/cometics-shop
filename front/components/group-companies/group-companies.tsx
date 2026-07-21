@@ -1,7 +1,7 @@
 "use client";
 
 import { ChevronLeft, ChevronRight, ExternalLink } from "lucide-react";
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import { Company, GROUP_COMPANIES } from "@/lib/companies";
 
 // Tarjeta de una empresa hermana: imagen destacada con el nombre en overlay,
@@ -59,6 +59,38 @@ export function GroupCompanies() {
     const el = scroller.current;
     if (el) el.scrollBy({ left: dir * el.clientWidth * 0.85, behavior: "smooth" });
   };
+
+  // Auto-avance del carrusel: cada 4.5s pasa a la siguiente "página" y al
+  // llegar al final vuelve al inicio. Se pausa al pasar el puntero por encima y
+  // respeta prefers-reduced-motion.
+  useEffect(() => {
+    const el = scroller.current;
+    if (!el) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+    let paused = false;
+    const pause = () => (paused = true);
+    const resume = () => (paused = false);
+    el.addEventListener("pointerenter", pause);
+    el.addEventListener("pointerleave", resume);
+    el.addEventListener("touchstart", pause, { passive: true });
+
+    const id = setInterval(() => {
+      if (paused) return;
+      const nearEnd = el.scrollLeft + el.clientWidth >= el.scrollWidth - 8;
+      el.scrollTo({
+        left: nearEnd ? 0 : el.scrollLeft + el.clientWidth * 0.85,
+        behavior: "smooth"
+      });
+    }, 4500);
+
+    return () => {
+      clearInterval(id);
+      el.removeEventListener("pointerenter", pause);
+      el.removeEventListener("pointerleave", resume);
+      el.removeEventListener("touchstart", pause);
+    };
+  }, []);
 
   return (
     <section
