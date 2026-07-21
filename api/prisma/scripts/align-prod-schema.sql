@@ -26,6 +26,9 @@
 -- products.visible: Boolean? @default(true)
 ALTER TABLE products ADD COLUMN IF NOT EXISTS visible boolean DEFAULT true;
 
+-- products.discount: Int? — porcentaje de descuento (oferta). NULL/0 = sin oferta.
+ALTER TABLE products ADD COLUMN IF NOT EXISTS discount integer;
+
 -- Retirar las tablas legado de Strapi que la API no usa (admin_* y strapi_*).
 -- CASCADE elimina también las FKs created_by_id/updated_by_id que apuntaban a
 -- admin_users desde las tablas de negocio (las columnas se conservan, sin

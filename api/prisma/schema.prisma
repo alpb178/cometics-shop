@@ -335,6 +335,7 @@ model products {
   updated_by_id           Int?
   locale                  String?                   @db.VarChar(255)
   visible                 Boolean?                  @default(true)
+  discount                Int?
   products_categories_lnk products_categories_lnk[]
 
   @@index([document_id])

@@ -68,6 +68,7 @@ export interface ProductInput {
   images: number[];
   categories: number | null;
   visible?: boolean;
+  discount?: number | null;
 }
 
 export async function createProduct(input: ProductInput): Promise<Product> {

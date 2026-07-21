@@ -15,6 +15,8 @@ export interface ProductInput {
   images?: number[];
   categories?: number | number[] | null;
   visible?: boolean;
+  /** Porcentaje de descuento (oferta). null/0 = sin oferta. */
+  discount?: number | null;
 }
 
 type Tx = Parameters<Parameters<PrismaService["$transaction"]>[0]>[0];
@@ -95,6 +97,7 @@ export class ProductsService {
           description: input.description ?? null,
           slug: input.slug ?? this.slugify(input.name ?? ""),
           visible: input.visible ?? true,
+          discount: input.discount ?? null,
           created_at: now,
           updated_at: now,
           published_at: now, // fila única siempre publicada (sin draft/publish)
@@ -118,6 +121,7 @@ export class ProductsService {
           currency: input.currency,
           description: input.description,
           slug: input.slug,
+          discount: input.discount,
           updated_at: new Date(),
           // Mantiene la fila publicada (por si viniera de datos heredados sin
           // publicar); la visibilidad en tienda la controla `visible`.
@@ -252,6 +256,7 @@ export class ProductsService {
     currency: string | null;
     description: string | null;
     visible: boolean | null;
+    discount: number | null;
     created_at: Date | null;
     updated_at: Date | null;
     published_at: Date | null;
@@ -269,6 +274,12 @@ export class ProductsService {
         include: { categories: true },
       }),
     ]);
+    // "Nuevo" = creado en los últimos 15 días (por fecha de creación).
+    const NEW_WINDOW_MS = 15 * 24 * 60 * 60 * 1000;
+    const isNew = row.created_at
+      ? Date.now() - row.created_at.getTime() <= NEW_WINDOW_MS
+      : false;
+
     return {
       id: row.id,
       documentId: row.document_id,
@@ -278,6 +289,8 @@ export class ProductsService {
       currency: row.currency,
       description: row.description,
       visible: row.visible ?? true,
+      discount: row.discount ?? null,
+      isNew,
       image,
       images: imagesRel
         .filter((r) => r.files)

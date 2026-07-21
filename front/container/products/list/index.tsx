@@ -25,6 +25,19 @@ export const ProductList = ({ products }: { products: Product[] }) => {
     };
   }, [products]);
 
+  // "Destacados" = los 10 productos más visitados (con al menos 1 visita).
+  const featuredSlugs = useMemo(
+    () =>
+      new Set(
+        [...products]
+          .filter((p) => (p.views ?? 0) >= 1)
+          .sort((a, b) => (b.views ?? 0) - (a.views ?? 0))
+          .slice(0, 10)
+          .map((p) => p.slug)
+      ),
+    [products]
+  );
+
   const [filter, setFilter] = useState<FilterState>({
     category: null,
     priceRange: [minPrice, maxPrice],
@@ -53,7 +66,7 @@ export const ProductList = ({ products }: { products: Product[] }) => {
     }
 
     if (filter.flags.has("featured")) {
-      result = result.filter((p) => p.featured === true);
+      result = result.filter((p) => featuredSlugs.has(p.slug));
     }
     if (filter.flags.has("isNew")) {
       result = result.filter((p) => p.isNew === true);
@@ -93,10 +106,14 @@ export const ProductList = ({ products }: { products: Product[] }) => {
         break;
       case "newest":
       default:
-        sorted.sort((a, b) => Number(b.isNew ?? 0) - Number(a.isNew ?? 0));
+        sorted.sort(
+          (a, b) =>
+            new Date(b.createdAt ?? 0).getTime() -
+            new Date(a.createdAt ?? 0).getTime()
+        );
     }
     return sorted;
-  }, [products, filter, sort, searchQuery, maxPrice]);
+  }, [products, filter, sort, searchQuery, maxPrice, featuredSlugs]);
 
   useEffect(() => {
     setPage(1);
