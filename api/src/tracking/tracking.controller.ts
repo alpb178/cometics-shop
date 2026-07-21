@@ -128,6 +128,14 @@ export class TrackingController {
     };
   }
 
+  @Get("store-events/product-views")
+  @ApiOperation({
+    summary: "Personas que han visto el detalle de cada producto (público)",
+  })
+  async productViews() {
+    return { data: await this.trackingService.getProductViewCounts() };
+  }
+
   @Get("store-events/group-clicks")
   @UseGuards(JwtAuthGuard, StaffGuard)
   @ApiBearerAuth()

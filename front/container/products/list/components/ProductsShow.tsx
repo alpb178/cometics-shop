@@ -32,7 +32,7 @@ export const ProductShows = ({
           viewport={{ once: true, margin: "-40px" }}
           transition={{ duration: 0.4, delay: Math.min(i, 8) * 0.05 }}
         >
-          <Tilt3D max={6} scale={1.02}>
+          <Tilt3D max={14} scale={1.06}>
             <ProductItem product={product} />
           </Tilt3D>
         </motion.div>

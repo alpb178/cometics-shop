@@ -13,4 +13,6 @@ export interface Product {
   featured?: boolean;
   isNew?: boolean;
   discount?: number;
+  /** Personas que han visto el detalle (contador social). */
+  views?: number;
 }
