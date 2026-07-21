@@ -1,7 +1,7 @@
 "use client";
 
 import { Product } from "@/definitions/Product";
-import { getImageSrc } from "@/lib/strapi/strapiImage";
+import { getImageSrc, cloudinaryResize } from "@/lib/strapi/strapiImage";
 import Image from "next/image";
 import { formatPrice } from "@/lib/price";
 import { useCart } from "@/context/cart-context";
@@ -28,8 +28,12 @@ export const ProductItem = ({ product }: { product: Product }) => {
       <article className="flex h-full flex-col">
         <div className="relative aspect-[3/4] w-full overflow-hidden bg-secondary">
           <Image
-            src={getImageSrc(
-              product?.image?.url ?? product?.images?.[0]?.url ?? ""
+            src={cloudinaryResize(
+              getImageSrc(
+                product?.image?.url ?? product?.images?.[0]?.url ?? ""
+              ),
+              1088,
+              976
             )}
             alt={product.name}
             fill
