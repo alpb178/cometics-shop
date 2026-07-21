@@ -11,6 +11,12 @@ Antes de cualquier cambio en este repo, sigue el flujo definido en [`FLUJO-TRABA
 - Convención de commits: `feat:`, `fix:`, `chore:`, `refactor:`, `test:`, `docs:`.
 - PRs pequeños y enfocados — una sola cosa por PR.
 
+## Idioma y nomenclatura
+
+- **Todo el código va en inglés**: nombres de tablas y columnas de base de datos, migraciones, nombres de componentes/archivos/variables/funciones, comentarios de código, mensajes de commit, y títulos y cuerpos de PR.
+- **El español se reserva exclusivamente para los textos de cara al usuario** (copy de UI, mensajes visibles, contenido de CMS, correos al cliente).
+- El esquema heredado de Strapi conserva nombres en inglés/snake_case; mantener esa convención en el esquema nuevo. El código preexistente en español se migra de forma oportunista al tocarlo, sin reescrituras masivas.
+
 ## Crear una rama nueva
 
 ```bash
