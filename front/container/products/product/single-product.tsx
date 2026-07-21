@@ -38,7 +38,13 @@ export const SingleProduct = ({ product }: { product: Product }) => {
     });
   }, [product.slug, product.name]);
 
-  const images = product.images && product.images.length > 0 ? product.images : [];
+  // Gallery shows the cover image (product.image) first, then the rest,
+  // skipping the cover if it is already included in product.images.
+  const gallery =
+    product.images && product.images.length > 0 ? product.images : [];
+  const images = product.image?.url
+    ? [product.image, ...gallery.filter((img: any) => img?.url !== product.image.url)]
+    : gallery;
   const activeImage = images[activeIndex];
 
   const description = product.description ?? "";
