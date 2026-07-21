@@ -43,6 +43,7 @@ export interface Product {
   images: StrapiMedia[] | null;
   categories: Category[];
   visible: boolean;
+  discount: number | null;
   publishedAt: string | null;
   createdAt: string;
   updatedAt: string;
