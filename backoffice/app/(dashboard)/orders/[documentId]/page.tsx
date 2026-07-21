@@ -1,11 +1,12 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, MessageCircle } from "lucide-react";
 import { ConfirmButton } from "@/components/confirm-button";
 import { getOrder } from "@/lib/data";
 import { formatDate, mediaUrl } from "@/lib/utils";
 import { StatusSelect } from "../status-select";
 import { PaymentVerification } from "../payment-verification";
+import { PhoneActions } from "../phone-actions";
 import { deleteOrderFromDetailAction } from "../actions";
 
 export const dynamic = "force-dynamic";
@@ -37,6 +38,9 @@ export default async function OrderDetailPage({
 
   const proof = mediaUrl(order.paymentProof);
   const addr = order.shippingAddress;
+  // La verificación de pago y el comprobante solo aplican a pagos por QR; en
+  // efectivo no hay nada que verificar online (el estado se cambia abajo).
+  const isQr = order.paymentMethod === "qr";
 
   // La API expone el precio original (sin markup) solo a staff. Con él
   // desglosamos el subtotal en ganancia de productos + ganancia de plataforma.
@@ -231,11 +235,13 @@ export default async function OrderDetailPage({
 
         {/* Lateral */}
         <div className="min-w-0 space-y-6">
-          <PaymentVerification
-            documentId={order.documentId}
-            status={order.status}
-            cancellationReason={order.cancellationReason}
-          />
+          {isQr && (
+            <PaymentVerification
+              documentId={order.documentId}
+              status={order.status}
+              cancellationReason={order.cancellationReason}
+            />
+          )}
 
           <div className="card p-5">
             <StatusSelect documentId={order.documentId} current={order.status} />
@@ -262,7 +268,12 @@ export default async function OrderDetailPage({
             <div className="card p-5 text-sm">
               <h2 className="mb-2 font-medium">Envío</h2>
               <p className="font-medium">{addr.fullName}</p>
-              <p className="text-neutral-600">{addr.phone}</p>
+              {addr.phone && (
+                <>
+                  <p className="text-neutral-600">{addr.phone}</p>
+                  <PhoneActions phone={addr.phone} />
+                </>
+              )}
               {addr.ci && (
                 <p className="text-neutral-600">CI: {addr.ci}</p>
               )}
@@ -299,17 +310,31 @@ export default async function OrderDetailPage({
                     loading="lazy"
                   />
                 </div>
-                <a
-                  href={`https://www.google.com/maps?q=${order.destLat},${order.destLng}`}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="mt-2 inline-block text-brand hover:underline"
-                >
-                  Abrir en Google Maps
-                </a>
+                <div className="mt-2 flex flex-wrap items-center gap-3">
+                  <a
+                    href={`https://www.google.com/maps?q=${order.destLat},${order.destLng}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-brand hover:underline"
+                  >
+                    Abrir en Google Maps
+                  </a>
+                  <a
+                    href={`https://wa.me/?text=${encodeURIComponent(
+                      `Ubicación de entrega del pedido ${order.orderNumber}: https://www.google.com/maps?q=${order.destLat},${order.destLng}`
+                    )}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center gap-1 rounded-md bg-green-50 px-2 py-1 text-xs font-medium text-green-700 hover:bg-green-100"
+                  >
+                    <MessageCircle className="h-3.5 w-3.5" />
+                    Compartir por WhatsApp
+                  </a>
+                </div>
               </div>
             )}
 
+          {isQr && (
           <div className="card p-5">
             <h2 className="mb-2 font-medium">Comprobante de pago</h2>
             {order.paymentReference && (
@@ -331,6 +356,7 @@ export default async function OrderDetailPage({
               <p className="text-sm text-neutral-400">Sin comprobante.</p>
             )}
           </div>
+          )}
         </div>
       </div>
     </div>

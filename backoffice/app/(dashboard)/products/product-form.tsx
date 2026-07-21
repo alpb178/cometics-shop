@@ -145,6 +145,27 @@ export function ProductForm({
           </div>
 
           <div className="mt-4">
+            <label className="label" htmlFor="discount">
+              Descuento (%)
+            </label>
+            <input
+              id="discount"
+              name="discount"
+              type="number"
+              min="0"
+              max="100"
+              step="1"
+              className="input"
+              defaultValue={product?.discount ?? ""}
+              placeholder="0"
+            />
+            <p className="mt-1 text-xs text-neutral-500">
+              Déjalo vacío o 0 si el producto no está en oferta. En la tienda se
+              muestra el precio rebajado y la etiqueta −%.
+            </p>
+          </div>
+
+          <div className="mt-4">
             <label className="label" htmlFor="categoryId">
               Categoría
             </label>
@@ -152,7 +173,7 @@ export function ProductForm({
               id="categoryId"
               name="categoryId"
               className="input"
-              defaultValue={product?.categories?.id ?? ""}
+              defaultValue={product?.categories?.[0]?.id ?? ""}
             >
               <option value="">— Sin categoría —</option>
               {categories.map((c) => (

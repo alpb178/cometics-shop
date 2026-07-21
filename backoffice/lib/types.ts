@@ -41,8 +41,9 @@ export interface Product {
   description: string | null;
   image: StrapiMedia | null;
   images: StrapiMedia[] | null;
-  categories: Category | null;
+  categories: Category[];
   visible: boolean;
+  discount: number | null;
   publishedAt: string | null;
   createdAt: string;
   updatedAt: string;
@@ -142,6 +143,12 @@ export interface HourPoint {
 
 export interface TopProduct {
   slug: string | null;
+  label: string | null;
+  count: number;
+}
+
+/** Clics en una tarjeta de "Sitios de interés" (label = nombre del sitio). */
+export interface GroupClick {
   label: string | null;
   count: number;
 }

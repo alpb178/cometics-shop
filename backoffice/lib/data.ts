@@ -11,6 +11,7 @@ import type {
   Category,
   DayPoint,
   Faq,
+  GroupClick,
   HourPoint,
   Order,
   OrderStats,
@@ -67,6 +68,7 @@ export interface ProductInput {
   images: number[];
   categories: number | null;
   visible?: boolean;
+  discount?: number | null;
 }
 
 export async function createProduct(input: ProductInput): Promise<Product> {
@@ -310,6 +312,17 @@ export async function getTopProducts(
 ): Promise<TopProduct[]> {
   const res = await strapiGet<ListResponse<TopProduct>>(
     `/api/store-events/top-products?days=${days}&limit=${limit}`
+  );
+  return res.data ?? [];
+}
+
+// Clics en las tarjetas de "Sitios de interés" (Grupo CorpSC), por sitio.
+export async function getGroupClicks(
+  days = 30,
+  limit = 20
+): Promise<GroupClick[]> {
+  const res = await strapiGet<ListResponse<GroupClick>>(
+    `/api/store-events/group-clicks?days=${days}&limit=${limit}`
   );
   return res.data ?? [];
 }

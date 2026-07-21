@@ -49,6 +49,8 @@ async function buildInput(formData: FormData): Promise<ProductInput> {
     image: imageId,
     images: galleryIds,
     categories: parseNumber(formData.get("categoryId")),
+    // Descuento (oferta) en %: vacío → sin oferta.
+    discount: parseNumber(formData.get("discount")),
     // "on" (checkbox marcado) → visible; ausente → oculto
     visible: formData.get("visible") === "on"
   };

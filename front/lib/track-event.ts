@@ -3,7 +3,11 @@
  * la reenvía a Strapi. Best-effort: usa `sendBeacon` cuando está disponible y
  * nunca lanza (el tracking no debe afectar a la UX).
  */
-export type StoreEventType = "product_view" | "add_to_cart" | "cart_view";
+export type StoreEventType =
+  | "product_view"
+  | "add_to_cart"
+  | "cart_view"
+  | "group_click";
 
 export interface TrackEventPayload {
   label?: string;

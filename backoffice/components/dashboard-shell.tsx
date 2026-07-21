@@ -14,6 +14,7 @@ import {
   Eye,
   Users,
   TrendingUp,
+  ExternalLink,
   LogOut,
   Menu,
   X,
@@ -37,6 +38,7 @@ const NAV: {
   { href: "/content", label: "Contenido", icon: FileText },
   { href: "/visits", label: "Visitas", icon: Eye },
   { href: "/top-products", label: "Top productos", icon: TrendingUp },
+  { href: "/site-clicks", label: "Sitios de interés", icon: ExternalLink },
   { href: "/users", label: "Usuarios", icon: Users },
 ];
 

@@ -4,7 +4,6 @@ import { motion } from "framer-motion";
 import { MapPin, MessageCircle, Send, Sparkles } from "lucide-react";
 import Link from "next/link";
 import { FormProvider, useForm } from "react-hook-form";
-import { Button } from "../button/Button";
 import { TextInput } from "../form/text-input/TextInput";
 import ViewMap from "../map/ViewMap";
 import { socials } from "./socials";
@@ -124,13 +123,14 @@ export function FormNextToSection({
                 {form?.inputs?.map((input: any) => {
                   if (input?.type === "submit") {
                     return (
-                      <Button
+                      <button
                         key={input?.name}
-                        className="w-full text-white rounded-xl py-3 px-4"
-                        variant="outline"
-                        label="Enviar por WhatsApp"
                         type="submit"
-                      />
+                        className="mt-2 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-green-500 px-4 py-3.5 text-base font-semibold text-white shadow-lg shadow-green-500/30 transition-all duration-300 hover:-translate-y-0.5 hover:bg-green-600 hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-offset-2"
+                      >
+                        <MessageCircle className="h-5 w-5" />
+                        Enviar por WhatsApp
+                      </button>
                     );
                   }
                   if (input?.type === "textarea") {

@@ -5,6 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { ArrowRight, ChevronLeft, ChevronRight, MapPin } from "lucide-react";
+import { SlideBurst } from "@/components/carrousel/slide-burst";
 
 const CAROUSEL_IMAGES = [
   "/images/carrousel/1.jpeg",
@@ -57,6 +58,9 @@ const HeroCarousel = ({ images }: { images: string[] }) => {
           />
         </div>
       ))}
+
+      {/* Ráfaga de destellos al cambiar de slide (debajo de flechas/indicadores) */}
+      <SlideBurst trigger={index} className="z-[5]" />
 
       {images.length > 1 && (
         <>

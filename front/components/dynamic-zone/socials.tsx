@@ -4,6 +4,7 @@ import {
   IconBrandInstagram,
   IconBrandLinkedin,
   IconBrandSnapchat,
+  IconBrandTiktok,
   IconBrandX
 } from "@tabler/icons-react";
 
@@ -30,6 +31,10 @@ export const socials = {
   facebook: {
     title: "facebook",
     icon: <IconBrandFacebook className={iconClassName} />
+  },
+  tiktok: {
+    title: "tiktok",
+    icon: <IconBrandTiktok className={iconClassName} />
   },
   bluesky: {
     title: "bluesky",
