@@ -1,11 +1,5 @@
 {
   "env": {
     "HUSKY": "0"
-  },
-  "crons": [
-    {
-      "path": "/api/keep-alive",
-      "schedule": "0 12 * * *"
-    }
-  ]
+  }
 }
