@@ -18,7 +18,7 @@ export const GROUP_COMPANIES: Company[] = [
     slug: "corpsc",
     name: "CorpSC",
     description:
-      "Estudio de software boliviano: plataformas web, apps móviles y SaaS a medida.",
+      "Crear tu web, app a tu medida con los mejores precios.",
     url: "https://corpsc.com",
     image: "/empresas/corpsc-destacada.jpg",
     background: "#102136",
@@ -27,7 +27,7 @@ export const GROUP_COMPANIES: Company[] = [
     slug: "dando-muela",
     name: "Dando Muela",
     description:
-      "App boliviana para conectar con personas. Descárgala y empieza a chatear.",
+      "App para conectar con personas. Descárgala y empieza a chatear.",
     url: "https://dandomuela.com",
     image: "/empresas/dando-muela-destacada.jpg",
     background: "#111827",
