@@ -1,7 +1,6 @@
 import "@/styles/globals.scss";
 
 import { libreFranklin, merriweatherGaramond } from "@/components/ui/fonts";
-import LayoutApp from "@/app/layout-app";
 import { cn } from "@/lib/utils";
 import { Metadata } from "next";
 import { getMessages } from "next-intl/server";
@@ -36,7 +35,7 @@ export default async function LocaleLayout({
         <OrganizationWebSiteJsonLd />
         <PageTracker />
         <Providers locale={locale} messages={messages}>
-          <LayoutApp>{children}</LayoutApp>
+          {children}
         </Providers>
       </body>
     </html>
