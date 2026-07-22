@@ -10,7 +10,8 @@ const config: Config = {
     "./pages/**/*.{js,ts,jsx,tsx,mdx}",
     "./components/**/*.{js,ts,jsx,tsx,mdx}",
     "./app/**/*.{js,ts,jsx,tsx,mdx}",
-    "./container/**/*.{js,ts,jsx,tsx,mdx}"
+    "./container/**/*.{js,ts,jsx,tsx,mdx}",
+    "./lib/**/*.{js,ts,jsx,tsx,mdx}"
   ],
   darkMode: "class",
   theme: {
@@ -22,6 +23,24 @@ const config: Config = {
         libre: ["var(--font-libre-franklin)", "sans-serif"]
       },
       colors: {
+        // Tokens del panel de administración (`/admin`). No colisionan con los
+        // del storefront salvo `primary`/`secondary`, que son de la tienda; en
+        // el panel esos usos se mapearon a `brand`.
+        brand: {
+          DEFAULT: "#3f6f52",
+          dark: "#2f5440",
+          light: "#eaf2ec"
+        },
+        "on-primary": "#ffffff",
+        error: "#ba1a1a",
+        "on-error": "#ffffff",
+        "on-surface": "#171717",
+        "on-surface-variant": "#525252",
+        "surface-container-lowest": "#ffffff",
+        "surface-container-low": "#fafafa",
+        "surface-container-high": "#e5e5e5",
+        outline: "#a3a3a3",
+        "outline-variant": "#e5e5e5",
         background: "rgb(var(--background))",
         foreground: "rgb(var(--foreground))",
         card: {
