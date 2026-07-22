@@ -8,7 +8,7 @@ import { onSendWhatsAppMessage } from "@/lib/utils";
 import { logsStrapi } from "@/lib/strapi/logs";
 
 export const HelpButton = () => {
-  const [isOpen, setIsOpen] = useState(true);
+  const [isOpen, setIsOpen] = useState(false);
   const [isCartOpen, setIsCartOpen] = useState(false);
 
   // Check if cart drawer is open
