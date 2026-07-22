@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import {
+  LayoutDashboard,
   LogOut,
   Package,
   User as UserIcon,
@@ -107,6 +108,20 @@ export function UserMenu({ locale }: { locale: string }) {
               <Package className="h-4 w-4 text-muted-foreground" strokeWidth={1.5} />
               Mis pedidos
             </Link>
+            {user.isStaff && (
+              <Link
+                href="/admin"
+                className="flex items-center gap-3 px-5 py-2.5 text-sm transition-colors hover:bg-secondary"
+                onClick={() => setOpen(false)}
+                role="menuitem"
+              >
+                <LayoutDashboard
+                  className="h-4 w-4 text-muted-foreground"
+                  strokeWidth={1.5}
+                />
+                Panel de administración
+              </Link>
+            )}
           </div>
 
           <button

@@ -34,9 +34,11 @@ PRs a `main` solo cuando el usuario lo pida explícitamente y el cambio ya esté
 
 ## Estructura del repo
 
-- `front/` — Next.js (TypeScript), storefront
+- `front/` — Next.js (TypeScript), storefront **+ panel de administración**
+  integrado en la ruta interna `/admin` (`front/app/[locale]/admin`, con su código
+  en `front/lib/admin` y `front/components/admin`). Acceso restringido a staff
+  reusando el login del storefront.
 - `api/` — NestJS 10 + Prisma (reemplazó al backend Strapi en julio de 2026)
-- `backoffice/` — Next.js, panel de administración
 - `mobile/` — React Native (Expo)
 
 Cada subcarpeta tiene su propio `CLAUDE.md` con detalles específicos del stack.
