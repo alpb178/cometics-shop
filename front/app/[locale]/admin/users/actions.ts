@@ -30,7 +30,7 @@ export async function createUserAction(formData: FormData) {
   }
 
   await createUser({ username, email, password, role });
-  revalidatePath("/users");
+  revalidatePath("/admin/users");
 }
 
 export async function updateUserAction(
@@ -47,7 +47,7 @@ export async function updateUserAction(
     throw new Error("Selecciona un rol válido.");
   }
   await updateUser(id, { username, email, role: input.role });
-  revalidatePath("/users");
+  revalidatePath("/admin/users");
 }
 
 export async function setUserPasswordAction(id: number, password: string) {
@@ -56,7 +56,7 @@ export async function setUserPasswordAction(id: number, password: string) {
     throw new Error("La contraseña debe tener al menos 8 caracteres.");
   }
   await setUserPassword(id, password);
-  revalidatePath("/users");
+  revalidatePath("/admin/users");
 }
 
 export async function deleteUserAction(id: number) {
@@ -65,7 +65,7 @@ export async function deleteUserAction(id: number) {
     throw new Error("No puedes eliminar tu propia cuenta.");
   }
   await deleteUser(id);
-  revalidatePath("/users");
+  revalidatePath("/admin/users");
 }
 
 /** Elimina varios usuarios seleccionados (nunca la cuenta propia). */
@@ -75,5 +75,5 @@ export async function bulkDeleteUsersAction(ids: number[]) {
     if (id === me.id) continue;
     await deleteUser(id);
   }
-  revalidatePath("/users");
+  revalidatePath("/admin/users");
 }

@@ -10,6 +10,9 @@ import { setProductVisibleAction } from "./actions";
 
 type SaveAction = (formData: FormData) => Promise<void>;
 
+/** Máximo de fotos en la galería (las ya guardadas cuentan). */
+const MAX_GALLERY = 3;
+
 export function ProductForm({
   categories,
   product,
@@ -54,8 +57,14 @@ export function ProductForm({
   const [keepGallery, setKeepGallery] = useState<StrapiMedia[]>(
     product?.images ?? []
   );
-  const [newGalleryPreviews, setNewGalleryPreviews] = useState<string[]>([]);
+  // Fotos nuevas: se acumulan de una en una en el estado (el input se vacía
+  // tras cada selección) y se añaden a mano al FormData al enviar.
+  const [newGallery, setNewGallery] = useState<{ file: File; url: string }[]>(
+    []
+  );
   const galleryInputRef = useRef<HTMLInputElement>(null);
+  const galleryCount = keepGallery.length + newGallery.length;
+  const galleryFull = galleryCount >= MAX_GALLERY;
 
   const currency = product?.currency ?? "BS";
 
@@ -65,8 +74,16 @@ export function ProductForm({
   }
 
   function onGalleryChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const files = Array.from(e.target.files ?? []);
-    setNewGalleryPreviews(files.map((f) => URL.createObjectURL(f)));
+    const file = e.target.files?.[0];
+    // El input se vacía siempre para poder volver a elegir la misma foto.
+    e.target.value = "";
+    if (!file || galleryFull) return;
+    setNewGallery((g) => [...g, { file, url: URL.createObjectURL(file) }]);
+  }
+
+  function removeNewGallery(url: string) {
+    URL.revokeObjectURL(url);
+    setNewGallery((g) => g.filter((p) => p.url !== url));
   }
 
   const keepGalleryIds = useMemo(
@@ -80,6 +97,7 @@ export function ProductForm({
     setSubmitting(true);
     try {
       const formData = new FormData(e.currentTarget);
+      for (const { file } of newGallery) formData.append("newGallery", file);
       await action(formData);
       // En éxito el server action redirige; si no, refrescamos.
       router.refresh();
@@ -199,7 +217,12 @@ export function ProductForm({
 
         {/* Galería */}
         <div className="card p-5">
-          <p className="label">Galería de fotos</p>
+          <p className="label">
+            Galería de fotos{" "}
+            <span className="font-normal text-neutral-500">
+              ({galleryCount}/{MAX_GALLERY})
+            </span>
+          </p>
           <div className="flex flex-wrap gap-3">
             {keepGallery.map((m) => (
               <div
@@ -224,39 +247,53 @@ export function ProductForm({
                 </button>
               </div>
             ))}
-            {newGalleryPreviews.map((src, i) => (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                key={i}
-                src={src}
-                alt={`Nueva foto ${i + 1}`}
-                className="h-24 w-24 rounded-lg border border-brand object-cover"
-              />
+            {newGallery.map(({ url }, i) => (
+              <div
+                key={url}
+                className="relative h-24 w-24 overflow-hidden rounded-lg border border-brand"
+              >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={url}
+                  alt={`Nueva foto ${i + 1}`}
+                  className="h-full w-full object-cover"
+                />
+                <button
+                  type="button"
+                  onClick={() => removeNewGallery(url)}
+                  className="absolute right-1 top-1 rounded-full bg-black/60 p-1 text-white hover:bg-black"
+                  aria-label="Quitar foto"
+                >
+                  <X className="h-3 w-3" />
+                </button>
+              </div>
             ))}
-            <button
-              type="button"
-              onClick={() => galleryInputRef.current?.click()}
-              className="flex h-24 w-24 flex-col items-center justify-center gap-1 rounded-lg border border-dashed border-neutral-300 text-neutral-400 hover:border-brand hover:text-brand"
-            >
-              <ImagePlus className="h-5 w-5" />
-              <span className="text-xs">Añadir</span>
-            </button>
+            {!galleryFull && (
+              <button
+                type="button"
+                onClick={() => galleryInputRef.current?.click()}
+                className="flex h-24 w-24 flex-col items-center justify-center gap-1 rounded-lg border border-dashed border-neutral-300 text-neutral-400 hover:border-brand hover:text-brand"
+              >
+                <ImagePlus className="h-5 w-5" />
+                <span className="text-xs">Añadir</span>
+              </button>
+            )}
           </div>
           <input
             ref={galleryInputRef}
-            name="newGallery"
             type="file"
             accept="image/*"
-            multiple
             className="hidden"
             onChange={onGalleryChange}
           />
           <input type="hidden" name="keepGalleryIds" value={keepGalleryIds} />
-          {newGalleryPreviews.length > 0 && (
-            <p className="mt-2 text-xs text-neutral-500">
-              {newGalleryPreviews.length} foto(s) nueva(s) por subir
-            </p>
-          )}
+          <p className="mt-2 text-xs text-neutral-500">
+            {galleryCount > MAX_GALLERY
+              ? `Hay ${galleryCount} fotos: al guardar solo se conservarán las primeras ${MAX_GALLERY}.`
+              : galleryFull
+              ? `Máximo de ${MAX_GALLERY} fotos alcanzado. Quita una para añadir otra.`
+              : `Se añaden de una en una, hasta ${MAX_GALLERY} fotos.`}
+          </p>
         </div>
       </div>
 
@@ -355,7 +392,7 @@ export function ProductForm({
           <button
             type="button"
             className="btn-secondary w-full"
-            onClick={() => router.push("/products")}
+            onClick={() => router.push("/admin/products")}
           >
             Cancelar
           </button>

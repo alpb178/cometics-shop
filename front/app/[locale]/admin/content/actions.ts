@@ -34,7 +34,7 @@ export async function savePaymentInfoAction(formData: FormData) {
   }
 
   await updatePaymentInfo(input);
-  revalidatePath("/content");
+  revalidatePath("/admin/content");
 }
 
 export async function savePricingAction(formData: FormData) {
@@ -50,14 +50,14 @@ export async function savePricingAction(formData: FormData) {
     scCenterLng: num("scCenterLng", -63.1821),
     scRadiusKm: num("scRadiusKm", 15)
   });
-  revalidatePath("/content");
+  revalidatePath("/admin/content");
 }
 
 export async function createFaqAction(question: string, answer: string) {
   await requireStaff();
   if (!question.trim()) throw new Error("La pregunta es obligatoria");
   await createFaq(question.trim(), answer.trim());
-  revalidatePath("/content");
+  revalidatePath("/admin/content");
 }
 
 export async function updateFaqAction(
@@ -68,11 +68,11 @@ export async function updateFaqAction(
   await requireStaff();
   if (!question.trim()) throw new Error("La pregunta es obligatoria");
   await updateFaq(documentId, question.trim(), answer.trim());
-  revalidatePath("/content");
+  revalidatePath("/admin/content");
 }
 
 export async function deleteFaqAction(documentId: string) {
   await requireStaff();
   await deleteFaq(documentId);
-  revalidatePath("/content");
+  revalidatePath("/admin/content");
 }
