@@ -8,6 +8,8 @@ import { useEffect, useState } from "react";
 import { trackEvent } from "@/lib/track-event";
 import { FormattedText } from "../../../components/text/formatted-text";
 import { QuantitySelector } from "./components/quantity-selector";
+import { SparklesCore } from "@/components/ui/sparkles";
+import { SHIPPING_POLICY_TEXT } from "@/lib/shipping";
 import Image from "next/image";
 import { useCart } from "@/context/cart-context";
 import { cn } from "@/lib/utils";
@@ -20,7 +22,7 @@ import {
   Store
 } from "lucide-react";
 
-const DESCRIPTION_PREVIEW_CHARS = 320;
+const DESCRIPTION_PREVIEW_CHARS = 700;
 
 export const SingleProduct = ({ product }: { product: Product }) => {
   const [activeIndex, setActiveIndex] = useState(0);
@@ -38,7 +40,8 @@ export const SingleProduct = ({ product }: { product: Product }) => {
     });
   }, [product.slug, product.name]);
 
-  const images = product.images && product.images.length > 0 ? product.images : [];
+  const images =
+    product.images && product.images.length > 0 ? product.images : [];
   const activeImage = images[activeIndex];
 
   const description = product.description ?? "";
@@ -51,7 +54,7 @@ export const SingleProduct = ({ product }: { product: Product }) => {
   const hasDiscount = !!product.discount && product.discount > 0;
   const finalPrice = hasDiscount
     ? (product.price ?? 0) * (1 - (product.discount ?? 0) / 100)
-    : product.price ?? 0;
+    : (product.price ?? 0);
 
   const handleAddToCart = async () => {
     for (let i = 0; i < quantity; i++) addToCart(product);
@@ -60,9 +63,7 @@ export const SingleProduct = ({ product }: { product: Product }) => {
       productSlug: product.slug,
       quantity
     });
-    setFeedback(
-      `Añadido al carrito: ${product.name} × ${quantity}`
-    );
+    setFeedback(`Añadido al carrito: ${product.name} × ${quantity}`);
     setTimeout(() => setFeedback(null), 3500);
     try {
       await logsStrapi(
@@ -76,8 +77,18 @@ export const SingleProduct = ({ product }: { product: Product }) => {
 
   return (
     <section className="mx-auto w-full max-w-screen-2xl px-4 py-6 sm:px-6 lg:px-10 lg:py-10">
-      <div className="grid grid-cols-1 gap-10 lg:grid-cols-[1fr_440px] lg:gap-16">
-        <div className="grid grid-cols-[64px_1fr] gap-3 sm:grid-cols-[88px_1fr] sm:gap-5">
+      {/* Reparto tipo Amazon: fotos a la izquierda, nombre y descripción en el
+          centro y la caja de compra a la derecha. En móvil el orden del DOM
+          manda: fotos, cabecera, carrito/envío y la descripción al final. */}
+      {/* `grid-rows-[auto_1fr]`: la fila de la cabecera se queda en su alto y
+          es la de la descripción la que absorbe el sobrante de las columnas
+          que ocupan las dos filas. Sin esto la cabecera crecía y dejaba un
+          hueco entre el precio y la descripción. */}
+      <div className="grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,520px)_minmax(0,1fr)_340px] lg:grid-rows-[auto_1fr] lg:gap-10">
+        {/* El bloque de imágenes se limita en ancho: estirado a toda la
+            columna la foto principal se escalaba por encima de la resolución
+            de origen y se veía pixelada. */}
+        <div className="grid w-full max-w-[520px] grid-cols-[64px_1fr] gap-3 sm:grid-cols-[88px_1fr] sm:gap-5 lg:sticky lg:top-24 lg:col-start-1 lg:row-span-2 lg:row-start-1 lg:self-start">
           <div className="flex flex-col gap-2">
             {images.map((image: any, index: number) => (
               <button
@@ -100,6 +111,20 @@ export const SingleProduct = ({ product }: { product: Product }) => {
                   sizes="88px"
                   className="object-cover"
                 />
+                {/* Grano de partículas sobre la miniatura activa. El canvas no
+                    captura clics para no anular el botón que lo contiene. */}
+                {index === activeIndex && (
+                  <SparklesCore
+                    id={`thumb-sparkles-${index}`}
+                    background="transparent"
+                    particleColor="#6DBA74"
+                    particleDensity={1400}
+                    minSize={0.4}
+                    maxSize={1.2}
+                    speed={2}
+                    className="pointer-events-none absolute inset-0 h-full w-full"
+                  />
+                )}
               </button>
             ))}
           </div>
@@ -116,7 +141,7 @@ export const SingleProduct = ({ product }: { product: Product }) => {
                 src={strapiImage(activeImage.url)}
                 alt={product.name}
                 fill
-                sizes="(max-width: 1024px) 100vw, 60vw"
+                sizes="(max-width: 640px) 100vw, 420px"
                 className="object-cover"
                 priority
               />
@@ -124,7 +149,8 @@ export const SingleProduct = ({ product }: { product: Product }) => {
           </motion.div>
         </div>
 
-        <div className="flex flex-col">
+        {/* Cabecera: categoría, nombre y precio */}
+        <div className="flex flex-col lg:col-start-2 lg:row-start-1">
           {product.categories?.[0]?.name && (
             <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
               {product.categories[0].name}
@@ -157,8 +183,12 @@ export const SingleProduct = ({ product }: { product: Product }) => {
               )}
             </div>
           )}
+        </div>
 
-          <div className="mt-6 border-t border-border pt-6">
+        {/* Caja de compra: cantidad, carrito y condiciones de envío. En móvil
+            cae justo debajo de las fotos, antes de la descripción. */}
+        <div className="border border-border p-5 lg:col-start-3 lg:row-span-2 lg:row-start-1 lg:self-start">
+          <div>
             <QuantitySelector
               min={1}
               max={20}
@@ -201,18 +231,28 @@ export const SingleProduct = ({ product }: { product: Product }) => {
             )}
           </div>
 
-          <div className="mt-6 grid grid-cols-2 gap-3 border-t border-border pt-6 text-xs">
+          <div className="mt-6 space-y-3 border-t border-border pt-6 text-xs">
             <div className="flex items-start gap-3">
-              <Truck className="mt-0.5 h-4 w-4 text-foreground" strokeWidth={1.5} />
+              <Truck
+                className="mt-0.5 h-4 w-4 text-foreground"
+                strokeWidth={1.5}
+              />
               <div>
                 <p className="font-semibold uppercase tracking-[0.12em] text-foreground">
                   Envío
                 </p>
                 <p className="text-muted-foreground">Entrega 24–72 h</p>
+                {/* Misma política que el aviso flotante de bienvenida. */}
+                <p className="mt-1 leading-relaxed text-muted-foreground">
+                  {SHIPPING_POLICY_TEXT}
+                </p>
               </div>
             </div>
             <div className="flex items-start gap-3">
-              <Store className="mt-0.5 h-4 w-4 text-foreground" strokeWidth={1.5} />
+              <Store
+                className="mt-0.5 h-4 w-4 text-foreground"
+                strokeWidth={1.5}
+              />
               <div>
                 <p className="font-semibold uppercase tracking-[0.12em] text-foreground">
                   Recogida
@@ -221,33 +261,36 @@ export const SingleProduct = ({ product }: { product: Product }) => {
               </div>
             </div>
           </div>
+        </div>
 
-          <div className="mt-8 border-t border-border pt-6">
-            <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.16em] text-foreground">
-              Descripción del producto
-            </p>
-            <FormattedText
-              content={displayedDescription}
-              className="text-sm leading-relaxed text-foreground"
-            />
-            {needsTruncation && (
-              <button
-                type="button"
-                onClick={() => setIsDescriptionExpanded((v) => !v)}
-                className="mt-3 inline-flex items-center gap-1 text-xs font-semibold uppercase tracking-[0.14em] text-foreground hover:text-foreground/70"
-              >
-                {isDescriptionExpanded ? (
-                  <>
-                    Ver menos <ChevronUp className="h-4 w-4" />
-                  </>
-                ) : (
-                  <>
-                    Ver más <ChevronDown className="h-4 w-4" />
-                  </>
-                )}
-              </button>
-            )}
-          </div>
+        {/* Descripción: en escritorio bajo la cabecera, en móvil al final. Es
+            lo único que scrollea en escritorio, para que la foto no se mueva
+            al leerla. */}
+        <div className="lg:col-start-2 lg:row-start-2 lg:max-h-[60vh] lg:self-start lg:overflow-y-auto lg:pr-3">
+          <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.16em] text-foreground">
+            Descripción del producto
+          </p>
+          <FormattedText
+            content={displayedDescription}
+            className="text-sm leading-relaxed text-foreground"
+          />
+          {needsTruncation && (
+            <button
+              type="button"
+              onClick={() => setIsDescriptionExpanded((v) => !v)}
+              className="mt-3 inline-flex items-center gap-1 text-xs font-semibold uppercase tracking-[0.14em] text-foreground hover:text-foreground/70"
+            >
+              {isDescriptionExpanded ? (
+                <>
+                  Ver menos <ChevronUp className="h-4 w-4" />
+                </>
+              ) : (
+                <>
+                  Ver más <ChevronDown className="h-4 w-4" />
+                </>
+              )}
+            </button>
+          )}
         </div>
       </div>
     </section>
