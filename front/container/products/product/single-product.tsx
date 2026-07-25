@@ -22,7 +22,7 @@ import {
   Store
 } from "lucide-react";
 
-const DESCRIPTION_PREVIEW_CHARS = 320;
+const DESCRIPTION_PREVIEW_CHARS = 700;
 
 export const SingleProduct = ({ product }: { product: Product }) => {
   const [activeIndex, setActiveIndex] = useState(0);
@@ -80,11 +80,15 @@ export const SingleProduct = ({ product }: { product: Product }) => {
       {/* Reparto tipo Amazon: fotos a la izquierda, nombre y descripción en el
           centro y la caja de compra a la derecha. En móvil el orden del DOM
           manda: fotos, cabecera, carrito/envío y la descripción al final. */}
-      <div className="grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,520px)_minmax(0,1fr)_340px] lg:gap-10">
+      {/* `grid-rows-[auto_1fr]`: la fila de la cabecera se queda en su alto y
+          es la de la descripción la que absorbe el sobrante de las columnas
+          que ocupan las dos filas. Sin esto la cabecera crecía y dejaba un
+          hueco entre el precio y la descripción. */}
+      <div className="grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,520px)_minmax(0,1fr)_340px] lg:grid-rows-[auto_1fr] lg:gap-10">
         {/* El bloque de imágenes se limita en ancho: estirado a toda la
             columna la foto principal se escalaba por encima de la resolución
             de origen y se veía pixelada. */}
-        <div className="grid w-full max-w-[520px] grid-cols-[64px_1fr] gap-3 sm:grid-cols-[88px_1fr] sm:gap-5 lg:col-start-1 lg:row-span-2 lg:row-start-1">
+        <div className="grid w-full max-w-[520px] grid-cols-[64px_1fr] gap-3 sm:grid-cols-[88px_1fr] sm:gap-5 lg:sticky lg:top-24 lg:col-start-1 lg:row-span-2 lg:row-start-1 lg:self-start">
           <div className="flex flex-col gap-2">
             {images.map((image: any, index: number) => (
               <button
@@ -259,8 +263,10 @@ export const SingleProduct = ({ product }: { product: Product }) => {
           </div>
         </div>
 
-        {/* Descripción: en escritorio bajo la cabecera, en móvil al final */}
-        <div className="lg:col-start-2 lg:row-start-2">
+        {/* Descripción: en escritorio bajo la cabecera, en móvil al final. Es
+            lo único que scrollea en escritorio, para que la foto no se mueva
+            al leerla. */}
+        <div className="lg:col-start-2 lg:row-start-2 lg:max-h-[60vh] lg:self-start lg:overflow-y-auto lg:pr-3">
           <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.16em] text-foreground">
             Descripción del producto
           </p>
