@@ -2,6 +2,7 @@
 
 import { Footer } from "../components/footer/footer";
 import { HelpButton } from "../components/help/help-button";
+import { ShippingWelcome } from "@/components/shipping/shipping-welcome";
 import Navbar from "@/components/navbar";
 
 interface LayoutAppProps {
@@ -17,6 +18,7 @@ export default function LayoutApp({ children }: LayoutAppProps) {
 
       <Footer locale="en" />
       <HelpButton />
+      <ShippingWelcome />
     </div>
   );
 }

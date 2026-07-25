@@ -24,7 +24,7 @@ export default async function TopProductsPage() {
       label: t.label || t.slug || "—",
       thumb: product ? mediaUrl(product.image, "thumbnail") : null,
       price: product ? formatPrice(product.price, product.currency) : "—",
-      editHref: product ? `/products/${product.documentId}/edit` : null,
+      editHref: product ? `/admin/products/${product.documentId}/edit` : null,
       views30: t.count,
       views7: views7.get(t.slug) ?? 0,
     };

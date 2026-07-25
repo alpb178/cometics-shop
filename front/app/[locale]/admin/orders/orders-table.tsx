@@ -152,7 +152,7 @@ export function OrdersTable({ orders }: { orders: Order[] }) {
               </td>
               <td className="px-4 py-3">
                 <Link
-                  href={`/orders/${o.documentId}`}
+                  href={`/admin/orders/${o.documentId}`}
                   className="font-mono text-brand hover:underline"
                 >
                   {o.orderNumber}

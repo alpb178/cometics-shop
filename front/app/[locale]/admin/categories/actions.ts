@@ -13,7 +13,7 @@ export async function createCategoryAction(name: string) {
   const trimmed = name.trim();
   if (!trimmed) throw new Error("El nombre es obligatorio");
   await createCategory(trimmed);
-  revalidatePath("/categories");
+  revalidatePath("/admin/categories");
 }
 
 export async function updateCategoryAction(documentId: string, name: string) {
@@ -21,13 +21,13 @@ export async function updateCategoryAction(documentId: string, name: string) {
   const trimmed = name.trim();
   if (!trimmed) throw new Error("El nombre es obligatorio");
   await updateCategory(documentId, trimmed);
-  revalidatePath("/categories");
+  revalidatePath("/admin/categories");
 }
 
 export async function deleteCategoryAction(documentId: string) {
   await requireStaff();
   await deleteCategory(documentId);
-  revalidatePath("/categories");
+  revalidatePath("/admin/categories");
 }
 
 /** Elimina varias categorías seleccionadas. */
@@ -36,5 +36,5 @@ export async function bulkDeleteCategoriesAction(documentIds: string[]) {
   for (const documentId of documentIds) {
     await deleteCategory(documentId);
   }
-  revalidatePath("/categories");
+  revalidatePath("/admin/categories");
 }

@@ -214,7 +214,7 @@ export function SalesTable({
             <tr key={r.o.documentId} className="hover:bg-neutral-50">
               <td className="px-4 py-3">
                 <Link
-                  href={`/orders/${r.o.documentId}`}
+                  href={`/admin/orders/${r.o.documentId}`}
                   className="font-mono text-brand hover:underline"
                 >
                   {r.o.orderNumber}

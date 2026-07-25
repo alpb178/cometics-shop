@@ -197,7 +197,7 @@ export function ProductsTable({
               <td className="px-4 py-3">
                 <div className="flex items-center justify-end gap-1">
                   <Link
-                    href={`/products/${p.documentId}/edit`}
+                    href={`/admin/products/${p.documentId}/edit`}
                     title={`Editar ${p.name}`}
                     aria-label={`Editar ${p.name}`}
                     className="rounded p-1.5 text-neutral-500 transition hover:bg-neutral-100 hover:text-neutral-800 active:scale-95"
