@@ -10,10 +10,9 @@ import { SlideBurst } from "@/components/carrousel/slide-burst";
 const CAROUSEL_IMAGES = [
   "/images/carrousel/1.jpeg",
   "/images/carrousel/2.jpeg",
+  "/images/carrousel/3.jpeg",
   "/images/carrousel/4.jpeg",
-  "/images/carrousel/5.jpeg",
-  "/images/carrousel/6.jpeg",
-  "/images/carrousel/8.jpeg"
+  "/images/carrousel/5.jpeg"
 ];
 
 const HeroCarousel = ({ images }: { images: string[] }) => {
