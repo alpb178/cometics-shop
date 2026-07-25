@@ -63,7 +63,7 @@ export default async function OrderDetailPage({
   return (
     <div>
       <Link
-        href="/orders"
+        href="/admin/orders"
         className="mb-4 inline-flex items-center gap-1 text-sm text-neutral-500 hover:text-neutral-800"
       >
         <ArrowLeft className="h-4 w-4" />

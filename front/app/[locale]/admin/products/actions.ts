@@ -12,6 +12,9 @@ import {
 import { uploadFiles } from "@/lib/admin/strapi";
 import { requireStaff } from "@/lib/admin/auth-guard";
 
+/** Máximo de fotos en la galería; debe coincidir con el del formulario. */
+const MAX_GALLERY = 3;
+
 function parseNumber(value: FormDataEntryValue | null): number | null {
   if (value == null || value === "") return null;
   const n = Number(value);
@@ -33,11 +36,17 @@ async function buildInput(formData: FormData): Promise<ProductInput> {
     .map((s) => Number(s.trim()))
     .filter((n) => Number.isFinite(n) && n > 0);
 
+  // Solo se sube lo que quepa dentro del máximo: el formulario ya limita,
+  // pero la acción no puede fiarse de lo que llegue en el FormData.
   const newGallery = formData
     .getAll("newGallery")
-    .filter((f): f is File => f instanceof File && f.size > 0);
+    .filter((f): f is File => f instanceof File && f.size > 0)
+    .slice(0, Math.max(0, MAX_GALLERY - keepGallery.length));
   const uploadedGallery = await uploadFiles(newGallery);
-  const galleryIds = [...keepGallery, ...uploadedGallery.map((m) => m.id)];
+  const galleryIds = [
+    ...keepGallery,
+    ...uploadedGallery.map((m) => m.id)
+  ].slice(0, MAX_GALLERY);
 
   return {
     name: String(formData.get("name") || "").trim(),
@@ -62,8 +71,8 @@ export async function createProductAction(formData: FormData) {
   await createProduct(input);
   // La visibilidad en la tienda la controla el flag `visible` (checkbox
   // "Mostrar en la tienda"); no hay paso de publicación (fila única).
-  revalidatePath("/products");
-  redirect("/products");
+  revalidatePath("/admin/products");
+  redirect("/admin/products");
 }
 
 /** Muestra u oculta el producto en la tienda. */
@@ -73,8 +82,8 @@ export async function setProductVisibleAction(
 ) {
   await requireStaff();
   await setProductVisible(documentId, visible);
-  revalidatePath("/products");
-  revalidatePath(`/products/${documentId}/edit`);
+  revalidatePath("/admin/products");
+  revalidatePath(`/admin/products/${documentId}/edit`);
 }
 
 export async function updateProductAction(
@@ -91,15 +100,15 @@ export async function updateProductAction(
   // Se edita en sitio la única fila del producto; la tienda lo refleja al
   // instante (el front lee sin caché).
   await updateProduct(documentId, input);
-  revalidatePath("/products");
-  revalidatePath(`/products/${documentId}/edit`);
-  redirect("/products");
+  revalidatePath("/admin/products");
+  revalidatePath(`/admin/products/${documentId}/edit`);
+  redirect("/admin/products");
 }
 
 export async function deleteProductAction(documentId: string) {
   await requireStaff();
   await deleteProduct(documentId);
-  revalidatePath("/products");
+  revalidatePath("/admin/products");
 }
 
 /** Elimina varios productos seleccionados. */
@@ -108,5 +117,5 @@ export async function bulkDeleteProductsAction(documentIds: string[]) {
   for (const documentId of documentIds) {
     await deleteProduct(documentId);
   }
-  revalidatePath("/products");
+  revalidatePath("/admin/products");
 }

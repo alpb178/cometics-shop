@@ -87,54 +87,54 @@ export default async function DashboardHome() {
         <StatCard
           label="Productos"
           value={products.length}
-          href="/products"
+          href="/admin/products"
           icon={Package}
         />
         <StatCard
           label="Pedidos"
           value={orderStats.total}
-          href="/orders"
+          href="/admin/orders"
           icon={ShoppingBag}
         />
         <StatCard
           label="Por verificar"
           value={orderStats.pending}
-          href="/orders"
+          href="/admin/orders"
           icon={FileText}
           hint="Pagos pendientes"
         />
         <StatCard
           label="Ingresos hoy"
           value={`Bs ${orderStats.today.revenue.toLocaleString("es-BO")}`}
-          href="/sales"
+          href="/admin/sales"
           icon={Wallet}
           hint="Desde las 00:00 · no cancelados"
         />
         <StatCard
           label="Ganancias productos"
           value={`Bs ${orderStats.today.productProfit.toLocaleString("es-BO")}`}
-          href="/sales"
+          href="/admin/sales"
           icon={Coins}
           hint="Precio original · hoy"
         />
         <StatCard
           label="Ganancias plataforma"
           value={`Bs ${orderStats.today.platformProfit.toLocaleString("es-BO")}`}
-          href="/sales"
+          href="/admin/sales"
           icon={Percent}
           hint={`Markup ${orderStats.markupPercent}% · hoy`}
         />
         <StatCard
           label="Visitas hoy"
           value={visits.today}
-          href="/visits"
+          href="/admin/visits"
           icon={Eye}
           hint={`Desde las 00:00 · 7 días ${visits.last7Days}`}
         />
         <StatCard
           label="Clientes"
           value={clients}
-          href="/users"
+          href="/admin/users"
           icon={Users}
           hint="Usuarios registrados"
         />
@@ -142,10 +142,10 @@ export default async function DashboardHome() {
 
       {/* Gráficos */}
       <div className="mt-6 grid gap-4 lg:grid-cols-2">
-        <ChartCard title="Visitas por día" subtitle="Últimos 30 días" href="/visits">
+        <ChartCard title="Visitas por día" subtitle="Últimos 30 días" href="/admin/visits">
           <DailyLine data={dailyVisits} />
         </ChartCard>
-        <ChartCard title="Pedidos por día" subtitle="Últimos 30 días" href="/orders">
+        <ChartCard title="Pedidos por día" subtitle="Últimos 30 días" href="/admin/orders">
           <DailyColumns data={orderStats.byDay} unit="pedido(s)" />
         </ChartCard>
         <ChartCard title="Visitas de hoy por hora">
@@ -154,7 +154,7 @@ export default async function DashboardHome() {
         <ChartCard
           title="Productos más vistos"
           subtitle="Últimos 30 días · vistas de hoy"
-          href="/top-products"
+          href="/admin/top-products"
         >
           <HorizontalBars
             data={topProducts.map((p) => ({
@@ -168,7 +168,7 @@ export default async function DashboardHome() {
       </div>
 
       <div className="mt-6 grid gap-4 lg:grid-cols-2">
-        <ChartCard title="Fuentes de tráfico" subtitle="Últimos 30 días" href="/visits">
+        <ChartCard title="Fuentes de tráfico" subtitle="Últimos 30 días" href="/admin/visits">
           <HorizontalBars
             data={sources
               .slice(0, 6)
@@ -183,7 +183,7 @@ export default async function DashboardHome() {
             <h3 className="text-sm font-semibold text-neutral-700">
               Últimos pedidos
             </h3>
-            <Link href="/orders" className="text-xs text-brand hover:underline">
+            <Link href="/admin/orders" className="text-xs text-brand hover:underline">
               Ver todos
             </Link>
           </div>
@@ -193,7 +193,7 @@ export default async function DashboardHome() {
               return (
                 <Link
                   key={o.documentId}
-                  href={`/orders/${o.documentId}`}
+                  href={`/admin/orders/${o.documentId}`}
                   className="flex items-center justify-between gap-3 py-2.5 transition hover:bg-neutral-50"
                 >
                   <span className="font-mono text-sm">{o.orderNumber}</span>

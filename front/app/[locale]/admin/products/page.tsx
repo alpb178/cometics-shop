@@ -18,7 +18,7 @@ export default async function ProductsPage() {
         title="Productos"
         subtitle={`${products.length} producto(s)`}
         action={
-          <Link href="/products/new" className="btn-primary">
+          <Link href="/admin/products/new" className="btn-primary">
             <Plus className="h-4 w-4" />
             Nuevo producto
           </Link>
