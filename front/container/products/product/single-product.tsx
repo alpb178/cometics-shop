@@ -8,6 +8,7 @@ import { useEffect, useState } from "react";
 import { trackEvent } from "@/lib/track-event";
 import { FormattedText } from "../../../components/text/formatted-text";
 import { QuantitySelector } from "./components/quantity-selector";
+import { SparklesCore } from "@/components/ui/sparkles";
 import Image from "next/image";
 import { useCart } from "@/context/cart-context";
 import { cn } from "@/lib/utils";
@@ -77,7 +78,10 @@ export const SingleProduct = ({ product }: { product: Product }) => {
   return (
     <section className="mx-auto w-full max-w-screen-2xl px-4 py-6 sm:px-6 lg:px-10 lg:py-10">
       <div className="grid grid-cols-1 gap-10 lg:grid-cols-[1fr_440px] lg:gap-16">
-        <div className="grid grid-cols-[64px_1fr] gap-3 sm:grid-cols-[88px_1fr] sm:gap-5">
+        {/* El bloque de imágenes se limita en ancho: estirado a toda la
+            columna la foto principal se escalaba por encima de la resolución
+            de origen y se veía pixelada. */}
+        <div className="grid w-full max-w-[620px] grid-cols-[64px_1fr] gap-3 sm:grid-cols-[88px_1fr] sm:gap-5">
           <div className="flex flex-col gap-2">
             {images.map((image: any, index: number) => (
               <button
@@ -100,6 +104,20 @@ export const SingleProduct = ({ product }: { product: Product }) => {
                   sizes="88px"
                   className="object-cover"
                 />
+                {/* Grano de partículas sobre la miniatura activa. El canvas no
+                    captura clics para no anular el botón que lo contiene. */}
+                {index === activeIndex && (
+                  <SparklesCore
+                    id={`thumb-sparkles-${index}`}
+                    background="transparent"
+                    particleColor="#6DBA74"
+                    particleDensity={1400}
+                    minSize={0.4}
+                    maxSize={1.2}
+                    speed={2}
+                    className="pointer-events-none absolute inset-0 h-full w-full"
+                  />
+                )}
               </button>
             ))}
           </div>
@@ -116,7 +134,7 @@ export const SingleProduct = ({ product }: { product: Product }) => {
                 src={strapiImage(activeImage.url)}
                 alt={product.name}
                 fill
-                sizes="(max-width: 1024px) 100vw, 60vw"
+                sizes="(max-width: 640px) 100vw, 512px"
                 className="object-cover"
                 priority
               />

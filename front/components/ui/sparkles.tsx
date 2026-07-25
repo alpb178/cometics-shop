@@ -6,6 +6,10 @@ import { loadSlim } from "@tsparticles/slim";
 import { motion, useAnimation } from "framer-motion";
 import { useEffect, useState } from "react";
 
+// El engine de tsparticles es global: cacheamos la promesa para no recargar
+// el bundle slim en cada montaje (esto se re-monta al cambiar de miniatura).
+let enginePromise: Promise<void> | null = null;
+
 // Function to resolve CSS variables to actual color values
 const resolveCSSVariable = (colorValue: string): string => {
   if (
@@ -52,9 +56,12 @@ export const SparklesCore = (props: ParticlesProps) => {
   );
 
   useEffect(() => {
-    initParticlesEngine(async (engine) => {
-      await loadSlim(engine);
-    }).then(() => {
+    if (!enginePromise) {
+      enginePromise = initParticlesEngine(async (engine) => {
+        await loadSlim(engine);
+      });
+    }
+    enginePromise.then(() => {
       setInit(true);
     });
   }, []);
