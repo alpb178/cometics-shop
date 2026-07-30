@@ -78,7 +78,12 @@ export class OrdersService {
     ];
     const [products, settings] = await Promise.all([
       this.prisma.products.findMany({
-        where: { id: { in: ids }, published_at: { not: null } },
+        // Misma regla que la vista pública de ProductsService.findMany: en el
+        // modelo de versión única la visibilidad la manda `visible`, no
+        // `published_at` (que quedó nulo en filas heredadas y en la fila
+        // superviviente del colapso de versiones). Filtrar por published_at
+        // rechazaba productos que la tienda sí ofrece: "Producto no disponible".
+        where: { id: { in: ids }, visible: { not: false } },
         select: { id: true, name: true, slug: true, price: true },
       }),
       this.pricingService.getSettings(),
