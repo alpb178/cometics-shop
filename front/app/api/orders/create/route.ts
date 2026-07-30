@@ -88,7 +88,9 @@ async function createOrder(
       total: payload.total,
       customerNotes: payload.customerNotes,
       paymentReference: payload.paymentReference,
-      // Entradas de cálculo de envío; el servidor las verifica y no las persiste.
+      // Entradas del cálculo de envío: el servidor recalcula el coste con ellas
+      // y además guarda destLat/destLng como ubicación de entrega del pedido
+      // (es lo que ve el admin), así que deben llegar con toda su precisión.
       isProvince: payload.isProvince ?? false,
       destLat: payload.destLat ?? null,
       destLng: payload.destLng ?? null

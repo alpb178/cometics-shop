@@ -115,3 +115,15 @@ DROP TABLE IF EXISTS
   components_shared_sections_cmps, components_shared_sections,
   components_shared_steps, components_shared_story_panel_shareds
 CASCADE;
+
+-- Coordenadas de entrega con precisión real: numeric(10,2) redondeaba cada
+-- punto marcado en el mapa a ~1,1 km, así que el admin mostraba una ubicación
+-- distinta de la que envió el cliente. 7 decimales ≈ 1 cm. Idempotente: repetir
+-- el ALTER sobre columnas que ya son numeric(10,7) es un no-op.
+ALTER TABLE orders
+  ALTER COLUMN dest_lat TYPE numeric(10,7),
+  ALTER COLUMN dest_lng TYPE numeric(10,7);
+
+ALTER TABLE pricing_settings
+  ALTER COLUMN sc_center_lat TYPE numeric(10,7),
+  ALTER COLUMN sc_center_lng TYPE numeric(10,7);
