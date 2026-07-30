@@ -25,6 +25,9 @@ model addresses {
   updated_by_id               Int?
   locale                      String?                       @db.VarChar(255)
   ci                          String?                       @db.VarChar(255)
+  /// Último punto que el cliente marcó en el mapa para esta dirección.
+  lat                         Decimal?                      @db.Decimal(10, 7)
+  lng                         Decimal?                      @db.Decimal(10, 7)
   addresses_user_lnk          addresses_user_lnk[]
   orders_shipping_address_lnk orders_shipping_address_lnk[]
 

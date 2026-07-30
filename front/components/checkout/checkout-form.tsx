@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { Fragment, useEffect, useMemo, useState } from "react";
+import { Fragment, useCallback, useEffect, useMemo, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { Upload, X, MapPin, ArrowLeft } from "lucide-react";
 import {
@@ -101,15 +101,7 @@ export function CheckoutForm({
   // Dentro de Santa Cruz mostramos el mapa para fijar el punto de entrega.
   const showMap = deliveryMethod === "delivery" && !isProvince;
 
-  // Pre-centra el pin en el centro de Santa Cruz para que el cliente solo lo
-  // ajuste; así siempre hay una ubicación de entrega para envíos en SC.
-  useEffect(() => {
-    if (showMap && !coords) {
-      setCoords({ lat: pricing.scCenterLat, lng: pricing.scCenterLng });
-    }
-  }, [showMap, coords, pricing]);
-
-  const requestLocation = () => {
+  const requestLocation = useCallback(() => {
     if (typeof navigator === "undefined" || !navigator.geolocation) {
       setGeoStatus("denied");
       return;
@@ -126,7 +118,30 @@ export function CheckoutForm({
       () => setGeoStatus("denied"),
       { enableHighAccuracy: true, timeout: 10000 }
     );
-  };
+  }, [pricing]);
+
+  // Último punto guardado para la dirección elegida, si tiene uno.
+  const savedCoords = useMemo(() => {
+    const addr = savedAddresses.find((a) => a.id === selectedAddressId);
+    if (!addr || addr.lat == null || addr.lng == null) return null;
+    return { lat: addr.lat, lng: addr.lng };
+  }, [savedAddresses, selectedAddressId]);
+
+  // El pin arranca en el último punto que el cliente marcó para esa dirección.
+  // Al cambiar de dirección salta al punto de la nueva.
+  useEffect(() => {
+    if (savedCoords) setCoords(savedCoords);
+  }, [savedCoords]);
+
+  // Primera vez (ninguna dirección con punto guardado): se pide la ubicación
+  // real del dispositivo. Antes se pre-centraba el pin en el centro de Santa
+  // Cruz, así que quien no tocaba el mapa enviaba un punto que no eligió.
+  const [autoLocated, setAutoLocated] = useState(false);
+  useEffect(() => {
+    if (!showMap || coords || savedCoords || autoLocated) return;
+    setAutoLocated(true);
+    requestLocation();
+  }, [showMap, coords, savedCoords, autoLocated, requestLocation]);
 
   const subtotal = useMemo(() => getCartTotal(), [getCartTotal]);
   const shippingCost =
@@ -236,10 +251,18 @@ export function CheckoutForm({
       // Cruz solo nombre y teléfono; fuera de Santa Cruz además CI, zona y
       // departamento (zona -> `city`, departamento -> `department`).
       const collectContact = useNew || isPickup;
+      // El punto del mapa se guarda con la dirección para que el pin arranque
+      // ahí la próxima vez. Solo aplica a envío dentro de Santa Cruz, que es
+      // donde se marca en el mapa.
+      const pointFields =
+        useNew && !isProvince && coords
+          ? { lat: coords.lat, lng: coords.lng }
+          : {};
       const newAddress = collectContact
         ? {
             fullName: values.fullName,
             phone: values.phone,
+            ...pointFields,
             ...(useNew && isProvince
               ? {
                   ci: values.ci?.trim() || undefined,
@@ -262,6 +285,23 @@ export function CheckoutForm({
           const j = (await r.json()) as { data: { id: number } };
           finalAddressId = j.data.id;
         }
+      }
+
+      // Dirección guardada cuyo punto ha cambiado: se actualiza para que la
+      // siguiente compra arranque en el último lugar que eligió el cliente. Si
+      // falla no se corta el pedido: es una comodidad, no un requisito.
+      if (
+        useSaved &&
+        selectedAddressId != null &&
+        coords &&
+        (savedCoords?.lat !== coords.lat || savedCoords?.lng !== coords.lng)
+      ) {
+        await fetch(`/api/addresses/${selectedAddressId}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({ data: { lat: coords.lat, lng: coords.lng } })
+        }).catch(() => {});
       }
 
       const payload = {
