@@ -176,9 +176,15 @@ export class TrackingService {
     return fillHourlySeries(new Map(rows.map((r) => [r.hour, r.count])));
   }
 
-  /** Productos más vistos (eventos product_view) en la ventana indicada. */
-  async getTopProducts(opts: { days: number; limit: number }) {
-    const since = new Date(Date.now() - opts.days * 86400000);
+  /**
+   * Productos más vistos (eventos product_view) en la ventana indicada.
+   * Con `today` la ventana es el día en curso en Bolivia (desde las 00:00), no
+   * las últimas 24 h, para que cuadre con el resto de KPIs de "hoy".
+   */
+  async getTopProducts(opts: { days: number; limit: number; today?: boolean }) {
+    const since = opts.today
+      ? laPazStartOfToday()
+      : new Date(Date.now() - opts.days * 86400000);
     const rows = await this.prisma.$queryRaw<
       { slug: string | null; label: string | null; count: number }[]
     >`

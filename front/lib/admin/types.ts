@@ -187,7 +187,12 @@ export interface TrafficSource {
   count: number;
 }
 
-export type StoreEventType = "product_view" | "add_to_cart" | "cart_view";
+export type StoreEventType =
+  | "product_view"
+  | "add_to_cart"
+  | "cart_view"
+  // Clic en una tarjeta de "Sitios de interés" (ver ALLOWED_EVENT_TYPES en la API)
+  | "group_click";
 
 export interface StoreEvent {
   id: number;

@@ -306,12 +306,17 @@ export async function getHourlyVisits(): Promise<HourPoint[]> {
   return res.data ?? [];
 }
 
+// `period: "today"` acota al día en curso en Bolivia (desde las 00:00) e ignora
+// `days`, para que cuadre con el resto de KPIs de "hoy" del dashboard.
 export async function getTopProducts(
   days = 30,
-  limit = 10
+  limit = 10,
+  period?: "today"
 ): Promise<TopProduct[]> {
   const res = await strapiGet<ListResponse<TopProduct>>(
-    `/api/store-events/top-products?days=${days}&limit=${limit}`
+    `/api/store-events/top-products?days=${days}&limit=${limit}${
+      period ? `&period=${period}` : ""
+    }`
   );
   return res.data ?? [];
 }
