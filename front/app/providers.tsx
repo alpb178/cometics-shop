@@ -1,5 +1,6 @@
 "use client";
 
+import { ErrorToaster } from "@/components/error/error-toaster";
 import { AuthProvider } from "@/context/auth-context";
 import { CartProvider } from "@/context/cart-context";
 import { ThemeProvider } from "@/context/theme-context";
@@ -43,7 +44,11 @@ export function Providers({
         <ViewTransitions>
           <AuthProvider>
             <CartProvider>
-              <ThemeProvider>{children}</ThemeProvider>
+              <ThemeProvider>
+                {children}
+                {/* Dentro del ThemeProvider: el toaster sigue el tema activo */}
+                <ErrorToaster />
+              </ThemeProvider>
               <SpeedInsights />
               <Analytics />
             </CartProvider>
