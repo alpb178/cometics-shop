@@ -208,8 +208,8 @@ model orders {
   locale                      String?                       @db.VarChar(255)
   payment_reference           String?                       @db.VarChar(255)
   cancellation_reason         String?
-  dest_lat                    Decimal?                      @db.Decimal(10, 2)
-  dest_lng                    Decimal?                      @db.Decimal(10, 2)
+  dest_lat                    Decimal?                      @db.Decimal(10, 7)
+  dest_lng                    Decimal?                      @db.Decimal(10, 7)
   orders_cmps                 orders_cmps[]
   orders_shipping_address_lnk orders_shipping_address_lnk[]
   orders_user_lnk             orders_user_lnk[]
@@ -305,8 +305,8 @@ model pricing_settings {
   document_id            String?   @db.VarChar(255)
   markup_percent         Decimal?  @db.Decimal(10, 2)
   province_shipping_cost Decimal?  @db.Decimal(10, 2)
-  sc_center_lat          Decimal?  @db.Decimal(10, 2)
-  sc_center_lng          Decimal?  @db.Decimal(10, 2)
+  sc_center_lat          Decimal?  @db.Decimal(10, 7)
+  sc_center_lng          Decimal?  @db.Decimal(10, 7)
   sc_radius_km           Decimal?  @db.Decimal(10, 2)
   created_at             DateTime? @db.Timestamp(6)
   updated_at             DateTime? @db.Timestamp(6)
