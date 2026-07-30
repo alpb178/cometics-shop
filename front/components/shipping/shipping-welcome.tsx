@@ -3,10 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Truck } from "lucide-react";
-import {
-  ONLINE_ORDER_PAYMENT_TEXT,
-  SHIPPING_POLICY_TEXT
-} from "@/lib/shipping";
+import { WELCOME_NOTICE_PARAGRAPHS } from "@/lib/shipping";
 
 const COOKIE_NAME = "iris_shipping_notice";
 // Un año: el aviso es informativo, no tiene sentido repetirlo cada sesión.
@@ -67,12 +64,14 @@ export const ShippingWelcome = () => {
               {/* El id envuelve los dos párrafos: aria-labelledby apunta aquí y
                   el nombre accesible del diálogo debe incluir ambos. */}
               <div id="shipping-welcome-text" className="space-y-2">
-                <p className="text-sm leading-relaxed text-foreground">
-                  {SHIPPING_POLICY_TEXT}
-                </p>
-                <p className="text-sm leading-relaxed text-foreground">
-                  {ONLINE_ORDER_PAYMENT_TEXT}
-                </p>
+                {WELCOME_NOTICE_PARAGRAPHS.map((paragraph) => (
+                  <p
+                    key={paragraph}
+                    className="text-sm leading-relaxed text-foreground"
+                  >
+                    {paragraph}
+                  </p>
+                ))}
               </div>
             </div>
             <div className="mt-4 flex justify-end">
