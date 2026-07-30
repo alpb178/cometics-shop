@@ -11,6 +11,6 @@ export const SHIPPING_POLICY_TEXT =
  * detalle de producto, que se queda solo con SHIPPING_POLICY_TEXT.
  */
 export const WELCOME_NOTICE_PARAGRAPHS = [
-  "Si realiza su pedido a través de nuestra página web, el envío de todos nuestros productos es gratuito dentro del 10.º anillo de Santa Cruz de la Sierra. Para envíos a zonas fuera del 10.º anillo y a otros departamentos de Bolivia, se aplica una tarifa adicional de Bs. 17.",
-  "Al realizar su pedido, puede elegir pagar en efectivo al momento de la entrega o mediante QR para reservar su pedido."
+  "Al realizar su pedido a través de nuestra página web, el envío de todos nuestros productos es gratuito dentro del 10.º anillo de Santa Cruz de la Sierra. Para envíos a zonas fuera del 10.º anillo y a otros departamentos de Bolivia, se aplica una tarifa adicional de Bs. 17.",
+  "Además, puede elegir pagar en efectivo al momento de la entrega o mediante QR para reservar su pedido."
 ];
