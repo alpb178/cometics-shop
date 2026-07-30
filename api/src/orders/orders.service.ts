@@ -34,6 +34,15 @@ interface SerializeOpts {
   includeOriginalPrice?: boolean;
 }
 
+interface ScopeOpts {
+  /**
+   * Fuerza el filtro por propiedad aunque el usuario sea staff. Lo pide la
+   * vista "Mis pedidos" del storefront (`?scope=mine`), que comparte endpoint
+   * con el panel: sin esto, un admin vería ahí los pedidos de todos.
+   */
+  onlyOwn?: boolean;
+}
+
 @Injectable()
 export class OrdersService {
   constructor(
@@ -288,10 +297,15 @@ export class OrdersService {
     };
   }
 
-  async findMany(user: AuthenticatedUser, pageSize: number) {
-    const where = isStaffUser(user)
-      ? {}
-      : { orders_user_lnk: { some: { user_id: user.id } } };
+  async findMany(
+    user: AuthenticatedUser,
+    pageSize: number,
+    opts?: ScopeOpts,
+  ) {
+    const where =
+      isStaffUser(user) && !opts?.onlyOwn
+        ? {}
+        : { orders_user_lnk: { some: { user_id: user.id } } };
     const [rows, total] = await Promise.all([
       this.prisma.orders.findMany({
         where,
@@ -315,13 +329,17 @@ export class OrdersService {
   }
 
   /** Acepta id numérico (front) o documentId (backoffice), como el controller original. */
-  async findOneOrThrow(idOrDocumentId: string, user: AuthenticatedUser) {
+  async findOneOrThrow(
+    idOrDocumentId: string,
+    user: AuthenticatedUser,
+    opts?: ScopeOpts,
+  ) {
     const where = isNumericId(idOrDocumentId)
       ? { id: Number(idOrDocumentId) }
       : { document_id: idOrDocumentId };
     const row = await this.prisma.orders.findFirst({ where });
     if (!row) throw new NotFoundException();
-    if (!isStaffUser(user)) {
+    if (!isStaffUser(user) || opts?.onlyOwn) {
       const owned = await this.prisma.orders_user_lnk.findFirst({
         where: { order_id: row.id, user_id: user.id },
       });
