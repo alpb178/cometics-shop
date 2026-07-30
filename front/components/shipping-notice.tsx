@@ -10,11 +10,11 @@ export const ShippingNotice = ({ className }: { className?: string }) => (
   >
     <Truck className="mt-1 h-6 w-6 shrink-0 text-primary" />
     <p className="text-base leading-relaxed text-foreground sm:text-lg">
-      Al comprar por nuestra página web:{" "}
+      Al hacer pedido por la web{" "}
       <strong className="font-semibold">
-        Delivery gratis hasta el 10.º anillo en Santa Cruz de la Sierra.
+        el envío de los productos es gratis hasta el 10.º anillo.
       </strong>{" "}
-      Otras zonas: Bs. 17.
+      Otras zonas y departamentos de Bolivia se cobra Bs. 17 adicionales.
     </p>
   </div>
 );
