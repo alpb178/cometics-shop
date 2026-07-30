@@ -14,6 +14,10 @@ type Payload = {
     department?: string;
     ci?: string;
     notes?: string;
+    // Último punto marcado en el mapa: se guarda con la dirección para que el
+    // pin del checkout arranque ahí en la siguiente compra.
+    lat?: number;
+    lng?: number;
   };
   deliveryMethod: "delivery" | "pickup";
   paymentMethod: "cash" | "qr";

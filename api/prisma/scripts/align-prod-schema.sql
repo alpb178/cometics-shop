@@ -127,3 +127,9 @@ ALTER TABLE orders
 ALTER TABLE pricing_settings
   ALTER COLUMN sc_center_lat TYPE numeric(10,7),
   ALTER COLUMN sc_center_lng TYPE numeric(10,7);
+
+-- Último punto de entrega por dirección (el pin del checkout arranca ahí en
+-- vez del centro de la ciudad). Idempotente por IF NOT EXISTS.
+ALTER TABLE addresses
+  ADD COLUMN IF NOT EXISTS lat numeric(10,7),
+  ADD COLUMN IF NOT EXISTS lng numeric(10,7);
