@@ -14,7 +14,6 @@ import {
 import { PhoneInput } from "@/components/form/phone-input/PhoneInput";
 import { TextInput } from "@/components/form/text-input/TextInput";
 import { LocationPicker } from "@/components/checkout/location-picker";
-import { ShippingNotice } from "@/components/shipping-notice";
 import { StoreMap } from "@/components/checkout/store-map";
 import { useAuth } from "@/context/auth-context";
 import { useCart } from "@/context/cart-context";
@@ -376,7 +375,6 @@ export function CheckoutForm({
             </Fragment>
           ))}
         </div>
-        <ShippingNotice className="mt-6" />
       </header>
 
       <FormProvider {...methods}>
