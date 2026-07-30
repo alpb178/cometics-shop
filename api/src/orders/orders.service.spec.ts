@@ -70,7 +70,19 @@ describe("OrdersService.buildVerifiedOrderData", () => {
     expect(result.shippingCost).toBe(0);
   });
 
-  it("rechaza productos no publicados o inexistentes", async () => {
+  it("filtra por visible, no por published_at (versión única)", async () => {
+    await service.buildVerifiedOrderData(
+      [{ productId: 5, quantity: 1 } as never],
+      { deliveryMethod: "pickup" },
+    );
+    const where = prismaMock.products.findMany.mock.calls[0][0].where;
+    expect(where).toEqual({ id: { in: [5] }, visible: { not: false } });
+    // published_at quedó nulo en filas heredadas y en el superviviente del
+    // colapso de versiones: filtrarlo rechazaba productos a la venta.
+    expect(where).not.toHaveProperty("published_at");
+  });
+
+  it("rechaza productos ocultos o inexistentes", async () => {
     prismaMock.products.findMany.mockResolvedValue([]);
     await expect(
       service.buildVerifiedOrderData(
