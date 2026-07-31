@@ -21,6 +21,7 @@ import {
   Truck,
   Store
 } from "lucide-react";
+import { applyDiscount } from "@/lib/pricing";
 
 const DESCRIPTION_PREVIEW_CHARS = 700;
 
@@ -53,7 +54,7 @@ export const SingleProduct = ({ product }: { product: Product }) => {
 
   const hasDiscount = !!product.discount && product.discount > 0;
   const finalPrice = hasDiscount
-    ? (product.price ?? 0) * (1 - (product.discount ?? 0) / 100)
+    ? applyDiscount(product.price, product.discount)
     : (product.price ?? 0);
 
   const handleAddToCart = async () => {

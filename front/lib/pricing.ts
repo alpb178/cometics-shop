@@ -57,12 +57,34 @@ export function isProvinceCoords(
   );
 }
 
+/**
+ * Precio de venta: base + markup, redondeado SIEMPRE hacia arriba al boliviano
+ * (41,12 → 42). Debe dar exactamente lo mismo que `PricingService.applyMarkup`
+ * de la API, que es quien recalcula los importes al crear el pedido.
+ *
+ * El redondeo a 2 decimales previo evita la trampa de la coma flotante: 25 ×
+ * 1.12 da 28.000000000000004, y un `ceil` directo cobraría 29.
+ */
 export function applyMarkup(
   price: number | null | undefined,
   markupPercent: number
 ): number {
   const base = Number(price) || 0;
-  return Math.round(base * (1 + markupPercent / 100) * 100) / 100;
+  return Math.ceil(Math.round(base * (1 + markupPercent / 100) * 100) / 100);
+}
+
+/**
+ * Precio con la oferta aplicada, con el mismo redondeo hacia arriba. Se calcula
+ * sobre el precio de venta (que ya trae el markup).
+ */
+export function applyDiscount(
+  price: number | null | undefined,
+  discountPercent: number | null | undefined
+): number {
+  const base = Number(price) || 0;
+  const pct = Number(discountPercent) || 0;
+  if (pct <= 0) return base;
+  return Math.ceil(Math.round(base * (1 - pct / 100) * 100) / 100);
 }
 
 export async function getPricingSettings(): Promise<PricingSettings> {

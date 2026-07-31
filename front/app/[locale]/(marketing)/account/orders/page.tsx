@@ -3,6 +3,7 @@ import { ChevronRight } from "lucide-react";
 import { requireUser } from "@/lib/auth/server";
 import { authFetch } from "@/lib/strapi/auth-fetch";
 import type { Order } from "@/definitions/Order";
+import { formatAmount } from "@/lib/price";
 
 const STATUS_LABELS: Record<Order["status"], string> = {
   pending_verification: "Pendiente de verificación",
@@ -66,7 +67,7 @@ export default async function OrdersPage() {
                 </div>
                 <div className="flex items-center gap-4">
                   <span className="text-sm font-semibold">
-                    Bs {Number(order.total).toFixed(2)}
+                    Bs {formatAmount(order.total)}
                   </span>
                   <ChevronRight className="h-4 w-4" />
                 </div>

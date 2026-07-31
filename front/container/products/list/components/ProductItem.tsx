@@ -9,6 +9,7 @@ import { Eye, ShoppingBag } from "lucide-react";
 import Link from "next/link";
 import { useLocale } from "next-intl";
 import { trackEvent } from "@/lib/track-event";
+import { applyDiscount } from "@/lib/pricing";
 
 export const ProductItem = ({ product }: { product: Product }) => {
   const { addToCart } = useCart();
@@ -16,7 +17,7 @@ export const ProductItem = ({ product }: { product: Product }) => {
 
   const hasDiscount = !!product.discount && product.discount > 0;
   const finalPrice = hasDiscount
-    ? (product.price ?? 0) * (1 - (product.discount ?? 0) / 100)
+    ? applyDiscount(product.price, product.discount)
     : product.price ?? 0;
 
   return (
