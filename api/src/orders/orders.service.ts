@@ -305,16 +305,20 @@ export class OrdersService {
   async findMany(
     user: AuthenticatedUser,
     pageSize: number,
-    opts?: ScopeOpts,
+    opts?: ScopeOpts & { page?: number },
   ) {
     const where =
       isStaffUser(user) && !opts?.onlyOwn
         ? {}
         : { orders_user_lnk: { some: { user_id: user.id } } };
+    // `page` se respeta de verdad: antes se anunciaba `page: 1` y se ignoraba
+    // el parámetro, así que pedir la página 2 devolvía otra vez la primera.
+    const page = Math.max(1, opts?.page ?? 1);
     const [rows, total] = await Promise.all([
       this.prisma.orders.findMany({
         where,
         orderBy: { created_at: "desc" },
+        skip: (page - 1) * pageSize,
         take: pageSize,
       }),
       this.prisma.orders.count({ where }),
@@ -324,7 +328,7 @@ export class OrdersService {
       data,
       meta: {
         pagination: {
-          page: 1,
+          page,
           pageSize,
           pageCount: Math.max(1, Math.ceil(total / pageSize)),
           total,
