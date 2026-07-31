@@ -16,7 +16,6 @@ import {
   DailyColumns,
   DailyLine,
   HorizontalBars,
-  HourlyColumns,
 } from "@/components/admin/charts";
 import { getCurrentUser } from "@/lib/admin/session";
 import {
@@ -24,13 +23,17 @@ import {
   listOrders,
   getVisitStats,
   getDailyVisits,
-  getHourlyVisits,
   getOrderStats,
   getTopProducts,
   getTrafficSources,
   countClients,
+  listStoreEvents,
 } from "@/lib/admin/data";
-import { ORDER_STATUS_META, formatDate } from "@/lib/admin/admin-utils";
+import {
+  EVENT_META,
+  ORDER_STATUS_META,
+  formatDate,
+} from "@/lib/admin/admin-utils";
 
 export const dynamic = "force-dynamic";
 
@@ -43,9 +46,9 @@ export default async function DashboardHome() {
     visits,
     clients,
     dailyVisits,
-    hourlyVisits,
+    recentEvents,
     orderStats,
-    topProducts,
+    topProductsToday,
     sources,
   ] = await Promise.all([
     listProducts().catch(() => []),
@@ -53,7 +56,7 @@ export default async function DashboardHome() {
     getVisitStats().catch(() => ({ total: 0, today: 0, last7Days: 0 })),
     countClients().catch(() => 0),
     getDailyVisits(30).catch(() => []),
-    getHourlyVisits().catch(() => []),
+    listStoreEvents(8).catch(() => []),
     getOrderStats(30).catch(() => ({
       total: 0,
       pending: 0,
@@ -65,15 +68,9 @@ export default async function DashboardHome() {
       days: 30,
       byDay: [],
     })),
-    getTopProducts(30, 5).catch(() => []),
+    getTopProducts(1, 5, "today").catch(() => []),
     getTrafficSources(30).catch(() => []),
   ]);
-
-  // Vistas de hoy por producto (últimas 24 h), para anotar el ranking de 30 días.
-  const topToday = await getTopProducts(1, 50).catch(() => []);
-  const todayViewsByKey = new Map(
-    topToday.map((p) => [p.slug || p.label || "", p.count]),
-  );
 
   return (
     <div>
@@ -148,23 +145,60 @@ export default async function DashboardHome() {
         <ChartCard title="Pedidos por día" subtitle="Últimos 30 días" href="/admin/orders">
           <DailyColumns data={orderStats.byDay} unit="pedido(s)" />
         </ChartCard>
-        <ChartCard title="Visitas de hoy por hora">
-          <HourlyColumns data={hourlyVisits} />
-        </ChartCard>
         <ChartCard
-          title="Productos más vistos"
-          subtitle="Últimos 30 días · vistas de hoy"
+          title="Productos más vistos hoy"
+          subtitle="Desde las 00:00"
           href="/admin/top-products"
         >
           <HorizontalBars
-            data={topProducts.map((p) => ({
+            data={topProductsToday.map((p) => ({
               label: p.label || p.slug || "—",
               count: p.count,
-              today: todayViewsByKey.get(p.slug || p.label || "") ?? 0,
             }))}
             unit="vistas"
           />
         </ChartCard>
+
+        {/* Últimos eventos registrados */}
+        <div className="card p-5">
+          <div className="mb-4 flex items-baseline justify-between">
+            <h3 className="text-sm font-semibold text-neutral-700">
+              Últimos eventos registrados
+            </h3>
+            <Link href="/admin/visits" className="text-xs text-brand hover:underline">
+              Ver todos
+            </Link>
+          </div>
+          <div className="divide-y divide-neutral-100">
+            {recentEvents.map((e) => {
+              const meta = EVENT_META[e.type];
+              return (
+                <div
+                  key={e.id}
+                  className="flex items-center justify-between gap-3 py-2.5"
+                >
+                  <span className={`badge ${meta?.className ?? ""}`}>
+                    {meta?.label ?? e.type}
+                  </span>
+                  <span className="min-w-0 flex-1 truncate text-sm text-neutral-700">
+                    {e.label || e.productSlug || e.path || "—"}
+                    {e.quantity && e.quantity > 1 ? (
+                      <span className="text-neutral-400"> × {e.quantity}</span>
+                    ) : null}
+                  </span>
+                  <span className="shrink-0 text-xs text-neutral-400">
+                    {formatDate(e.createdAt)}
+                  </span>
+                </div>
+              );
+            })}
+            {recentEvents.length === 0 && (
+              <p className="py-6 text-center text-sm text-neutral-400">
+                Aún no hay eventos registrados.
+              </p>
+            )}
+          </div>
+        </div>
       </div>
 
       <div className="mt-6 grid gap-4 lg:grid-cols-2">

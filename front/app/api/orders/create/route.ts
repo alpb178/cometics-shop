@@ -14,6 +14,10 @@ type Payload = {
     department?: string;
     ci?: string;
     notes?: string;
+    // Último punto marcado en el mapa: se guarda con la dirección para que el
+    // pin del checkout arranque ahí en la siguiente compra.
+    lat?: number;
+    lng?: number;
   };
   deliveryMethod: "delivery" | "pickup";
   paymentMethod: "cash" | "qr";
@@ -34,6 +38,37 @@ type Payload = {
   destLng?: number | null;
 };
 
+/**
+ * Fallo de una llamada a la API. Conserva el estado y el motivo para que el
+ * checkout muestre "Producto no disponible" en vez de un 500 con el JSON crudo.
+ */
+class ApiError extends Error {
+  constructor(
+    message: string,
+    readonly status: number
+  ) {
+    super(message);
+  }
+}
+
+/** Saca el `message` del error de Nest; si no lo hay, deja el texto en bruto. */
+async function apiError(res: Response, fallback: string): Promise<ApiError> {
+  const text = await res.text().catch(() => "");
+  let message = text;
+  try {
+    const body = JSON.parse(text) as { message?: unknown };
+    if (typeof body.message === "string" && body.message) {
+      message = body.message;
+    } else if (Array.isArray(body.message) && body.message.length) {
+      // class-validator devuelve un array de mensajes
+      message = body.message.join(". ");
+    }
+  } catch {
+    // respuesta no JSON: nos queda el texto tal cual
+  }
+  return new ApiError(message || fallback, res.status);
+}
+
 async function uploadProof(token: string, file: File): Promise<number> {
   const fd = new FormData();
   fd.append("files", file, file.name);
@@ -43,8 +78,7 @@ async function uploadProof(token: string, file: File): Promise<number> {
     body: fd
   });
   if (!res.ok) {
-    const text = await res.text().catch(() => "");
-    throw new Error(`upload failed: ${res.status} ${text}`);
+    throw await apiError(res, "No se pudo subir el comprobante.");
   }
   const data = (await res.json()) as Array<{ id: number }>;
   if (!data?.[0]?.id) throw new Error("upload returned no id");
@@ -64,8 +98,7 @@ async function createAddress(
     body: JSON.stringify({ data: address })
   });
   if (!res.ok) {
-    const text = await res.text().catch(() => "");
-    throw new Error(`address failed: ${res.status} ${text}`);
+    throw await apiError(res, "No se pudo guardar la dirección.");
   }
   const data = (await res.json()) as { data: { id: number } };
   return data.data.id;
@@ -88,7 +121,9 @@ async function createOrder(
       total: payload.total,
       customerNotes: payload.customerNotes,
       paymentReference: payload.paymentReference,
-      // Entradas de cálculo de envío; el servidor las verifica y no las persiste.
+      // Entradas del cálculo de envío: el servidor recalcula el coste con ellas
+      // y además guarda destLat/destLng como ubicación de entrega del pedido
+      // (es lo que ve el admin), así que deben llegar con toda su precisión.
       isProvince: payload.isProvince ?? false,
       destLat: payload.destLat ?? null,
       destLng: payload.destLng ?? null
@@ -103,8 +138,7 @@ async function createOrder(
     body: JSON.stringify(body)
   });
   if (!res.ok) {
-    const text = await res.text().catch(() => "");
-    throw new Error(`order failed: ${res.status} ${text}`);
+    throw await apiError(res, "No se pudo crear el pedido.");
   }
   // Strapi v5 devuelve los atributos aplanados (sin envoltorio `attributes`).
   const data = (await res.json()) as {
@@ -171,9 +205,15 @@ export async function POST(req: Request) {
       orderNumber: order.orderNumber
     });
   } catch (err) {
-    const msg = err instanceof Error ? err.message : "unknown";
+    // Un 4xx de la API es un problema del pedido (producto no disponible,
+    // dirección inválida…), no un fallo de este servidor: se propaga el estado
+    // y el motivo para que el checkout lo muestre tal cual. El resto sí es 500.
+    if (err instanceof ApiError && err.status >= 400 && err.status < 500) {
+      return NextResponse.json({ error: err.message }, { status: err.status });
+    }
+    console.error("[orders/create]", err);
     return NextResponse.json(
-      { error: `No se pudo crear el pedido: ${msg}` },
+      { error: "No se pudo crear el pedido. Inténtalo de nuevo." },
       { status: 500 }
     );
   }

@@ -45,6 +45,13 @@ export function parsePageSize(raw: unknown, fallback = 50, max = 200): number {
   return Math.min(n, max);
 }
 
+/** pagination[page] de los clientes; 1 si falta o no es válido. */
+export function parsePage(raw: unknown): number {
+  const n = Number(raw);
+  if (!Number.isInteger(n) || n < 1) return 1;
+  return n;
+}
+
 export function isNumericId(value: string): boolean {
   return /^\d+$/.test(value);
 }

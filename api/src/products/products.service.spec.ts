@@ -112,4 +112,62 @@ describe("ProductsService", () => {
     const where = prismaMock.products.findMany.mock.calls[0][0].where;
     expect(where.visible).toBeUndefined();
   });
+
+  it("pide el doble de filas que el pageSize: el `take` se gasta en duplicados", async () => {
+    prismaMock.products.findMany.mockResolvedValue([]);
+    await service.findMany({ status: "published", pageSize: 24 });
+    expect(prismaMock.products.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({ take: 48 }),
+    );
+  });
+
+  it("no pierde productos por los duplicados y recorta al pageSize", async () => {
+    // 8 documentos duplicados (draft + published) = 16 filas: con `take` sobre
+    // filas y sin margen, un pageSize de 8 devolvía solo 4 productos.
+    const rows = Array.from({ length: 8 }).flatMap((_, i) => [
+      {
+        ...baseRow,
+        id: i * 2 + 1,
+        document_id: `doc${i}`,
+        name: `p${i}`,
+        updated_at: new Date(2026, 0, i + 1),
+        created_at: new Date(2026, 0, i + 1),
+      },
+      {
+        ...baseRow,
+        id: i * 2 + 2,
+        document_id: `doc${i}`,
+        name: `p${i}`,
+        updated_at: new Date(2025, 0, i + 1),
+        created_at: new Date(2026, 0, i + 1),
+      },
+    ]);
+    prismaMock.products.findMany.mockResolvedValue(rows);
+
+    const res = await service.findMany({ status: "published", pageSize: 8 });
+
+    expect(res.data).toHaveLength(8);
+    expect(new Set(res.data.map((p) => p.documentId)).size).toBe(8);
+    // Una sola página: el endpoint no acepta offset, así que anunciar más
+    // páginas a partir de una división era engañoso.
+    expect(res.meta.pagination.pageCount).toBe(1);
+    expect(res.meta.pagination.total).toBe(8);
+  });
+
+  it("recorta al pageSize cuando hay más documentos que sitio", async () => {
+    const rows = Array.from({ length: 6 }).map((_, i) => ({
+      ...baseRow,
+      id: i + 1,
+      document_id: `doc${i}`,
+      name: `p${i}`,
+      updated_at: new Date(2026, 0, i + 1),
+      created_at: new Date(2026, 0, i + 1),
+    }));
+    prismaMock.products.findMany.mockResolvedValue(rows);
+
+    const res = await service.findMany({ status: "published", pageSize: 4 });
+
+    expect(res.data).toHaveLength(4);
+    expect(res.meta.pagination.total).toBe(4);
+  });
 });

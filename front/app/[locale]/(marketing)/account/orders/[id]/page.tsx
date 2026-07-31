@@ -36,8 +36,10 @@ export default async function OrderDetailPage({
   const { id } = await params;
   await requireUser(`/account/orders/${id}`);
 
+  // scope=mine: aunque el usuario sea staff, desde la cuenta solo puede abrir
+  // el detalle de sus propios pedidos (404 en cualquier otro caso).
   const res = await authFetch(
-    `/api/orders/${id}?populate[shippingAddress]=true&populate[paymentProof]=true&populate[items]=true`
+    `/api/orders/${id}?scope=mine&populate[shippingAddress]=true&populate[paymentProof]=true&populate[items]=true`
   );
 
   if (!res.ok) return notFound();

@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
-import { generateDocumentId } from "../common/strapi.util";
+import { generateDocumentId, toNumber } from "../common/strapi.util";
 import { PrismaService } from "../prisma/prisma.service";
 import { AddressDto } from "./address.dto";
 
@@ -40,6 +40,8 @@ export class AddressesService {
           ci: dto.ci,
           notes: dto.notes,
           is_default: dto.isDefault ?? false,
+          lat: dto.lat,
+          lng: dto.lng,
           created_at: now,
           updated_at: now,
           published_at: now,
@@ -67,6 +69,8 @@ export class AddressesService {
         ci: dto.ci,
         notes: dto.notes,
         is_default: dto.isDefault,
+        lat: dto.lat,
+        lng: dto.lng,
         updated_at: new Date(),
       },
     });
@@ -91,6 +95,8 @@ export class AddressesService {
     ci: string | null;
     notes: string | null;
     is_default: boolean | null;
+    lat: unknown;
+    lng: unknown;
     created_at: Date | null;
     updated_at: Date | null;
   }) {
@@ -106,6 +112,8 @@ export class AddressesService {
       ci: row.ci,
       notes: row.notes,
       isDefault: row.is_default,
+      lat: toNumber(row.lat),
+      lng: toNumber(row.lng),
       createdAt: row.created_at,
       updatedAt: row.updated_at,
     };

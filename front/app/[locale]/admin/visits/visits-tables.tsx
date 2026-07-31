@@ -4,31 +4,10 @@ import { useState } from "react";
 import { Globe, MousePointerClick } from "lucide-react";
 import { Pagination } from "@/components/admin/pagination";
 import { AdminTable, Badge } from "@/components/admin/ui";
-import { formatDate } from "@/lib/admin/admin-utils";
-import type {
-  StoreEvent,
-  StoreEventType,
-  TopPath,
-  TrafficSource,
-} from "@/lib/admin/types";
+import { EVENT_META, formatDate } from "@/lib/admin/admin-utils";
+import type { StoreEvent, TopPath, TrafficSource } from "@/lib/admin/types";
 
 const PAGE_SIZE = 10;
-
-const EVENT_META: Record<StoreEventType, { label: string; className: string }> =
-  {
-    product_view: {
-      label: "Vio producto",
-      className: "bg-blue-100 text-blue-800",
-    },
-    add_to_cart: {
-      label: "Añadió al carrito",
-      className: "bg-green-100 text-green-800",
-    },
-    cart_view: {
-      label: "Abrió carrito",
-      className: "bg-amber-100 text-amber-800",
-    },
-  };
 
 function usePage<T>(rows: T[]) {
   const [page, setPage] = useState(1);
