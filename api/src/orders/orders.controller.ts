@@ -14,7 +14,7 @@ import { JwtAuthGuard } from "../auth/jwt-auth.guard";
 import { StaffGuard } from "../auth/staff.guard";
 import { CurrentUser } from "../common/current-user.decorator";
 import { AuthenticatedUser, isStaffUser } from "../common/staff.util";
-import { nestedQuery, parsePageSize } from "../common/strapi.util";
+import { nestedQuery, parsePage, parsePageSize } from "../common/strapi.util";
 import { CreateOrderDto, UpdateOrderDto } from "./order.dto";
 import { OrdersService } from "./orders.service";
 
@@ -46,7 +46,10 @@ export class OrdersController {
     return this.ordersService.findMany(
       user,
       parsePageSize(nestedQuery(query, "pagination", "pageSize")),
-      { onlyOwn: scope === MINE_SCOPE },
+      {
+        onlyOwn: scope === MINE_SCOPE,
+        page: parsePage(nestedQuery(query, "pagination", "page")),
+      },
     );
   }
 
