@@ -41,8 +41,16 @@ export class PricingService {
     };
   }
 
+  /**
+   * Precio de venta: base + markup, redondeado SIEMPRE hacia arriba al boliviano
+   * (41,12 → 42). Es el precio que se muestra y el que se cobra: mismo cálculo
+   * aquí y en `front/lib/pricing.ts`.
+   *
+   * El `round2` previo no es decorativo: en coma flotante 25 × 1.12 da
+   * 28.000000000000004, y un `ceil` directo cobraría 29.
+   */
   applyMarkup(basePrice: number, settings: PricingSettings): number {
-    return round2(basePrice * (1 + settings.markupPercent / 100));
+    return Math.ceil(round2(basePrice * (1 + settings.markupPercent / 100)));
   }
 
   /**
