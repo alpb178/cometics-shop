@@ -120,28 +120,32 @@ export function CheckoutForm({
     );
   }, [pricing]);
 
-  // Último punto guardado para la dirección elegida, si tiene uno.
+  // Último punto guardado para el destino elegido: solo existe si se está usando
+  // una dirección guardada que ya tenga punto.
   const savedCoords = useMemo(() => {
+    if (addressMode !== "saved") return null;
     const addr = savedAddresses.find((a) => a.id === selectedAddressId);
     if (!addr || addr.lat == null || addr.lng == null) return null;
     return { lat: addr.lat, lng: addr.lng };
-  }, [savedAddresses, selectedAddressId]);
+  }, [addressMode, savedAddresses, selectedAddressId]);
 
-  // El pin arranca en el último punto que el cliente marcó para esa dirección.
-  // Al cambiar de dirección salta al punto de la nueva.
+  // El pin sigue al destino elegido: salta al punto de la dirección nueva, y se
+  // vacía si esa dirección no tiene ninguno. Antes solo se asignaba cuando había
+  // punto, así que al pasar a una dirección sin él el pin conservaba el de la
+  // anterior — y al confirmar se guardaba ese punto ajeno en ella.
   useEffect(() => {
-    if (savedCoords) setCoords(savedCoords);
+    setCoords(savedCoords);
   }, [savedCoords]);
 
-  // Primera vez (ninguna dirección con punto guardado): se pide la ubicación
-  // real del dispositivo. Antes se pre-centraba el pin en el centro de Santa
-  // Cruz, así que quien no tocaba el mapa enviaba un punto que no eligió.
-  const [autoLocated, setAutoLocated] = useState(false);
+  // Sin punto para el destino elegido se pide la ubicación real del dispositivo.
+  // Antes se pre-centraba el pin en el centro de Santa Cruz, así que quien no
+  // tocaba el mapa enviaba un punto que no eligió. El propio `geoStatus` evita
+  // reintentos: "locating" corta la re-entrada y "denied" no vuelve a pedirlo.
   useEffect(() => {
-    if (!showMap || coords || savedCoords || autoLocated) return;
-    setAutoLocated(true);
+    if (!showMap || coords || savedCoords) return;
+    if (geoStatus === "locating" || geoStatus === "denied") return;
     requestLocation();
-  }, [showMap, coords, savedCoords, autoLocated, requestLocation]);
+  }, [showMap, coords, savedCoords, geoStatus, requestLocation]);
 
   const subtotal = useMemo(() => getCartTotal(), [getCartTotal]);
   const shippingCost =
@@ -301,7 +305,11 @@ export function CheckoutForm({
           headers: { "Content-Type": "application/json" },
           credentials: "include",
           body: JSON.stringify({ data: { lat: coords.lat, lng: coords.lng } })
-        }).catch(() => {});
+        }).catch((e) => {
+          // No corta el pedido, pero tampoco se silencia: si esto falla, la
+          // próxima compra vuelve a arrancar sin punto y sin pista de por qué.
+          console.error("No se pudo guardar el punto de la dirección", e);
+        });
       }
 
       const payload = {

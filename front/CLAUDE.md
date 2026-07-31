@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Iris Natural — e-commerce website built with **Next.js 15** (App Router), **React 18**, **TypeScript** (strict mode), and **Strapi** as the headless CMS. Deployed on Vercel. The site is a bilingual (English/Spanish) product catalog with WhatsApp-based ordering for a business in Santa Cruz de la Sierra, Bolivia.
+Iris Natural — e-commerce website built with **Next.js 15** (App Router), **React 18** and **TypeScript** (strict mode). Deployed on Vercel. Storefront **plus the admin panel** on the internal `/admin` route. Products, orders, addresses and analytics come from the project's own **NestJS + Prisma API** (`api/`), which replaced Strapi in July 2026. Checkout is on-site (cash on delivery or QR); WhatsApp is now only a contact channel. Bilingual (English/Spanish) for a business in Santa Cruz de la Sierra, Bolivia.
 
 ## Commands
 
@@ -32,9 +32,14 @@ app/[locale]/(marketing)/about|contact|faq|how-it-works|policy-privacy/
 
 Locale detection via `next-intl` middleware (locales: `en`, `es`; prefix strategy: `"never"` — no `/en/` or `/es/` in URLs). Configuration in `i18n/routing.ts`, translations in `locales/{en,es}/common.json`.
 
-### Data Fetching — Strapi CMS
+### Data Fetching — API propia (NestJS)
 
-Two fetch paths for Strapi REST API (`NEXT_PUBLIC_API_URL`):
+`NEXT_PUBLIC_API_URL` apunta a la API de `api/` (en local, `http://localhost:4000`). Los
+helpers conservan el nombre `strapi*` (`lib/strapi/`, `strapiGet`, `STRAPI_URL`) porque la
+API mantiene a propósito el contrato de Strapi v5 (`{ data, meta }`, `documentId`,
+`populate[...]`, `pagination[...]`): es deuda de nombre, no de comportamiento.
+
+Two fetch paths for the REST API (`NEXT_PUBLIC_API_URL`):
 
 - **Server Components** — `lib/strapi/fetchContentType.ts` (uses `draftMode()`, `cache: "no-store"`)
 - **Client Components** — `lib/strapi/fetchContentTypeClient.ts` + `hooks/useStrapiData.ts` hook
