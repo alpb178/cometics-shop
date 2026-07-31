@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { requireUser } from "@/lib/auth/server";
 import { authFetch } from "@/lib/strapi/auth-fetch";
 import type { Order } from "@/definitions/Order";
+import { formatAmount } from "@/lib/price";
 
 const STATUS_LABELS: Record<Order["status"], string> = {
   pending_verification: "Pendiente de verificación",
@@ -99,12 +100,12 @@ export default async function OrderDetailPage({
                   <div>
                     <p className="text-sm font-semibold">{item.name}</p>
                     <p className="text-xs text-muted-foreground">
-                      Bs {Number(item.price).toFixed(2)} × {item.quantity}
+                      Bs {formatAmount(item.price)} × {item.quantity}
                     </p>
                   </div>
                 </div>
                 <p className="text-sm font-semibold">
-                  Bs {(Number(item.price) * item.quantity).toFixed(2)}
+                  Bs {formatAmount(Number(item.price) * item.quantity)}
                 </p>
               </li>
             ))}
@@ -187,17 +188,17 @@ export default async function OrderDetailPage({
           <dl className="space-y-2 text-sm">
             <div className="flex justify-between">
               <dt className="text-muted-foreground">Subtotal</dt>
-              <dd>Bs {Number(order.subtotal).toFixed(2)}</dd>
+              <dd>Bs {formatAmount(order.subtotal)}</dd>
             </div>
             {order.shippingCost != null && (
               <div className="flex justify-between">
                 <dt className="text-muted-foreground">Envío</dt>
-                <dd>Bs {Number(order.shippingCost).toFixed(2)}</dd>
+                <dd>Bs {formatAmount(order.shippingCost)}</dd>
               </div>
             )}
             <div className="flex justify-between border-t border-border pt-2 font-semibold">
               <dt>Total</dt>
-              <dd>Bs {Number(order.total).toFixed(2)}</dd>
+              <dd>Bs {formatAmount(order.total)}</dd>
             </div>
           </dl>
         </div>

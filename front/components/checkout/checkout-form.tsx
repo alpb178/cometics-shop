@@ -21,6 +21,7 @@ import type { Address } from "@/definitions/Address";
 import type { User } from "@/definitions/User";
 import type { PaymentInfo } from "@/definitions/PaymentInfo";
 import type { DeliveryMethod, PaymentMethod } from "@/definitions/Order";
+import { formatAmount } from "@/lib/price";
 
 type FormValues = {
   fullName: string;
@@ -194,7 +195,7 @@ export function CheckoutForm({
 
   async function copyAmount() {
     try {
-      await navigator.clipboard.writeText(total.toFixed(2));
+      await navigator.clipboard.writeText(formatAmount(total));
       setAmountCopied(true);
       setTimeout(() => setAmountCopied(false), 2000);
     } catch {
@@ -541,7 +542,7 @@ export function CheckoutForm({
                       {isProvince && (
                         <p className="text-xs text-muted-foreground">
                           Envío a provincia (a la terminal): Bs{" "}
-                          {pricing.provinceShippingCost.toFixed(2)}.
+                          {formatAmount(pricing.provinceShippingCost)}.
                         </p>
                       )}
                     </div>
@@ -765,7 +766,7 @@ export function CheckoutForm({
                         Monto exacto a pagar
                       </p>
                       <p className="font-display text-2xl font-semibold">
-                        Bs {total.toFixed(2)}
+                        Bs {formatAmount(total)}
                       </p>
                       <p className="mt-1 text-xs text-muted-foreground">
                         {paymentMethod === "qr"
@@ -790,7 +791,7 @@ export function CheckoutForm({
                       {deliveryMethod === "pickup"
                         ? "Paga en efectivo al recoger tu pedido en la tienda."
                         : "Paga en efectivo al recibir tu pedido (contra entrega)."}{" "}
-                      Ten listo el monto exacto: Bs {total.toFixed(2)}.
+                      Ten listo el monto exacto: Bs {formatAmount(total)}.
                     </p>
                   </div>
                 )}
@@ -919,7 +920,7 @@ export function CheckoutForm({
                       </span>
                     </span>
                     <span>
-                      Bs {(Number(it.product.price) * it.quantity).toFixed(2)}
+                      Bs {formatAmount(Number(it.product.price) * it.quantity)}
                     </span>
                   </li>
                 ))}
@@ -928,17 +929,17 @@ export function CheckoutForm({
               <dl className="space-y-2 border-t border-border pt-4 text-sm">
                 <div className="flex justify-between">
                   <dt className="text-muted-foreground">Subtotal</dt>
-                  <dd>Bs {subtotal.toFixed(2)}</dd>
+                  <dd>Bs {formatAmount(subtotal)}</dd>
                 </div>
                 {shippingCost > 0 && (
                   <div className="flex justify-between">
                     <dt className="text-muted-foreground">Envío a provincia</dt>
-                    <dd>Bs {shippingCost.toFixed(2)}</dd>
+                    <dd>Bs {formatAmount(shippingCost)}</dd>
                   </div>
                 )}
                 <div className="flex justify-between border-t border-border pt-2 text-base font-semibold">
                   <dt>Total</dt>
-                  <dd>Bs {total.toFixed(2)}</dd>
+                  <dd>Bs {formatAmount(total)}</dd>
                 </div>
               </dl>
 
@@ -1028,7 +1029,7 @@ export function CheckoutForm({
             />
           </div>
           <p className="text-center text-sm text-white/80">
-            Monto exacto: Bs {total.toFixed(2)} · Toca fuera del QR para cerrar
+            Monto exacto: Bs {formatAmount(total)} · Toca fuera del QR para cerrar
           </p>
         </div>
       )}
