@@ -4,6 +4,7 @@ import { Footer } from "../components/footer/footer";
 import { HelpButton } from "../components/help/help-button";
 import { ShippingWelcome } from "@/components/shipping/shipping-welcome";
 import Navbar from "@/components/navbar";
+import { GroupTicker } from "@/components/group-companies/group-ticker";
 
 interface LayoutAppProps {
   children: React.ReactNode;
@@ -12,6 +13,7 @@ interface LayoutAppProps {
 export default function LayoutApp({ children }: LayoutAppProps) {
   return (
     <div className="min-h-screen flex flex-col bg-background">
+      <GroupTicker />
       <Navbar locale="en" />
 
       <div className="flex-1">{children}</div>
