@@ -19,6 +19,24 @@ Welcome to our cutting-edge Next.js Multilingual Blog Template! This powerful an
 4. Run the development server: `npm run dev`
 5. Open [http://localhost:3000](http://localhost:3000) in your browser
 
+## Analítica del grupo
+
+El storefront manda al hub de CORPSC su visita y los clics que se van a un sitio
+hermano: `components/analytics/hub-analytics.tsx` recoge, `app/api/hub-track`
+reenvía con la clave. Es independiente de `PageTracker`, que sigue alimentando
+el panel de esta tienda.
+
+Dos variables en `.env.local` (sin ellas la ruta no envía nada, que es lo que se
+quiere en local):
+
+```
+HUB_URL=https://hub.corpsc.com/api
+HUB_API_KEY=   # se emite en el hub, Ajustes → Proyectos, y se enseña una vez
+```
+
+La clave **nunca** puede ir en una variable `NEXT_PUBLIC_`: quien la tenga puede
+escribir métricas de este proyecto.
+
 ## 🛠️ Customization
 
 - Modify `config.ts` to change language settings
