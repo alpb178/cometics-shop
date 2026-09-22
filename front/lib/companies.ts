@@ -6,6 +6,13 @@ export interface Company {
   slug: string;
   name: string;
   description: string;
+  // Descripción corta que acompaña al enlace en el cintillo (la larga no
+  // entra en la franja).
+  tagline: string;
+  // Acento de la marca en el cintillo. No se reutiliza `background` porque
+  // ese color es el de la captura (casi negro en varias marcas) y sobre el
+  // azul marino de la franja el punto no se vería.
+  accent: string;
   url: string;
   // Imagen destacada en /public/empresas.
   image: string;
@@ -19,6 +26,8 @@ export const GROUP_COMPANIES: Company[] = [
     name: "CorpSC",
     description:
       "Crear tu web, app a tu medida con los mejores precios.",
+    tagline: "Convertimos tus ideas en productos digitales",
+    accent: "#1668e3",
     url: "https://corpsc.com",
     image: "/empresas/corpsc-destacada.jpg",
     background: "#102136",
@@ -28,6 +37,8 @@ export const GROUP_COMPANIES: Company[] = [
     name: "Dando Muela",
     description:
       "App para conectar con personas. Descárgala y empieza a chatear.",
+    tagline: "Conoce gente y chatea",
+    accent: "#a78bfa",
     url: "https://dandomuela.com",
     image: "/empresas/dando-muela-destacada.jpg",
     background: "#111827",
@@ -37,6 +48,8 @@ export const GROUP_COMPANIES: Company[] = [
     name: "Tu Chamba",
     description:
       "El portal boliviano para encontrar y publicar empleos de forma rápida y segura.",
+    tagline: "Empleos en Bolivia",
+    accent: "#00b473",
     url: "https://tu-chamba.corpsc.com",
     image: "/empresas/tu-chamba-destacada.jpg",
     background: "#004ac6",
@@ -46,6 +59,8 @@ export const GROUP_COMPANIES: Company[] = [
     name: "Invoices",
     description:
       "Portal para generar y gestionar tus facturas de forma rápida y sencilla.",
+    tagline: "Factura en PDF en minutos",
+    accent: "#2dd4bf",
     url: "https://invoices.corpsc.com/",
     image: "/empresas/invoices-destacada.png",
     background: "#0f766e",

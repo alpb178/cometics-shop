@@ -9,9 +9,12 @@ import { Grid2X2, Grid3X3, SlidersHorizontal, X } from "lucide-react";
 import { ShippingNotice } from "@/components/shipping-notice";
 import { cn } from "@/lib/utils";
 
-type SortOption = "newest" | "price-asc" | "price-desc" | "name";
+type SortOption = "popular" | "newest" | "price-asc" | "price-desc" | "name";
 
 const PAGE_SIZE_OPTIONS = [24, 48, 96];
+
+const byNewest = (a: Product, b: Product) =>
+  new Date(b.createdAt ?? 0).getTime() - new Date(a.createdAt ?? 0).getTime();
 
 export const ProductList = ({ products }: { products: Product[] }) => {
   const { minPrice, maxPrice } = useMemo(() => {
@@ -44,7 +47,7 @@ export const ProductList = ({ products }: { products: Product[] }) => {
     flags: new Set()
   });
   const [searchQuery, setSearchQuery] = useState("");
-  const [sort, setSort] = useState<SortOption>("newest");
+  const [sort, setSort] = useState<SortOption>("popular");
   const [pageSize, setPageSize] = useState(PAGE_SIZE_OPTIONS[0]);
   const [page, setPage] = useState(1);
   const [density, setDensity] = useState<"comfortable" | "compact">(
@@ -105,11 +108,15 @@ export const ProductList = ({ products }: { products: Product[] }) => {
         sorted.sort((a, b) => a.name.localeCompare(b.name));
         break;
       case "newest":
+        sorted.sort(byNewest);
+        break;
+      case "popular":
       default:
+        // De más visto a menos. Los que aún no tienen visitas quedan al final
+        // ordenados por novedad, para que el bloque de ceros no salga en un
+        // orden arbitrario.
         sorted.sort(
-          (a, b) =>
-            new Date(b.createdAt ?? 0).getTime() -
-            new Date(a.createdAt ?? 0).getTime()
+          (a, b) => (b.views ?? 0) - (a.views ?? 0) || byNewest(a, b)
         );
     }
     return sorted;
@@ -350,6 +357,7 @@ const Toolbar = ({
           onChange={(e) => setSort(e.target.value as SortOption)}
           className="border-0 bg-transparent font-semibold text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-foreground"
         >
+          <option value="popular">Lo más visto</option>
           <option value="newest">Lo más nuevo</option>
           <option value="price-asc">Precio: menor a mayor</option>
           <option value="price-desc">Precio: mayor a menor</option>

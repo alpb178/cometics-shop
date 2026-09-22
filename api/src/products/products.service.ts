@@ -30,6 +30,12 @@ type Tx = Parameters<Parameters<PrismaService["$transaction"]>[0]>[0];
  * 'draft' = vista admin (todas). El dedupe por `document_id` es defensivo por
  * si quedaran filas duplicadas heredadas.
  */
+/**
+ * Margen de filas sobre el `pageSize` pedido: mientras queden duplicados de
+ * draft & publish hay hasta 2 filas por documento.
+ */
+const ROW_BUDGET_FACTOR = 2;
+
 @Injectable()
 export class ProductsService {
   constructor(
@@ -47,10 +53,17 @@ export class ProductsService {
     };
     // Se pide por updated_at desc para que, ante duplicados heredados, la
     // primera fila de cada document_id sea la última editada (superviviente).
+    //
+    // El `take` se aplica a FILAS y la deduplicación viene después, así que con
+    // los duplicados de draft & publish (2 filas por documento) el presupuesto
+    // se gastaba a la mitad: pedir 100 devolvía ~50 productos y el resto
+    // desaparecía del catálogo sin ningún error. Se pide el doble y se recorta
+    // tras deduplicar. Cuando se corra `collapse-product-versions.sql` el
+    // margen sobra y no molesta.
     const rows = await this.prisma.products.findMany({
       where,
       orderBy: { updated_at: "desc" },
-      take: opts.pageSize,
+      take: opts.pageSize * ROW_BUDGET_FACTOR,
     });
     const seen = new Set<string>();
     const unique = rows.filter((r) => {
@@ -64,16 +77,19 @@ export class ProductsService {
       (a, b) =>
         (b.created_at?.getTime() ?? 0) - (a.created_at?.getTime() ?? 0),
     );
-    const data = await Promise.all(unique.map((r) => this.serialize(r)));
-    const total = unique.length;
+    const page = unique.slice(0, opts.pageSize);
+    const data = await Promise.all(page.map((r) => this.serialize(r)));
+    // El endpoint devuelve una sola página acotada por `pageSize` (el catálogo
+    // pagina en cliente) y no acepta offset, así que anunciar `pageCount` a
+    // partir de una división era engañoso: siempre hay una página.
     return {
       data,
       meta: {
         pagination: {
           page: 1,
           pageSize: opts.pageSize,
-          pageCount: Math.max(1, Math.ceil(total / opts.pageSize)),
-          total,
+          pageCount: 1,
+          total: data.length,
         },
       },
     };

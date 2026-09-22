@@ -129,7 +129,12 @@ export function GroupCompanies() {
       aria-label="Sitios de interés del Grupo CorpSC"
       className="mx-auto w-full max-w-screen-2xl px-4 py-12 sm:px-6 lg:px-10"
     >
-      <div className="relative">
+      {/* Alinea las tarjetas con la columna de productos: mismo grid que la
+          lista (barra lateral de 220px + productos) con un hueco a la izquierda en lg. */}
+      <div className="lg:grid lg:grid-cols-[220px_1fr] lg:gap-x-10">
+        <div aria-hidden="true" className="hidden lg:block" />
+        <div className="min-w-0">
+          <div className="relative">
         <div
           ref={scroller}
           className="flex snap-x snap-mandatory gap-6 overflow-x-auto scroll-smooth pb-2 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
@@ -166,6 +171,8 @@ export function GroupCompanies() {
             }`}
           />
         ))}
+      </div>
+        </div>
       </div>
     </section>
   );

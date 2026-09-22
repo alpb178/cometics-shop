@@ -52,14 +52,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const login = useCallback(async (email: string, password: string) => {
     const { user: u } = await loginRequest(email, password);
-    setUser(u);
-    return u;
+    // The login response does not include server-computed fields such as
+    // `isStaff`, so re-fetch the full user from /api/auth/me to populate them.
+    const fullUser = (await meRequest()) ?? u;
+    setUser(fullUser);
+    return fullUser;
   }, []);
 
   const register = useCallback(async (payload: RegisterPayload) => {
     const { user: u } = await registerRequest(payload);
-    setUser(u);
-    return u;
+    const fullUser = (await meRequest()) ?? u;
+    setUser(fullUser);
+    return fullUser;
   }, []);
 
   const logout = useCallback(async () => {

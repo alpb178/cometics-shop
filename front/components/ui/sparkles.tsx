@@ -3,8 +3,12 @@ import { cn } from "@/lib/utils";
 import type { Container, SingleOrMultiple } from "@tsparticles/engine";
 import Particles, { initParticlesEngine } from "@tsparticles/react";
 import { loadSlim } from "@tsparticles/slim";
-import { motion, useAnimation } from "framer-motion";
+import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
+
+// El engine de tsparticles es global: cacheamos la promesa para no recargar
+// el bundle slim en cada montaje (esto se re-monta al cambiar de miniatura).
+let enginePromise: Promise<void> | null = null;
 
 // Function to resolve CSS variables to actual color values
 const resolveCSSVariable = (colorValue: string): string => {
@@ -52,9 +56,12 @@ export const SparklesCore = (props: ParticlesProps) => {
   );
 
   useEffect(() => {
-    initParticlesEngine(async (engine) => {
-      await loadSlim(engine);
-    }).then(() => {
+    if (!enginePromise) {
+      enginePromise = initParticlesEngine(async (engine) => {
+        await loadSlim(engine);
+      });
+    }
+    enginePromise.then(() => {
       setInit(true);
     });
   }, []);
@@ -67,21 +74,23 @@ export const SparklesCore = (props: ParticlesProps) => {
     }
   }, [particleColor]);
 
-  const controls = useAnimation();
+  // El contenedor entra con un fundido cuando las partículas ya están
+  // cargadas. Se hace con estado y no con `useAnimation` (controles
+  // imperativos): esa API dejó de exportarse en el bundle de framer-motion que
+  // usa el proyecto y rompía el componente al montarse.
+  const [loaded, setLoaded] = useState(false);
 
   const particlesLoaded = async (container?: Container) => {
-    if (container) {
-      controls.start({
-        opacity: 1,
-        transition: {
-          duration: 1
-        }
-      });
-    }
+    if (container) setLoaded(true);
   };
 
   return (
-    <motion.div animate={controls} className={cn("opacity-0", className)}>
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: loaded ? 1 : 0 }}
+      transition={{ duration: 1 }}
+      className={cn(className)}
+    >
       {init && (
         <Particles
           id={id || "tsparticles"}

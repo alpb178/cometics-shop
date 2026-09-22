@@ -9,12 +9,12 @@ export const ShippingNotice = ({ className }: { className?: string }) => (
     )}
   >
     <Truck className="mt-1 h-6 w-6 shrink-0 text-primary" />
-    <p className="text-base font-medium leading-relaxed text-foreground sm:text-lg">
-      El envío de nuestros productos es gratuito hasta el 10.º anillo en Santa
-      Cruz de la Sierra.{" "}
-      <span className="text-muted-foreground">
-        Para envíos fuera de esta zona se aplica un adicional de Bs. 17.
-      </span>
+    <p className="text-base leading-relaxed text-foreground sm:text-lg">
+      Al hacer pedido por la web{" "}
+      <strong className="font-semibold">
+        el envío de los productos es gratis hasta el 10.º anillo.
+      </strong>{" "}
+      Otras zonas y departamentos de Bolivia se cobra Bs. 17 adicionales.
     </p>
   </div>
 );

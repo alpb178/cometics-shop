@@ -115,15 +115,22 @@ export class TrackingController {
   @Get("store-events/top-products")
   @UseGuards(JwtAuthGuard, StaffGuard)
   @ApiBearerAuth()
-  @ApiOperation({ summary: "Productos más vistos (solo staff)" })
+  @ApiOperation({
+    summary: "Productos más vistos (solo staff)",
+    description:
+      "Con `?period=today` la ventana es el día en curso en Bolivia (desde " +
+      "las 00:00) e ignora `days`; si no, son los últimos `days` días.",
+  })
   async topProducts(
     @Query("days") days?: string,
     @Query("limit") limit?: string,
+    @Query("period") period?: string,
   ) {
     return {
       data: await this.trackingService.getTopProducts({
         days: Number(days) || 30,
         limit: Math.min(Number(limit) || 10, 50),
+        today: period === "today",
       }),
     };
   }
