@@ -9,7 +9,6 @@ import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import { trackEvent } from "@/lib/track-event";
-import { ShippingNotice } from "@/components/shipping-notice";
 
 export function CartPage({ locale }: { locale: string }) {
   const { items, updateQuantity, removeFromCart, getCartTotal, clearCart } =
@@ -94,7 +93,6 @@ export function CartPage({ locale }: { locale: string }) {
         </div>
       ) : (
         <>
-          <ShippingNotice className="mb-8" />
           <div className="grid gap-12 lg:grid-cols-[1fr_400px]">
             <ul className="divide-y divide-border border-y border-border">
               {items.map((item) => (

@@ -9,6 +9,9 @@ export interface Address {
   ci?: string | null;
   notes?: string | null;
   isDefault?: boolean;
+  /** Último punto que el cliente marcó en el mapa para esta dirección. */
+  lat?: number | null;
+  lng?: number | null;
 }
 
 export interface AddressInput {
@@ -20,4 +23,6 @@ export interface AddressInput {
   department?: string;
   ci?: string;
   notes?: string;
+  lat?: number;
+  lng?: number;
 }

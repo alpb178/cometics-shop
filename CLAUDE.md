@@ -10,6 +10,11 @@ Antes de cualquier cambio en este repo, sigue el flujo definido en [`FLUJO-TRABA
 - Usar **Squash and merge** al mergear PRs.
 - Convención de commits: `feat:`, `fix:`, `chore:`, `refactor:`, `test:`, `docs:`.
 - PRs pequeños y enfocados — una sola cosa por PR.
+- **Todo en inglés salvo lo que ve el usuario:** nombres de rama, mensajes de
+  commit, títulos y descripciones de PR, y el código (modelos, campos, enums,
+  clases, rutas nuevas, claves JSON, variables). Los textos de la UI siguen en
+  español. El código legado en español no se renombra "de paso". Detalle en
+  `FLUJO-TRABAJO-DEVS.md`, secciones "Idioma del código" e "Idioma de git".
 
 ## Crear una rama nueva
 
@@ -34,9 +39,11 @@ PRs a `main` solo cuando el usuario lo pida explícitamente y el cambio ya esté
 
 ## Estructura del repo
 
-- `front/` — Next.js (TypeScript), storefront
+- `front/` — Next.js (TypeScript), storefront **+ panel de administración**
+  integrado en la ruta interna `/admin` (`front/app/[locale]/admin`, con su código
+  en `front/lib/admin` y `front/components/admin`). Acceso restringido a staff
+  reusando el login del storefront.
 - `api/` — NestJS 10 + Prisma (reemplazó al backend Strapi en julio de 2026)
-- `backoffice/` — Next.js, panel de administración
 - `mobile/` — React Native (Expo)
 
 Cada subcarpeta tiene su propio `CLAUDE.md` con detalles específicos del stack.

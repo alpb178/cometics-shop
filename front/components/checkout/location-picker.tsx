@@ -78,6 +78,9 @@ export function LocationPicker({
     };
   }, [expanded]);
 
+  // La vista del mapa siempre necesita un punto; el pin, en cambio, solo se
+  // dibuja si el cliente ya eligió uno. Antes se dibujaba sobre `center`, así
+  // que parecía elegido un punto que nadie había marcado.
   const pos = value ?? center;
 
   const locate = () => {
@@ -106,7 +109,9 @@ export function LocationPicker({
       ? "Obteniendo tu ubicación…"
       : geoStatus === "error"
         ? "No pudimos obtener tu ubicación. Marca el punto manualmente."
-        : "Toca el mapa o arrastra el pin a tu ubicación de entrega";
+        : value
+          ? "Toca el mapa o arrastra el pin a tu ubicación de entrega"
+          : "Toca el mapa para marcar tu ubicación de entrega";
 
   const renderMap = (zoom: number) => (
     <Map
@@ -123,23 +128,25 @@ export function LocationPicker({
         onChange({ lat: e.lngLat.lat, lng: e.lngLat.lng })
       }
     >
-      <Marker
-        longitude={pos.lng}
-        latitude={pos.lat}
-        anchor="bottom"
-        draggable
-        onDragEnd={(e: LngLatEvent) =>
-          onChange({ lat: e.lngLat.lat, lng: e.lngLat.lng })
-        }
-      >
-        <svg width="30" height="38" viewBox="0 0 32 40" fill="none">
-          <path
-            d="M16 0C7.164 0 0 7.164 0 16C0 26.5 16 40 16 40C16 40 32 26.5 32 16C32 7.164 24.836 0 16 0Z"
-            fill="#111827"
-          />
-          <circle cx="16" cy="16" r="6" fill="white" />
-        </svg>
-      </Marker>
+      {value && (
+        <Marker
+          longitude={value.lng}
+          latitude={value.lat}
+          anchor="bottom"
+          draggable
+          onDragEnd={(e: LngLatEvent) =>
+            onChange({ lat: e.lngLat.lat, lng: e.lngLat.lng })
+          }
+        >
+          <svg width="30" height="38" viewBox="0 0 32 40" fill="none">
+            <path
+              d="M16 0C7.164 0 0 7.164 0 16C0 26.5 16 40 16 40C16 40 32 26.5 32 16C32 7.164 24.836 0 16 0Z"
+              fill="#111827"
+            />
+            <circle cx="16" cy="16" r="6" fill="white" />
+          </svg>
+        </Marker>
+      )}
     </Map>
   );
 

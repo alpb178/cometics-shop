@@ -3,6 +3,7 @@ import { ChevronRight } from "lucide-react";
 import { requireUser } from "@/lib/auth/server";
 import { authFetch } from "@/lib/strapi/auth-fetch";
 import type { Order } from "@/definitions/Order";
+import { formatAmount } from "@/lib/price";
 
 const STATUS_LABELS: Record<Order["status"], string> = {
   pending_verification: "Pendiente de verificación",
@@ -15,8 +16,10 @@ const STATUS_LABELS: Record<Order["status"], string> = {
 export default async function OrdersPage() {
   await requireUser("/account/orders");
 
+  // scope=mine: esta vista comparte endpoint con el panel, y sin el parámetro
+  // una cuenta staff vería aquí los pedidos de todos los clientes.
   const res = await authFetch(
-    "/api/orders?sort[0]=createdAt:desc&pagination[pageSize]=50"
+    "/api/orders?scope=mine&sort[0]=createdAt:desc&pagination[pageSize]=50"
   );
   const data = res.ok
     ? ((await res.json()) as { data: Order[] })
@@ -64,7 +67,7 @@ export default async function OrdersPage() {
                 </div>
                 <div className="flex items-center gap-4">
                   <span className="text-sm font-semibold">
-                    Bs {Number(order.total).toFixed(2)}
+                    Bs {formatAmount(order.total)}
                   </span>
                   <ChevronRight className="h-4 w-4" />
                 </div>

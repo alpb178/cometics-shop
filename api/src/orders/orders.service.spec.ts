@@ -1,4 +1,5 @@
-import { BadRequestException } from "@nestjs/common";
+import { BadRequestException, NotFoundException } from "@nestjs/common";
+import { AuthenticatedUser } from "../common/staff.util";
 import { PricingService } from "../pricing/pricing.service";
 import { OrdersService } from "./orders.service";
 
@@ -69,7 +70,19 @@ describe("OrdersService.buildVerifiedOrderData", () => {
     expect(result.shippingCost).toBe(0);
   });
 
-  it("rechaza productos no publicados o inexistentes", async () => {
+  it("filtra por visible, no por published_at (versión única)", async () => {
+    await service.buildVerifiedOrderData(
+      [{ productId: 5, quantity: 1 } as never],
+      { deliveryMethod: "pickup" },
+    );
+    const where = prismaMock.products.findMany.mock.calls[0][0].where;
+    expect(where).toEqual({ id: { in: [5] }, visible: { not: false } });
+    // published_at quedó nulo en filas heredadas y en el superviviente del
+    // colapso de versiones: filtrarlo rechazaba productos a la venta.
+    expect(where).not.toHaveProperty("published_at");
+  });
+
+  it("rechaza productos ocultos o inexistentes", async () => {
     prismaMock.products.findMany.mockResolvedValue([]);
     await expect(
       service.buildVerifiedOrderData(
@@ -83,6 +96,121 @@ describe("OrdersService.buildVerifiedOrderData", () => {
     await expect(
       service.buildVerifiedOrderData([], { deliveryMethod: "pickup" }),
     ).rejects.toThrow(BadRequestException);
+  });
+});
+
+describe("OrdersService: alcance por usuario", () => {
+  const prismaMock = {
+    orders: { findMany: jest.fn(), count: jest.fn(), findFirst: jest.fn() },
+    orders_cmps: { findMany: jest.fn() },
+    orders_shipping_address_lnk: { findFirst: jest.fn() },
+    orders_user_lnk: { findFirst: jest.fn() },
+    pricing_settings: { findFirst: jest.fn() },
+  };
+  const mediaMock = { findRelatedFile: jest.fn() };
+  const service = new OrdersService(
+    prismaMock as never,
+    new PricingService(prismaMock as never) as never,
+    mediaMock as never,
+    {} as never,
+  );
+
+  const baseUser = (over: Partial<AuthenticatedUser>): AuthenticatedUser =>
+    ({
+      id: 7,
+      email: "cliente@example.com",
+      roleType: "authenticated",
+      ...over,
+    }) as AuthenticatedUser;
+  const customer = baseUser({});
+  const staff = baseUser({ id: 1, email: "admin@example.com", roleType: "admin" });
+  const ownedBy = (userId: number) => ({
+    orders_user_lnk: { some: { user_id: userId } },
+  });
+
+  const orderRow = { id: 42, document_id: "abc", status: "confirmed" };
+
+  beforeEach(() => {
+    // isStaffUser lee STAFF_EMAILS en cada llamada: fijarlo para no depender
+    // del entorno donde corran los tests.
+    process.env.STAFF_EMAILS = "";
+    prismaMock.orders.findMany.mockReset().mockResolvedValue([]);
+    prismaMock.orders.count.mockReset().mockResolvedValue(0);
+    prismaMock.orders.findFirst.mockReset().mockResolvedValue(orderRow);
+    prismaMock.orders_cmps.findMany.mockReset().mockResolvedValue([]);
+    prismaMock.orders_shipping_address_lnk.findFirst.mockReset().mockResolvedValue(null);
+    prismaMock.orders_user_lnk.findFirst.mockReset().mockResolvedValue(null);
+    prismaMock.pricing_settings.findFirst.mockReset().mockResolvedValue(null);
+    mediaMock.findRelatedFile.mockReset().mockResolvedValue(null);
+  });
+
+  describe("findMany", () => {
+    it("un cliente solo recibe sus pedidos (también en el count)", async () => {
+      await service.findMany(customer, 50);
+      expect(prismaMock.orders.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({ where: ownedBy(customer.id) }),
+      );
+      expect(prismaMock.orders.count).toHaveBeenCalledWith({
+        where: ownedBy(customer.id),
+      });
+    });
+
+    it("staff sin scope ve todos los pedidos", async () => {
+      await service.findMany(staff, 50);
+      expect(prismaMock.orders.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({ where: {} }),
+      );
+      expect(prismaMock.orders.count).toHaveBeenCalledWith({ where: {} });
+    });
+
+    it("scope=mine filtra por propiedad aunque el usuario sea staff", async () => {
+      await service.findMany(staff, 50, { onlyOwn: true });
+      expect(prismaMock.orders.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({ where: ownedBy(staff.id) }),
+      );
+      expect(prismaMock.orders.count).toHaveBeenCalledWith({
+        where: ownedBy(staff.id),
+      });
+    });
+  });
+
+  describe("findOneOrThrow", () => {
+    it("404 (no 403) cuando el pedido no es del cliente", async () => {
+      await expect(service.findOneOrThrow("42", customer)).rejects.toThrow(
+        NotFoundException,
+      );
+    });
+
+    it("devuelve el pedido cuando el cliente es el dueño", async () => {
+      prismaMock.orders_user_lnk.findFirst.mockResolvedValue({
+        order_id: 42,
+        user_id: customer.id,
+      });
+      await expect(service.findOneOrThrow("42", customer)).resolves.toEqual(
+        orderRow,
+      );
+    });
+
+    it("staff sin scope abre pedidos ajenos", async () => {
+      await expect(service.findOneOrThrow("42", staff)).resolves.toEqual(orderRow);
+      expect(prismaMock.orders_user_lnk.findFirst).not.toHaveBeenCalled();
+    });
+
+    it("scope=mine devuelve 404 a staff en pedidos ajenos", async () => {
+      await expect(
+        service.findOneOrThrow("42", staff, { onlyOwn: true }),
+      ).rejects.toThrow(NotFoundException);
+      expect(prismaMock.orders_user_lnk.findFirst).toHaveBeenCalledWith({
+        where: { order_id: 42, user_id: staff.id },
+      });
+    });
+
+    it("acepta documentId además de id numérico", async () => {
+      await service.findOneOrThrow("abc", staff);
+      expect(prismaMock.orders.findFirst).toHaveBeenCalledWith({
+        where: { document_id: "abc" },
+      });
+    });
   });
 });
 

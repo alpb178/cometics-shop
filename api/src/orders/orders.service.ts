@@ -34,6 +34,15 @@ interface SerializeOpts {
   includeOriginalPrice?: boolean;
 }
 
+interface ScopeOpts {
+  /**
+   * Fuerza el filtro por propiedad aunque el usuario sea staff. Lo pide la
+   * vista "Mis pedidos" del storefront (`?scope=mine`), que comparte endpoint
+   * con el panel: sin esto, un admin vería ahí los pedidos de todos.
+   */
+  onlyOwn?: boolean;
+}
+
 @Injectable()
 export class OrdersService {
   constructor(
@@ -69,7 +78,12 @@ export class OrdersService {
     ];
     const [products, settings] = await Promise.all([
       this.prisma.products.findMany({
-        where: { id: { in: ids }, published_at: { not: null } },
+        // Misma regla que la vista pública de ProductsService.findMany: en el
+        // modelo de versión única la visibilidad la manda `visible`, no
+        // `published_at` (que quedó nulo en filas heredadas y en la fila
+        // superviviente del colapso de versiones). Filtrar por published_at
+        // rechazaba productos que la tienda sí ofrece: "Producto no disponible".
+        where: { id: { in: ids }, visible: { not: false } },
         select: { id: true, name: true, slug: true, price: true },
       }),
       this.pricingService.getSettings(),
@@ -288,14 +302,23 @@ export class OrdersService {
     };
   }
 
-  async findMany(user: AuthenticatedUser, pageSize: number) {
-    const where = isStaffUser(user)
-      ? {}
-      : { orders_user_lnk: { some: { user_id: user.id } } };
+  async findMany(
+    user: AuthenticatedUser,
+    pageSize: number,
+    opts?: ScopeOpts & { page?: number },
+  ) {
+    const where =
+      isStaffUser(user) && !opts?.onlyOwn
+        ? {}
+        : { orders_user_lnk: { some: { user_id: user.id } } };
+    // `page` se respeta de verdad: antes se anunciaba `page: 1` y se ignoraba
+    // el parámetro, así que pedir la página 2 devolvía otra vez la primera.
+    const page = Math.max(1, opts?.page ?? 1);
     const [rows, total] = await Promise.all([
       this.prisma.orders.findMany({
         where,
         orderBy: { created_at: "desc" },
+        skip: (page - 1) * pageSize,
         take: pageSize,
       }),
       this.prisma.orders.count({ where }),
@@ -305,7 +328,7 @@ export class OrdersService {
       data,
       meta: {
         pagination: {
-          page: 1,
+          page,
           pageSize,
           pageCount: Math.max(1, Math.ceil(total / pageSize)),
           total,
@@ -315,13 +338,17 @@ export class OrdersService {
   }
 
   /** Acepta id numérico (front) o documentId (backoffice), como el controller original. */
-  async findOneOrThrow(idOrDocumentId: string, user: AuthenticatedUser) {
+  async findOneOrThrow(
+    idOrDocumentId: string,
+    user: AuthenticatedUser,
+    opts?: ScopeOpts,
+  ) {
     const where = isNumericId(idOrDocumentId)
       ? { id: Number(idOrDocumentId) }
       : { document_id: idOrDocumentId };
     const row = await this.prisma.orders.findFirst({ where });
     if (!row) throw new NotFoundException();
-    if (!isStaffUser(user)) {
+    if (!isStaffUser(user) || opts?.onlyOwn) {
       const owned = await this.prisma.orders_user_lnk.findFirst({
         where: { order_id: row.id, user_id: user.id },
       });

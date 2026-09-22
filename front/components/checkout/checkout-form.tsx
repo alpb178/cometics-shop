@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { Fragment, useEffect, useMemo, useState } from "react";
+import { Fragment, useCallback, useEffect, useMemo, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { Upload, X, MapPin, ArrowLeft } from "lucide-react";
 import {
@@ -14,7 +14,6 @@ import {
 import { PhoneInput } from "@/components/form/phone-input/PhoneInput";
 import { TextInput } from "@/components/form/text-input/TextInput";
 import { LocationPicker } from "@/components/checkout/location-picker";
-import { ShippingNotice } from "@/components/shipping-notice";
 import { StoreMap } from "@/components/checkout/store-map";
 import { useAuth } from "@/context/auth-context";
 import { useCart } from "@/context/cart-context";
@@ -22,6 +21,7 @@ import type { Address } from "@/definitions/Address";
 import type { User } from "@/definitions/User";
 import type { PaymentInfo } from "@/definitions/PaymentInfo";
 import type { DeliveryMethod, PaymentMethod } from "@/definitions/Order";
+import { formatAmount } from "@/lib/price";
 
 type FormValues = {
   fullName: string;
@@ -102,15 +102,7 @@ export function CheckoutForm({
   // Dentro de Santa Cruz mostramos el mapa para fijar el punto de entrega.
   const showMap = deliveryMethod === "delivery" && !isProvince;
 
-  // Pre-centra el pin en el centro de Santa Cruz para que el cliente solo lo
-  // ajuste; así siempre hay una ubicación de entrega para envíos en SC.
-  useEffect(() => {
-    if (showMap && !coords) {
-      setCoords({ lat: pricing.scCenterLat, lng: pricing.scCenterLng });
-    }
-  }, [showMap, coords, pricing]);
-
-  const requestLocation = () => {
+  const requestLocation = useCallback(() => {
     if (typeof navigator === "undefined" || !navigator.geolocation) {
       setGeoStatus("denied");
       return;
@@ -127,7 +119,34 @@ export function CheckoutForm({
       () => setGeoStatus("denied"),
       { enableHighAccuracy: true, timeout: 10000 }
     );
-  };
+  }, [pricing]);
+
+  // Último punto guardado para el destino elegido: solo existe si se está usando
+  // una dirección guardada que ya tenga punto.
+  const savedCoords = useMemo(() => {
+    if (addressMode !== "saved") return null;
+    const addr = savedAddresses.find((a) => a.id === selectedAddressId);
+    if (!addr || addr.lat == null || addr.lng == null) return null;
+    return { lat: addr.lat, lng: addr.lng };
+  }, [addressMode, savedAddresses, selectedAddressId]);
+
+  // El pin sigue al destino elegido: salta al punto de la dirección nueva, y se
+  // vacía si esa dirección no tiene ninguno. Antes solo se asignaba cuando había
+  // punto, así que al pasar a una dirección sin él el pin conservaba el de la
+  // anterior — y al confirmar se guardaba ese punto ajeno en ella.
+  useEffect(() => {
+    setCoords(savedCoords);
+  }, [savedCoords]);
+
+  // Sin punto para el destino elegido se pide la ubicación real del dispositivo.
+  // Antes se pre-centraba el pin en el centro de Santa Cruz, así que quien no
+  // tocaba el mapa enviaba un punto que no eligió. El propio `geoStatus` evita
+  // reintentos: "locating" corta la re-entrada y "denied" no vuelve a pedirlo.
+  useEffect(() => {
+    if (!showMap || coords || savedCoords) return;
+    if (geoStatus === "locating" || geoStatus === "denied") return;
+    requestLocation();
+  }, [showMap, coords, savedCoords, geoStatus, requestLocation]);
 
   const subtotal = useMemo(() => getCartTotal(), [getCartTotal]);
   const shippingCost =
@@ -176,7 +195,7 @@ export function CheckoutForm({
 
   async function copyAmount() {
     try {
-      await navigator.clipboard.writeText(total.toFixed(2));
+      await navigator.clipboard.writeText(formatAmount(total));
       setAmountCopied(true);
       setTimeout(() => setAmountCopied(false), 2000);
     } catch {
@@ -237,10 +256,18 @@ export function CheckoutForm({
       // Cruz solo nombre y teléfono; fuera de Santa Cruz además CI, zona y
       // departamento (zona -> `city`, departamento -> `department`).
       const collectContact = useNew || isPickup;
+      // El punto del mapa se guarda con la dirección para que el pin arranque
+      // ahí la próxima vez. Solo aplica a envío dentro de Santa Cruz, que es
+      // donde se marca en el mapa.
+      const pointFields =
+        useNew && !isProvince && coords
+          ? { lat: coords.lat, lng: coords.lng }
+          : {};
       const newAddress = collectContact
         ? {
             fullName: values.fullName,
             phone: values.phone,
+            ...pointFields,
             ...(useNew && isProvince
               ? {
                   ci: values.ci?.trim() || undefined,
@@ -263,6 +290,27 @@ export function CheckoutForm({
           const j = (await r.json()) as { data: { id: number } };
           finalAddressId = j.data.id;
         }
+      }
+
+      // Dirección guardada cuyo punto ha cambiado: se actualiza para que la
+      // siguiente compra arranque en el último lugar que eligió el cliente. Si
+      // falla no se corta el pedido: es una comodidad, no un requisito.
+      if (
+        useSaved &&
+        selectedAddressId != null &&
+        coords &&
+        (savedCoords?.lat !== coords.lat || savedCoords?.lng !== coords.lng)
+      ) {
+        await fetch(`/api/addresses/${selectedAddressId}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({ data: { lat: coords.lat, lng: coords.lng } })
+        }).catch((e) => {
+          // No corta el pedido, pero tampoco se silencia: si esto falla, la
+          // próxima compra vuelve a arrancar sin punto y sin pista de por qué.
+          console.error("No se pudo guardar el punto de la dirección", e);
+        });
       }
 
       const payload = {
@@ -376,7 +424,6 @@ export function CheckoutForm({
             </Fragment>
           ))}
         </div>
-        <ShippingNotice className="mt-6" />
       </header>
 
       <FormProvider {...methods}>
@@ -495,7 +542,7 @@ export function CheckoutForm({
                       {isProvince && (
                         <p className="text-xs text-muted-foreground">
                           Envío a provincia (a la terminal): Bs{" "}
-                          {pricing.provinceShippingCost.toFixed(2)}.
+                          {formatAmount(pricing.provinceShippingCost)}.
                         </p>
                       )}
                     </div>
@@ -719,7 +766,7 @@ export function CheckoutForm({
                         Monto exacto a pagar
                       </p>
                       <p className="font-display text-2xl font-semibold">
-                        Bs {total.toFixed(2)}
+                        Bs {formatAmount(total)}
                       </p>
                       <p className="mt-1 text-xs text-muted-foreground">
                         {paymentMethod === "qr"
@@ -744,7 +791,7 @@ export function CheckoutForm({
                       {deliveryMethod === "pickup"
                         ? "Paga en efectivo al recoger tu pedido en la tienda."
                         : "Paga en efectivo al recibir tu pedido (contra entrega)."}{" "}
-                      Ten listo el monto exacto: Bs {total.toFixed(2)}.
+                      Ten listo el monto exacto: Bs {formatAmount(total)}.
                     </p>
                   </div>
                 )}
@@ -873,7 +920,7 @@ export function CheckoutForm({
                       </span>
                     </span>
                     <span>
-                      Bs {(Number(it.product.price) * it.quantity).toFixed(2)}
+                      Bs {formatAmount(Number(it.product.price) * it.quantity)}
                     </span>
                   </li>
                 ))}
@@ -882,17 +929,17 @@ export function CheckoutForm({
               <dl className="space-y-2 border-t border-border pt-4 text-sm">
                 <div className="flex justify-between">
                   <dt className="text-muted-foreground">Subtotal</dt>
-                  <dd>Bs {subtotal.toFixed(2)}</dd>
+                  <dd>Bs {formatAmount(subtotal)}</dd>
                 </div>
                 {shippingCost > 0 && (
                   <div className="flex justify-between">
                     <dt className="text-muted-foreground">Envío a provincia</dt>
-                    <dd>Bs {shippingCost.toFixed(2)}</dd>
+                    <dd>Bs {formatAmount(shippingCost)}</dd>
                   </div>
                 )}
                 <div className="flex justify-between border-t border-border pt-2 text-base font-semibold">
                   <dt>Total</dt>
-                  <dd>Bs {total.toFixed(2)}</dd>
+                  <dd>Bs {formatAmount(total)}</dd>
                 </div>
               </dl>
 
@@ -982,7 +1029,7 @@ export function CheckoutForm({
             />
           </div>
           <p className="text-center text-sm text-white/80">
-            Monto exacto: Bs {total.toFixed(2)} · Toca fuera del QR para cerrar
+            Monto exacto: Bs {formatAmount(total)} · Toca fuera del QR para cerrar
           </p>
         </div>
       )}
