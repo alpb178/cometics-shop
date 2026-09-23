@@ -1,11 +1,11 @@
 import { ProductsService } from "./products.service";
 
 /**
- * Cubre el modelo de versión única (sin draft & publish):
- *  - create deja la fila publicada (published_at no nulo),
- *  - update edita en sitio y conserva published_at,
- *  - findMany deduplica por document_id (la última editada) y solo filtra por
- *    visibilidad en la vista pública.
+ * Covers the single-version model (no draft & publish):
+ *  - create leaves the row published (non-null published_at),
+ *  - update edits in place and keeps published_at,
+ *  - findMany dedupes by document_id (the last edited one) and only filters by
+ *    visibility in the public view.
  */
 describe("ProductsService", () => {
   const tx = {
@@ -56,7 +56,7 @@ describe("ProductsService", () => {
     mediaMock.findRelatedFile.mockResolvedValue(null);
   });
 
-  it("create deja la fila ya publicada (published_at no nulo)", async () => {
+  it("create leaves the row already published (non-null published_at)", async () => {
     tx.products.create.mockImplementation((args: { data: Record<string, unknown> }) =>
       Promise.resolve({ ...baseRow, ...args.data }),
     );
@@ -65,7 +65,7 @@ describe("ProductsService", () => {
     expect(data.published_at).toBeInstanceOf(Date);
   });
 
-  it("update edita en sitio y conserva la fila publicada", async () => {
+  it("update edits in place and keeps the row published", async () => {
     prismaMock.products.findFirst.mockResolvedValue(baseRow);
     tx.products.update.mockImplementation((args: { where: { id: number }; data: Record<string, unknown> }) =>
       Promise.resolve({ ...baseRow, ...args.data, id: args.where.id }),
@@ -81,11 +81,11 @@ describe("ProductsService", () => {
     );
     const data = tx.products.update.mock.calls[0][0].data;
     expect(data.name).toBe("Editado");
-    // mantiene la publicación existente (no la vuelve a null)
+    // keeps the existing publication (doesn't reset it to null)
     expect(data.published_at).toEqual(baseRow.published_at);
   });
 
-  it("findMany deduplica por document_id quedándose con la última editada", async () => {
+  it("findMany dedupes by document_id keeping the last edited row", async () => {
     const rows = [
       { ...baseRow, id: 2, document_id: "d", name: "v2", updated_at: new Date("2026-02-02"), created_at: new Date("2026-01-02") },
       { ...baseRow, id: 1, document_id: "d", name: "v1", updated_at: new Date("2026-01-01"), created_at: new Date("2026-01-01") },
@@ -98,7 +98,7 @@ describe("ProductsService", () => {
     expect(res.meta.pagination.total).toBe(2);
     expect(res.data).toHaveLength(2);
     expect(res.data.find((p) => p.documentId === "d")?.name).toBe("v2");
-    // vista pública: filtra por visibilidad
+    // public view: filters by visibility
     expect(prismaMock.products.findMany).toHaveBeenCalledWith(
       expect.objectContaining({
         where: expect.objectContaining({ visible: { not: false } }),
@@ -106,14 +106,14 @@ describe("ProductsService", () => {
     );
   });
 
-  it("findMany en vista admin (draft) no filtra por visibilidad", async () => {
+  it("findMany in the admin view (draft) doesn't filter by visibility", async () => {
     prismaMock.products.findMany.mockResolvedValue([]);
     await service.findMany({ status: "draft", pageSize: 200 });
     const where = prismaMock.products.findMany.mock.calls[0][0].where;
     expect(where.visible).toBeUndefined();
   });
 
-  it("pide el doble de filas que el pageSize: el `take` se gasta en duplicados", async () => {
+  it("requests twice the pageSize in rows: `take` is spent on duplicates", async () => {
     prismaMock.products.findMany.mockResolvedValue([]);
     await service.findMany({ status: "published", pageSize: 24 });
     expect(prismaMock.products.findMany).toHaveBeenCalledWith(
@@ -121,9 +121,9 @@ describe("ProductsService", () => {
     );
   });
 
-  it("no pierde productos por los duplicados y recorta al pageSize", async () => {
-    // 8 documentos duplicados (draft + published) = 16 filas: con `take` sobre
-    // filas y sin margen, un pageSize de 8 devolvía solo 4 productos.
+  it("doesn't lose products to duplicates and trims to pageSize", async () => {
+    // 8 duplicated documents (draft + published) = 16 rows: with `take` on
+    // rows and no headroom, a pageSize of 8 returned only 4 products.
     const rows = Array.from({ length: 8 }).flatMap((_, i) => [
       {
         ...baseRow,
@@ -148,13 +148,13 @@ describe("ProductsService", () => {
 
     expect(res.data).toHaveLength(8);
     expect(new Set(res.data.map((p) => p.documentId)).size).toBe(8);
-    // Una sola página: el endpoint no acepta offset, así que anunciar más
-    // páginas a partir de una división era engañoso.
+    // A single page: the endpoint takes no offset, so reporting more pages
+    // derived from a division was misleading.
     expect(res.meta.pagination.pageCount).toBe(1);
     expect(res.meta.pagination.total).toBe(8);
   });
 
-  it("recorta al pageSize cuando hay más documentos que sitio", async () => {
+  it("trims to pageSize when there are more documents than room", async () => {
     const rows = Array.from({ length: 6 }).map((_, i) => ({
       ...baseRow,
       id: i + 1,

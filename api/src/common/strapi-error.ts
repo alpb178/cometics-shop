@@ -1,9 +1,9 @@
 import { HttpException } from "@nestjs/common";
 
 /**
- * Errores con el mismo cuerpo que devuelve Strapi v5
- * ({ data: null, error: { status, name, message } }) para que los clientes
- * que leen error.message sigan funcionando sin cambios.
+ * Errors with the same body Strapi v5 returns
+ * ({ data: null, error: { status, name, message } }) so clients that read
+ * error.message keep working unchanged.
  */
 export function strapiError(
   status: number,

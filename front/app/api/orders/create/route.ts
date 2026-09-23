@@ -14,8 +14,8 @@ type Payload = {
     department?: string;
     ci?: string;
     notes?: string;
-    // Último punto marcado en el mapa: se guarda con la dirección para que el
-    // pin del checkout arranque ahí en la siguiente compra.
+    // Last point marked on the map: saved with the address so the checkout pin
+    // starts there on the next purchase.
     lat?: number;
     lng?: number;
   };
@@ -39,8 +39,8 @@ type Payload = {
 };
 
 /**
- * Fallo de una llamada a la API. Conserva el estado y el motivo para que el
- * checkout muestre "Producto no disponible" en vez de un 500 con el JSON crudo.
+ * A failed API call. Keeps the status and reason so checkout shows
+ * "Producto no disponible" instead of a 500 with the raw JSON.
  */
 class ApiError extends Error {
   constructor(
@@ -51,7 +51,7 @@ class ApiError extends Error {
   }
 }
 
-/** Saca el `message` del error de Nest; si no lo hay, deja el texto en bruto. */
+/** Extracts the `message` from the Nest error; if missing, keeps the raw text. */
 async function apiError(res: Response, fallback: string): Promise<ApiError> {
   const text = await res.text().catch(() => "");
   let message = text;
@@ -60,11 +60,11 @@ async function apiError(res: Response, fallback: string): Promise<ApiError> {
     if (typeof body.message === "string" && body.message) {
       message = body.message;
     } else if (Array.isArray(body.message) && body.message.length) {
-      // class-validator devuelve un array de mensajes
+      // class-validator returns an array of messages
       message = body.message.join(". ");
     }
   } catch {
-    // respuesta no JSON: nos queda el texto tal cual
+    // non-JSON response: keep the text as is
   }
   return new ApiError(message || fallback, res.status);
 }
@@ -121,9 +121,9 @@ async function createOrder(
       total: payload.total,
       customerNotes: payload.customerNotes,
       paymentReference: payload.paymentReference,
-      // Entradas del cálculo de envío: el servidor recalcula el coste con ellas
-      // y además guarda destLat/destLng como ubicación de entrega del pedido
-      // (es lo que ve el admin), así que deben llegar con toda su precisión.
+      // Shipping calculation inputs: the server recalculates the cost with them
+      // and also stores destLat/destLng as the order's delivery location
+      // (it's what the admin sees), so they must arrive at full precision.
       isProvince: payload.isProvince ?? false,
       destLat: payload.destLat ?? null,
       destLng: payload.destLng ?? null
@@ -140,7 +140,7 @@ async function createOrder(
   if (!res.ok) {
     throw await apiError(res, "No se pudo crear el pedido.");
   }
-  // Strapi v5 devuelve los atributos aplanados (sin envoltorio `attributes`).
+  // Strapi v5 returns flattened attributes (no `attributes` wrapper).
   const data = (await res.json()) as {
     data: { id: number; orderNumber?: string };
   };
@@ -176,8 +176,8 @@ export async function POST(req: Request) {
   if (!payload.items?.length) {
     return NextResponse.json({ error: "Carrito vacío" }, { status: 400 });
   }
-  // El comprobante solo es obligatorio para pago por QR; en efectivo se paga
-  // contra entrega o en tienda.
+  // The receipt is only required for QR payment; cash is paid on delivery
+  // or in store.
   if (payload.paymentMethod === "qr" && !(proof instanceof File)) {
     return NextResponse.json({ error: "Missing proof file" }, { status: 400 });
   }
@@ -205,9 +205,9 @@ export async function POST(req: Request) {
       orderNumber: order.orderNumber
     });
   } catch (err) {
-    // Un 4xx de la API es un problema del pedido (producto no disponible,
-    // dirección inválida…), no un fallo de este servidor: se propaga el estado
-    // y el motivo para que el checkout lo muestre tal cual. El resto sí es 500.
+    // A 4xx from the API is a problem with the order (product unavailable,
+    // invalid address…), not a failure of this server: the status and reason
+    // are passed through so checkout shows them as is. Anything else is a 500.
     if (err instanceof ApiError && err.status >= 400 && err.status < 500) {
       return NextResponse.json({ error: err.message }, { status: err.status });
     }

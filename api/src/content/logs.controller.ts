@@ -16,7 +16,7 @@ export class LogsController {
   constructor(private readonly prisma: PrismaService) {}
 
   @Post()
-  @ApiOperation({ summary: "Registrar log (best-effort desde el front)" })
+  @ApiOperation({ summary: "Record a log (best-effort from the front)" })
   async create(@Body("data") data: LogDto) {
     const now = new Date();
     const row = await this.prisma.logs.create({

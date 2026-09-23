@@ -13,8 +13,8 @@ export interface Product {
   featured?: boolean;
   isNew?: boolean;
   discount?: number;
-  /** Fecha de creación (ISO). Usada para ordenar y marcar "nuevos". */
+  /** Creation date (ISO). Used for sorting and flagging "new" items. */
   createdAt?: string;
-  /** Personas que han visto el detalle (contador social). */
+  /** People who have viewed the detail page (social counter). */
   views?: number;
 }

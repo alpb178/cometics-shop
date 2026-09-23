@@ -1,9 +1,9 @@
-// Origen del tráfico que sale de este sitio hacia sus hermanos del grupo.
+// Source of the traffic leaving this site towards its sibling group sites.
 const SOURCE = "iris-natural";
 
-// Marca los enlaces del cintillo con UTM para poder medir, del lado del sitio
-// de destino, cuánta atención trae la franja del grupo. Si la URL ya traía
-// parámetros se conservan; llamarla dos veces da el mismo resultado.
+// Tags the ticker links with UTM params so the destination site can measure how
+// much attention the group strip brings. Existing URL params are kept; calling
+// it twice gives the same result.
 export function groupSiteUrl(url: string): string {
   const target = new URL(url);
   target.searchParams.set("utm_source", SOURCE);
@@ -12,8 +12,8 @@ export function groupSiteUrl(url: string): string {
   return target.toString();
 }
 
-// Dominio que se muestra junto al nombre en el cintillo: el enlace a la vista,
-// sin protocolo, sin "www." y sin la barra final.
+// Domain shown next to the name in the ticker: the visible link, without the
+// protocol, without "www." and without the trailing slash.
 export function siteDomain(url: string): string {
   return new URL(url).host.replace(/^www\./, "");
 }

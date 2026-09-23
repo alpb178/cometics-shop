@@ -28,7 +28,7 @@ export const ProductList = ({ products }: { products: Product[] }) => {
     };
   }, [products]);
 
-  // "Destacados" = los 10 productos más visitados (con al menos 1 visita).
+  // "Destacados" = the 10 most visited products (with at least 1 visit).
   const featuredSlugs = useMemo(
     () =>
       new Set(
@@ -112,9 +112,9 @@ export const ProductList = ({ products }: { products: Product[] }) => {
         break;
       case "popular":
       default:
-        // De más visto a menos. Los que aún no tienen visitas quedan al final
-        // ordenados por novedad, para que el bloque de ceros no salga en un
-        // orden arbitrario.
+        // Most viewed first. Products with no visits yet go last, sorted by
+        // newest, so the block of zeros does not come out in an arbitrary
+        // order.
         sorted.sort(
           (a, b) => (b.views ?? 0) - (a.views ?? 0) || byNewest(a, b)
         );

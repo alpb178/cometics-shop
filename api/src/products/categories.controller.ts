@@ -31,7 +31,7 @@ export class CategoriesController {
   constructor(private readonly prisma: PrismaService) {}
 
   @Get()
-  @ApiOperation({ summary: "Listar categorías (público)" })
+  @ApiOperation({ summary: "List categories (public)" })
   async find(@Query() query: Record<string, unknown>) {
     const take = parsePageSize(nestedQuery(query, "pagination", "pageSize"), 100);
     const rows = await this.prisma.categories.findMany({
@@ -48,7 +48,7 @@ export class CategoriesController {
   @Post()
   @UseGuards(JwtAuthGuard, StaffGuard)
   @ApiBearerAuth()
-  @ApiOperation({ summary: "Crear categoría (solo staff)" })
+  @ApiOperation({ summary: "Create category (staff only)" })
   async create(@Body("data") data: CategoryDto) {
     const now = new Date();
     const row = await this.prisma.categories.create({
@@ -57,7 +57,7 @@ export class CategoriesController {
         name: data.name,
         created_at: now,
         updated_at: now,
-        published_at: now, // draft & publish desactivado en category
+        published_at: now, // draft & publish disabled on category
       },
     });
     return { data: this.serialize(row) };
@@ -66,7 +66,7 @@ export class CategoriesController {
   @Put(":documentId")
   @UseGuards(JwtAuthGuard, StaffGuard)
   @ApiBearerAuth()
-  @ApiOperation({ summary: "Renombrar categoría (solo staff)" })
+  @ApiOperation({ summary: "Rename category (staff only)" })
   async update(
     @Param("documentId") documentId: string,
     @Body("data") data: CategoryDto,
@@ -85,7 +85,7 @@ export class CategoriesController {
   @Delete(":documentId")
   @UseGuards(JwtAuthGuard, StaffGuard)
   @ApiBearerAuth()
-  @ApiOperation({ summary: "Eliminar categoría (solo staff)" })
+  @ApiOperation({ summary: "Delete category (staff only)" })
   async delete(@Param("documentId") documentId: string) {
     const row = await this.prisma.categories.findFirst({
       where: { document_id: documentId },

@@ -4,9 +4,9 @@ import { usePathname } from "next/navigation";
 import { useEffect, useRef } from "react";
 
 /**
- * Registra una visita cada vez que cambia la ruta. Envía la traza a
- * `/api/track` (same-origin), que la reenvía a Strapi. Usa `sendBeacon` cuando
- * está disponible para no bloquear la navegación.
+ * Records a visit every time the route changes. Sends the trace to `/api/track`
+ * (same-origin), which forwards it to Strapi. Uses `sendBeacon` when available
+ * so navigation is not blocked.
  */
 export function PageTracker() {
   const pathname = usePathname();

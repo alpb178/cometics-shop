@@ -9,7 +9,7 @@ export class MailService {
 
   constructor(private readonly config: ConfigService) {}
 
-  /** Mismas variables SMTP_* que usaba el provider nodemailer de Strapi. */
+  /** Same SMTP_* variables Strapi's nodemailer provider used. */
   private getTransporter(): nodemailer.Transporter | null {
     const user = this.config.get<string>("SMTP_USER");
     const pass = this.config.get<string>("SMTP_PASS");
@@ -29,7 +29,7 @@ export class MailService {
     const transporter = this.getTransporter();
     if (!transporter) {
       this.logger.warn(
-        `SMTP no configurado (SMTP_USER/SMTP_PASS): email a ${to} no enviado`,
+        `SMTP not configured (SMTP_USER/SMTP_PASS): email to ${to} not sent`,
       );
       return;
     }

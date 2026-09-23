@@ -5,9 +5,9 @@ import type { Address } from "@/definitions/Address";
 import type { PaymentInfo } from "@/definitions/PaymentInfo";
 
 async function loadPaymentInfo(): Promise<PaymentInfo | null> {
-  // Con token: `payment-info.find` está concedido a los roles client/admin, no
-  // al rol public. Un fetch anónimo devolvía 403 y el QR/datos bancarios no se
-  // mostraban. El checkout siempre tiene sesión (requireUser).
+  // With a token: `payment-info.find` is granted to the client/admin roles, not
+  // to the public role. An anonymous fetch returned 403 and the QR/bank details
+  // were not shown. Checkout always has a session (requireUser).
   try {
     const res = await authFetch("/api/payment-info?populate[qrImage]=true");
     if (!res.ok) return null;

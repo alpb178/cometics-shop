@@ -17,7 +17,7 @@ const STATUS_LABELS: Record<Order["status"], string> = {
 const PAYMENT_LABELS: Record<string, string> = {
   cash: "Efectivo",
   qr: "Pago por QR",
-  // Legado: pedidos anteriores al cambio a efectivo/QR.
+  // Legacy: orders created before the switch to cash/QR.
   bank_transfer: "Transferencia bancaria"
 };
 
@@ -37,8 +37,8 @@ export default async function OrderDetailPage({
   const { id } = await params;
   await requireUser(`/account/orders/${id}`);
 
-  // scope=mine: aunque el usuario sea staff, desde la cuenta solo puede abrir
-  // el detalle de sus propios pedidos (404 en cualquier otro caso).
+  // scope=mine: even if the user is staff, the account area can only open
+  // the detail of their own orders (404 otherwise).
   const res = await authFetch(
     `/api/orders/${id}?scope=mine&populate[shippingAddress]=true&populate[paymentProof]=true&populate[items]=true`
   );

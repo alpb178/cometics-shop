@@ -9,7 +9,7 @@ const right = (label: string) => (
   <span className="block text-right">{label}</span>
 );
 
-/** Clics en la sección "Sitios de interés" (tarjetas del Grupo CorpSC). */
+/** Clicks on the "Sitios de interés" section (Grupo CorpSC cards). */
 export default async function SiteClicksPage() {
   const [d30, d7] = await Promise.all([
     getGroupClicks(30, 50).catch(() => []),

@@ -1,7 +1,7 @@
 {
   "name": "iris-api",
   "version": "0.1.0",
-  "description": "API de Iris Natural (NestJS) — reemplazo incremental del backend Strapi",
+  "description": "Iris Natural API (NestJS) — incremental replacement for the Strapi backend",
   "private": true,
   "scripts": {
     "build": "nest build",

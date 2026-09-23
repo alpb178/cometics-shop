@@ -10,15 +10,15 @@ type Me = StaffCheckUser & {
 };
 
 /**
- * Revalida la autorización del panel. No se confía solo en el middleware (que
- * únicamente comprueba la presencia de la cookie de sesión): aquí se verifica
- * contra la API que el JWT siga siendo válido (cubre tokens expirados o
- * revocados) y que el usuario sea staff. Se usa como guarda del layout de
- * `/admin` y al inicio de cada Server Action.
+ * Re-validates panel authorization. The middleware alone is not trusted (it
+ * only checks that the session cookie is present): here we verify against the
+ * API that the JWT is still valid (covers expired or revoked tokens) and that
+ * the user is staff. Used as the guard of the `/admin` layout and at the start
+ * of every Server Action.
  *
- * Login unificado con el storefront: sin sesión válida redirige a `/sign-in`
- * (con `redirect` para volver al panel); si la cuenta no es staff redirige a la
- * home (fail-closed) en vez de mostrar el panel.
+ * Login is shared with the storefront: without a valid session it redirects to
+ * `/sign-in` (with `redirect` to come back to the panel); if the account is not
+ * staff it redirects to the home page (fail-closed) instead of showing the panel.
  */
 export async function requireStaff(): Promise<Me> {
   const token = await getSessionToken();

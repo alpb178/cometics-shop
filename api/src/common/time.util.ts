@@ -1,24 +1,24 @@
 /**
- * Utilidades de series temporales en hora local de Bolivia (America/La_Paz,
- * UTC-4 fijo, sin horario de verano). Los timestamps en BD están en UTC.
+ * Time-series helpers in Bolivia local time (America/La_Paz, fixed UTC-4,
+ * no daylight saving). Timestamps in the DB are in UTC.
  */
 
 const LA_PAZ_OFFSET_MS = 4 * 60 * 60 * 1000;
 
-/** Fecha YYYY-MM-DD de un instante, vista desde La Paz. */
+/** YYYY-MM-DD date of an instant, as seen from La Paz. */
 export function laPazDateKey(instant: Date): string {
   return new Date(instant.getTime() - LA_PAZ_OFFSET_MS)
     .toISOString()
     .slice(0, 10);
 }
 
-/** Medianoche de hoy en La Paz, expresada como instante UTC. */
+/** Today's midnight in La Paz, expressed as a UTC instant. */
 export function laPazStartOfToday(): Date {
   const key = laPazDateKey(new Date());
   return new Date(`${key}T00:00:00.000-04:00`);
 }
 
-/** Serie completa de los últimos `days` días (rellena con 0 los que falten). */
+/** Full series of the last `days` days (missing ones filled with 0). */
 export function fillDailySeries(
   counts: Map<string, number>,
   days: number,
@@ -34,7 +34,7 @@ export function fillDailySeries(
   return out;
 }
 
-/** Serie completa de 24 horas (rellena con 0 las que falten). */
+/** Full 24-hour series (missing hours filled with 0). */
 export function fillHourlySeries(
   counts: Map<number, number>,
 ): { hour: number; count: number }[] {

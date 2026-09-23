@@ -16,7 +16,7 @@ const Marker = dynamic(
 
 type LngLatEvent = { lngLat: { lat: number; lng: number } };
 
-// Estilo raster de OpenStreetMap (sin API key), igual que el mapa de la ficha.
+// OpenStreetMap raster style (no API key), same as the product page map.
 const OSM_STYLE = {
   version: 8 as const,
   sources: {
@@ -39,10 +39,9 @@ const OSM_STYLE = {
 };
 
 /**
- * Mapa interactivo para que el cliente fije el punto exacto de entrega.
- * Toca el mapa o arrastra el pin para actualizar las coordenadas. Incluye
- * controles para usar la ubicación actual del dispositivo y para ampliar el
- * mapa a pantalla completa.
+ * Interactive map for the customer to pin the exact delivery point. Tap the map
+ * or drag the pin to update the coordinates. Includes controls to use the
+ * device's current location and to expand the map to full screen.
  */
 export function LocationPicker({
   value,
@@ -58,8 +57,8 @@ export function LocationPicker({
   const [geoStatus, setGeoStatus] = useState<"idle" | "locating" | "error">(
     "idle"
   );
-  // Remonta el mapa para recentrarlo cuando llega la ubicación del dispositivo
-  // (la vista es no controlada: mover solo el pin no recentra).
+  // Remount the map to re-center it when the device location arrives (the view
+  // is uncontrolled: moving only the pin does not re-center).
   const [mapKey, setMapKey] = useState(0);
 
   useEffect(() => setMounted(true), []);
@@ -78,9 +77,9 @@ export function LocationPicker({
     };
   }, [expanded]);
 
-  // La vista del mapa siempre necesita un punto; el pin, en cambio, solo se
-  // dibuja si el cliente ya eligió uno. Antes se dibujaba sobre `center`, así
-  // que parecía elegido un punto que nadie había marcado.
+  // The map view always needs a point; the pin, however, is only drawn if the
+  // customer already chose one. It used to be drawn on `center`, so it looked
+  // like a point had been chosen when nobody had marked one.
   const pos = value ?? center;
 
   const locate = () => {

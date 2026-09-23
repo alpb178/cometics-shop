@@ -1,30 +1,30 @@
 import { randomBytes } from "crypto";
 
 /**
- * Utilidades para mantener compatibilidad con las convenciones que Strapi v5
- * dejó en la base de datos y en los clientes (front/backoffice).
+ * Helpers to stay compatible with the conventions Strapi v5 left in the
+ * database and in the clients (front/backoffice).
  */
 
 const ALPHANUM = "abcdefghijklmnopqrstuvwxyz0123456789";
 
-/** Genera un documentId con el mismo aspecto que los de Strapi v5 (24 chars alfanuméricos). */
+/** Generates a documentId that looks like Strapi v5's (24 alphanumeric chars). */
 export function generateDocumentId(): string {
   const bytes = randomBytes(24);
   let out = "";
   for (let i = 0; i < 24; i += 1) {
-    // El primer carácter siempre letra, como los cuid2 que usa Strapi
+    // The first character is always a letter, like the cuid2 ids Strapi uses
     const pool = i === 0 ? ALPHANUM.slice(0, 26) : ALPHANUM;
     out += pool[bytes[i] % pool.length];
   }
   return out;
 }
 
-/** Mismo redondeo que usaba el servicio de pedidos de Strapi. */
+/** Same rounding the Strapi orders service used. */
 export function round2(value: number): number {
   return Math.round(value * 100) / 100;
 }
 
-/** Número de pedido con el formato original: IN-<timestamp base36><3 random>. */
+/** Order number in the original format: IN-<base36 timestamp><3 random>. */
 export function generateOrderNumber(): string {
   const rand = Array.from({ length: 3 })
     .map(() => ALPHANUM[Math.floor(Math.random() * 36)])
@@ -38,14 +38,14 @@ export function toNumber(value: unknown): number | null {
   return Number.isFinite(n) ? n : null;
 }
 
-/** pagination[pageSize] de los clientes; acotado para no permitir barridos. */
+/** Clients' pagination[pageSize]; capped to prevent full sweeps. */
 export function parsePageSize(raw: unknown, fallback = 50, max = 200): number {
   const n = Number(raw);
   if (!Number.isInteger(n) || n < 1) return fallback;
   return Math.min(n, max);
 }
 
-/** pagination[page] de los clientes; 1 si falta o no es válido. */
+/** Clients' pagination[page]; 1 if missing or invalid. */
 export function parsePage(raw: unknown): number {
   const n = Number(raw);
   if (!Number.isInteger(n) || n < 1) return 1;
@@ -57,8 +57,8 @@ export function isNumericId(value: string): boolean {
 }
 
 /**
- * Lee un query param estilo Strapi (`filters[slug]=x`), que Express puede
- * entregar como clave plana o como objeto anidado según el parser.
+ * Reads a Strapi-style query param (`filters[slug]=x`), which Express may
+ * deliver as a flat key or as a nested object depending on the parser.
  */
 export function nestedQuery(
   query: Record<string, unknown> | undefined,

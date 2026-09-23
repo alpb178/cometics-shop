@@ -34,8 +34,8 @@ export default async function HomePage() {
     );
   }
 
-  // Contador social: personas (sesiones) que han visto el detalle de cada
-  // producto. Best-effort: si falla, las tarjetas simplemente no lo muestran.
+  // Social counter: people (sessions) who have viewed each product's detail.
+  // Best-effort: if it fails, the cards simply don't show it.
   const viewsBySlug: Record<string, number> = {};
   try {
     const res = await fetch(

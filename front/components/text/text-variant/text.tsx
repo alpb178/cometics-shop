@@ -17,9 +17,9 @@ const variants: TextVariants = {
   title: "h1",
   subtitle: "h2",
   heading: "h3",
-  // `helper`/`error` son texto inline dentro de contenedores (no tablas): deben
-  // ser <span>. Antes eran <caption>, válido solo dentro de <table>, lo que
-  // provocaba un error de hidratación al mostrarse dentro de un <div>.
+  // `helper`/`error` are inline text inside containers (not tables): they must
+  // be <span>. They used to be <caption>, only valid inside <table>, which
+  // caused a hydration error when shown inside a <div>.
   helper: "span",
   text: "p",
   error: "span",

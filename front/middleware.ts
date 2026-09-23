@@ -10,9 +10,9 @@ const intlMiddleware = createIntlMiddleware({
 export default function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
-  // Puerta del panel: sin cookie de sesión no se entra a /admin. La
-  // verificación real de staff (JWT válido + rol) la hace `requireStaff()` en
-  // el layout del panel; aquí solo evitamos renderizarlo sin sesión.
+  // Panel gate: without a session cookie there's no entry to /admin. The real
+  // staff check (valid JWT + role) is done by `requireStaff()` in the panel
+  // layout; here we only avoid rendering it without a session.
   if (pathname === "/admin" || pathname.startsWith("/admin/")) {
     const hasSession = Boolean(req.cookies.get(SESSION_COOKIE)?.value);
     if (!hasSession) {

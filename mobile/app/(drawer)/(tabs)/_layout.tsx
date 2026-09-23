@@ -84,13 +84,13 @@ export default function TabLayout() {
       <Tabs.Screen
         name="faq"
         options={{
-          href: null, // Ocultar del tab bar
+          href: null, // Hide from the tab bar
         }}
       />
       <Tabs.Screen
         name="products/[slug]/index"
         options={{
-          href: null, // Ocultar del tab bar
+          href: null, // Hide from the tab bar
           headerShown: true,
           headerTitle: APP_NAME,
           headerTitleStyle: {
@@ -102,25 +102,25 @@ export default function TabLayout() {
       <Tabs.Screen
         name="how-it-works"
         options={{
-          href: null, // Ocultar del tab bar
+          href: null, // Hide from the tab bar
         }}
       />
       <Tabs.Screen
         name="about"
         options={{
-          href: null, // Ocultar del tab bar
+          href: null, // Hide from the tab bar
         }}
       />
       <Tabs.Screen
         name="contact"
         options={{
-          href: null, // Ocultar del tab bar
+          href: null, // Hide from the tab bar
         }}
       />
       <Tabs.Screen
         name="location"
         options={{
-          href: null, // Ocultar del tab bar
+          href: null, // Hide from the tab bar
         }}
       />
     </Tabs>

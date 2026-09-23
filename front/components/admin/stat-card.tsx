@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { ChevronRight, type LucideIcon } from "lucide-react";
 
-/** KPI enlazado con hover-lift y chevron (estilo StatCard de Tu Chamba). */
+/** Linked KPI with hover-lift and chevron (Tu Chamba StatCard style). */
 export function StatCard({
   label,
   value,

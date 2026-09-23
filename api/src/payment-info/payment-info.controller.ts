@@ -37,7 +37,7 @@ export class PaymentInfoController {
   @Get()
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
-  @ApiOperation({ summary: "Datos de pago mostrados en el checkout (single type)" })
+  @ApiOperation({ summary: "Payment details shown at checkout (single type)" })
   async find() {
     const row = await this.prisma.payment_infos.findFirst({
       orderBy: { id: "asc" },
@@ -49,7 +49,7 @@ export class PaymentInfoController {
   @Put()
   @UseGuards(JwtAuthGuard, StaffGuard)
   @ApiBearerAuth()
-  @ApiOperation({ summary: "Actualizar datos de pago (solo staff)" })
+  @ApiOperation({ summary: "Update payment details (staff only)" })
   async update(@Body("data") data: UpdatePaymentInfoDto) {
     const existing = await this.prisma.payment_infos.findFirst({
       orderBy: { id: "asc" },

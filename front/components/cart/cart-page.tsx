@@ -19,7 +19,7 @@ export function CartPage({ locale }: { locale: string }) {
     clearAll?: boolean;
   }>({ show: false });
 
-  // Registra la apertura del carrito (una vez por montaje).
+  // Record the cart being opened (once per mount).
   useEffect(() => {
     trackEvent("cart_view");
   }, []);

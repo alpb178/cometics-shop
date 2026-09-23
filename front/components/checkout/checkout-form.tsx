@@ -62,8 +62,8 @@ export function CheckoutForm({
     }
   });
 
-  // Paso del wizard: 1 = método de entrega, 2 = datos de entrega, 3 = pago.
-  // Mejora la experiencia en móvil.
+  // Wizard step: 1 = delivery method, 2 = delivery details, 3 = payment.
+  // Improves the mobile experience.
   const [step, setStep] = useState<1 | 2 | 3>(1);
 
   const defaultAddress = savedAddresses[0] ?? null;
@@ -85,7 +85,7 @@ export function CheckoutForm({
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Configuración de precios/envío y zona de entrega.
+  // Pricing/shipping configuration and delivery zone.
   const [pricing, setPricing] = useState<PricingSettings>(PRICING_DEFAULTS);
   const [isProvince, setIsProvince] = useState(false);
   const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(
@@ -99,7 +99,7 @@ export function CheckoutForm({
     getPricingSettings().then(setPricing);
   }, []);
 
-  // Dentro de Santa Cruz mostramos el mapa para fijar el punto de entrega.
+  // Inside Santa Cruz we show the map to pin the delivery point.
   const showMap = deliveryMethod === "delivery" && !isProvince;
 
   const requestLocation = useCallback(() => {
@@ -121,8 +121,8 @@ export function CheckoutForm({
     );
   }, [pricing]);
 
-  // Último punto guardado para el destino elegido: solo existe si se está usando
-  // una dirección guardada que ya tenga punto.
+  // Last saved point for the chosen destination: only exists when a saved
+  // address that already has a point is being used.
   const savedCoords = useMemo(() => {
     if (addressMode !== "saved") return null;
     const addr = savedAddresses.find((a) => a.id === selectedAddressId);
@@ -130,18 +130,20 @@ export function CheckoutForm({
     return { lat: addr.lat, lng: addr.lng };
   }, [addressMode, savedAddresses, selectedAddressId]);
 
-  // El pin sigue al destino elegido: salta al punto de la dirección nueva, y se
-  // vacía si esa dirección no tiene ninguno. Antes solo se asignaba cuando había
-  // punto, así que al pasar a una dirección sin él el pin conservaba el de la
-  // anterior — y al confirmar se guardaba ese punto ajeno en ella.
+  // The pin follows the chosen destination: it jumps to the point of the new
+  // address, and is cleared if that address has none. It used to be assigned
+  // only when there was a point, so switching to an address without one kept
+  // the previous address's pin — and on confirm that foreign point was saved
+  // into it.
   useEffect(() => {
     setCoords(savedCoords);
   }, [savedCoords]);
 
-  // Sin punto para el destino elegido se pide la ubicación real del dispositivo.
-  // Antes se pre-centraba el pin en el centro de Santa Cruz, así que quien no
-  // tocaba el mapa enviaba un punto que no eligió. El propio `geoStatus` evita
-  // reintentos: "locating" corta la re-entrada y "denied" no vuelve a pedirlo.
+  // With no point for the chosen destination, the device's real location is
+  // requested. The pin used to be pre-centered on downtown Santa Cruz, so
+  // anyone who did not touch the map sent a point they never chose. `geoStatus`
+  // itself prevents retries: "locating" blocks re-entry and "denied" does not
+  // ask again.
   useEffect(() => {
     if (!showMap || coords || savedCoords) return;
     if (geoStatus === "locating" || geoStatus === "denied") return;
@@ -157,8 +159,8 @@ export function CheckoutForm({
 
   const qrUrl = mediaUrl(paymentInfo?.qrImage?.url);
 
-  // Fuera de Santa Cruz (envío a provincia) solo se acepta QR: el pedido viaja
-  // por terminal/mensajería, así que debe prepagarse.
+  // Outside Santa Cruz (shipping to the provinces) only QR is accepted: the
+  // order travels by bus terminal/courier, so it must be prepaid.
   const onlyQr = deliveryMethod === "delivery" && isProvince;
 
   const paymentOptions: { value: PaymentMethod; label: string }[] = onlyQr
@@ -199,7 +201,7 @@ export function CheckoutForm({
       setAmountCopied(true);
       setTimeout(() => setAmountCopied(false), 2000);
     } catch {
-      // clipboard no disponible: el monto igual está visible en pantalla.
+      // Clipboard unavailable: the amount is visible on screen anyway.
     }
   }
 
@@ -209,7 +211,7 @@ export function CheckoutForm({
     if (typeof window !== "undefined") window.scrollTo({ top: 0 });
   }
 
-  // Valida el paso 2 (datos de entrega) antes de pasar al pago.
+  // Validate step 2 (delivery details) before moving on to payment.
   async function goToPayment() {
     setError(null);
     if (deliveryMethod === "delivery") {
@@ -231,7 +233,7 @@ export function CheckoutForm({
         return;
       }
     } else {
-      // Recojo en tienda: pedimos nombre y teléfono de contacto.
+      // Store pickup: we ask for a contact name and phone.
       const ok = await methods.trigger(["fullName", "phone"]);
       if (!ok) return;
     }
@@ -251,14 +253,14 @@ export function CheckoutForm({
         deliveryMethod === "delivery" && addressMode === "saved";
       const useNew = deliveryMethod === "delivery" && addressMode === "new";
 
-      // Se adjunta un contacto (nombre + teléfono) al pedido tanto para envío a
-      // domicilio (dirección nueva) como para recojo en tienda. Dentro de Santa
-      // Cruz solo nombre y teléfono; fuera de Santa Cruz además CI, zona y
-      // departamento (zona -> `city`, departamento -> `department`).
+      // A contact (name + phone) is attached to the order both for home
+      // delivery (new address) and for store pickup. Inside Santa Cruz only
+      // name and phone; outside Santa Cruz also CI, zone and department (zone
+      // -> `city`, department -> `department`).
       const collectContact = useNew || isPickup;
-      // El punto del mapa se guarda con la dirección para que el pin arranque
-      // ahí la próxima vez. Solo aplica a envío dentro de Santa Cruz, que es
-      // donde se marca en el mapa.
+      // The map point is saved with the address so the pin starts there next
+      // time. Only applies to delivery inside Santa Cruz, which is where it is
+      // marked on the map.
       const pointFields =
         useNew && !isProvince && coords
           ? { lat: coords.lat, lng: coords.lng }
@@ -292,9 +294,9 @@ export function CheckoutForm({
         }
       }
 
-      // Dirección guardada cuyo punto ha cambiado: se actualiza para que la
-      // siguiente compra arranque en el último lugar que eligió el cliente. Si
-      // falla no se corta el pedido: es una comodidad, no un requisito.
+      // Saved address whose point changed: it is updated so the next purchase
+      // starts at the last place the customer chose. A failure does not stop
+      // the order: it is a convenience, not a requirement.
       if (
         useSaved &&
         selectedAddressId != null &&
@@ -307,9 +309,10 @@ export function CheckoutForm({
           credentials: "include",
           body: JSON.stringify({ data: { lat: coords.lat, lng: coords.lng } })
         }).catch((e) => {
-          // No corta el pedido, pero tampoco se silencia: si esto falla, la
-          // próxima compra vuelve a arrancar sin punto y sin pista de por qué.
-          console.error("No se pudo guardar el punto de la dirección", e);
+          // Does not stop the order, but it is not silenced either: if this
+          // fails, the next purchase starts again with no point and no clue
+          // why.
+          console.error("Could not save the address point", e);
         });
       }
 
@@ -333,8 +336,8 @@ export function CheckoutForm({
         })),
         subtotal,
         total,
-        // Zona de entrega: el servidor verifica con las coords si están; si no,
-        // usa este flag como respaldo.
+        // Delivery zone: the server checks with the coords if present;
+        // otherwise it uses this flag as a fallback.
         isProvince: deliveryMethod === "delivery" ? isProvince : false,
         destLat: coords?.lat ?? null,
         destLng: coords?.lng ?? null
@@ -354,25 +357,25 @@ export function CheckoutForm({
         throw new Error(data?.error || "No se pudo crear el pedido.");
       }
 
-      // Éxito: navegamos primero (manteniendo `submitting` en true) para que la
-      // UI no parpadee al estado "carrito vacío" al limpiar el carrito antes de
-      // que complete el redirect. El carrito se vacía y la sesión se refresca
-      // sin bloquear la navegación al detalle del pedido.
+      // Success: we navigate first (keeping `submitting` true) so the UI does
+      // not flash the "empty cart" state when the cart is cleared before the
+      // redirect completes. The cart is cleared and the session refreshed
+      // without blocking navigation to the order detail.
       router.push(`/account/orders/${data.orderId}`);
       router.refresh();
       clearCart();
       refresh().catch(() => {});
     } catch (err) {
-      // Solo reactivamos el botón en error; en el camino de éxito nos vamos de
-      // la página, así que dejamos `submitting` en true y el loading visible.
+      // We only re-enable the button on error; on the success path we leave the
+      // page, so `submitting` stays true and the loading state visible.
       setError(err instanceof Error ? err.message : "Algo salió mal.");
       setSubmitting(false);
     }
   });
 
-  // No mostramos "carrito vacío" mientras se envía el pedido: tras confirmar el
-  // pago vaciamos el carrito, y sin este guard la pantalla parpadearía a "vacío"
-  // antes de que complete el redirect al detalle del pedido.
+  // Do not show "empty cart" while the order is being submitted: after the
+  // payment is confirmed we clear the cart, and without this guard the screen
+  // would flash "empty" before the redirect to the order detail completes.
   if (items.length === 0 && !submitting) {
     return (
       <section className="mx-auto w-full max-w-md px-6 py-24 text-center">
@@ -395,8 +398,8 @@ export function CheckoutForm({
         <h1 className="font-display text-3xl font-semibold tracking-tight">
           Finaliza tu pedido
         </h1>
-        {/* Indicador de pasos: los pasos ya completados son clickeables para
-            volver atrás; avanzar solo se puede con los botones (validan). */}
+        {/* Step indicator: completed steps are clickable to go back; moving
+            forward is only possible with the buttons (they validate). */}
         <div className="mt-4 flex items-center gap-3 text-xs font-semibold uppercase tracking-[0.14em]">
           {(
             [
@@ -444,7 +447,7 @@ export function CheckoutForm({
               </button>
             )}
 
-            {/* ==================== PASO 1: MÉTODO DE ENTREGA ==================== */}
+            {/* ==================== STEP 1: DELIVERY METHOD ==================== */}
             {step === 1 && (
               <section>
                 <h2 className="mb-4 text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
@@ -493,7 +496,7 @@ export function CheckoutForm({
               </section>
             )}
 
-            {/* ==================== PASO 2: DATOS DE ENTREGA ==================== */}
+            {/* ==================== STEP 2: DELIVERY DETAILS ==================== */}
             {step === 2 && (
               <>
                 {deliveryMethod === "delivery" && (
@@ -720,7 +723,7 @@ export function CheckoutForm({
               </>
             )}
 
-            {/* ======================== PASO 3: PAGO ======================== */}
+            {/* ======================== STEP 3: PAYMENT ======================== */}
             {step === 3 && (
               <section>
                 <h2 className="mb-4 text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">

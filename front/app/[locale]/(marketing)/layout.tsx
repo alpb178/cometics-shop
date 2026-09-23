@@ -1,8 +1,8 @@
 import LayoutApp from "@/app/layout-app";
 
-// Chrome del storefront (navbar/footer/ayuda). Vive aquí, no en el layout raíz
-// de `[locale]`, para que el segmento `/admin` NO lo herede y tenga su propio
-// shell de panel.
+// Storefront chrome (navbar/footer/help). It lives here, not in the `[locale]`
+// root layout, so the `/admin` segment does NOT inherit it and keeps its own
+// panel shell.
 export default function MarketingLayout({
   children
 }: {

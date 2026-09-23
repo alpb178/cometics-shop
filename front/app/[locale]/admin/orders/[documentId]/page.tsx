@@ -18,7 +18,7 @@ const DELIVERY_LABEL: Record<string, string> = {
 const PAYMENT_LABEL: Record<string, string> = {
   cash: "Efectivo",
   qr: "Pago QR",
-  // Legado: pedidos antiguos creados antes del cambio a efectivo/QR.
+  // Legacy: old orders created before the switch to cash/QR.
   bank_transfer: "Transferencia bancaria"
 };
 const PAYMENT_BADGE: Record<string, string> = {
@@ -38,12 +38,12 @@ export default async function OrderDetailPage({
 
   const proof = mediaUrl(order.paymentProof);
   const addr = order.shippingAddress;
-  // La verificación de pago y el comprobante solo aplican a pagos por QR; en
-  // efectivo no hay nada que verificar online (el estado se cambia abajo).
+  // Payment verification and the receipt only apply to QR payments; with cash
+  // there is nothing to verify online (the status is changed below).
   const isQr = order.paymentMethod === "qr";
 
-  // La API expone el precio original (sin markup) solo a staff. Con él
-  // desglosamos el subtotal en ganancia de productos + ganancia de plataforma.
+  // The API exposes the original price (without markup) to staff only. With it
+  // we split the subtotal into product earnings + platform earnings.
   const hasOriginal = order.items?.some((it) => it.originalPrice != null);
   const originalSubtotal =
     order.items?.reduce(
@@ -145,8 +145,8 @@ export default async function OrderDetailPage({
             </div>
           </div>
 
-          {/* Desglose de ganancias (solo staff: la API incluye el precio
-              original únicamente para el backoffice). */}
+          {/* Earnings breakdown (staff only: the API includes the original
+              price only for the back office). */}
           {hasOriginal && (
             <div className="card overflow-hidden">
               <div className="flex items-center justify-between border-b border-neutral-100 px-5 py-3">
@@ -233,7 +233,7 @@ export default async function OrderDetailPage({
           )}
         </div>
 
-        {/* Lateral */}
+        {/* Sidebar */}
         <div className="min-w-0 space-y-6">
           {isQr && (
             <PaymentVerification

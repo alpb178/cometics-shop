@@ -11,8 +11,8 @@ const lng = Number(process.env.NEXT_PUBLIC_LNG);
 const address = process.env.NEXT_PUBLIC_ADDRESS || "";
 const locationLink = process.env.NEXT_PUBLIC_LOCATION_URL;
 
-// Enlace a la ubicación de la tienda: el configurado (Google Maps) o uno
-// generado desde las coordenadas como respaldo.
+// Link to the store location: the configured one (Google Maps) or one generated
+// from the coordinates as a fallback.
 const mapsUrl = locationLink || `https://www.google.com/maps?q=${lat},${lng}`;
 
 const whatsappShareUrl = `https://wa.me/?text=${encodeURIComponent(
@@ -20,9 +20,8 @@ const whatsappShareUrl = `https://wa.me/?text=${encodeURIComponent(
 )}`;
 
 /**
- * Mapa de la tienda para el paso "Recoger en tienda" del checkout, con
- * opciones para ampliarlo a pantalla completa y compartir la ubicación por
- * WhatsApp.
+ * Store map for the "Pick up in store" checkout step, with options to expand it
+ * to full screen and share the location via WhatsApp.
  */
 export function StoreMap() {
   const [expanded, setExpanded] = useState(false);

@@ -3,10 +3,9 @@
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
 /**
- * Paginación del admin de Tu Chamba, copiada verbatim (solo cambia el set
- * de iconos: lucide en lugar de Material Symbols). A la izquierda el rango
- * mostrado y a la derecha los botones de página con puntos suspensivos
- * para saltos grandes.
+ * Pagination from the Tu Chamba admin, copied verbatim (only the icon set
+ * changes: lucide instead of Material Symbols). The shown range on the left and
+ * the page buttons on the right, with ellipses for large jumps.
  */
 function pageItems(page: number, totalPages: number): (number | "…")[] {
   if (totalPages <= 7) {

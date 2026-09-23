@@ -1,4 +1,4 @@
-// URL pública de la API (NestJS, contrato compatible con Strapi v5). Se unifica
-// con la del storefront: el panel comparte backend, endpoints y JWT con la web.
+// Public API URL (NestJS, Strapi v5-compatible contract). Shared with the
+// storefront: the panel uses the same backend, endpoints and JWT as the site.
 export const STRAPI_URL =
   process.env.NEXT_PUBLIC_API_URL || "http://localhost:1337";

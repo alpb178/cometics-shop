@@ -16,7 +16,7 @@ export class AddressesService {
     return rows.map((r) => this.serialize(r));
   }
 
-  /** 404 (no 403) si la dirección no existe o no es del usuario, como en Strapi. */
+  /** 404 (not 403) if the address doesn't exist or isn't the user's, as in Strapi. */
   async findOwnedOrThrow(id: number, userId: number) {
     const row = await this.prisma.addresses.findFirst({
       where: { id, addresses_user_lnk: { some: { user_id: userId } } },

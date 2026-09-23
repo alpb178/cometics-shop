@@ -16,8 +16,8 @@ const STATUS_LABELS: Record<Order["status"], string> = {
 export default async function OrdersPage() {
   await requireUser("/account/orders");
 
-  // scope=mine: esta vista comparte endpoint con el panel, y sin el parámetro
-  // una cuenta staff vería aquí los pedidos de todos los clientes.
+  // scope=mine: this view shares its endpoint with the admin panel; without the
+  // parameter a staff account would see every customer's orders here.
   const res = await authFetch(
     "/api/orders?scope=mine&sort[0]=createdAt:desc&pagination[pageSize]=50"
   );

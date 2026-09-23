@@ -6,10 +6,10 @@ import { cn } from "@/lib/admin/admin-utils";
 import type { DayPoint, HourPoint } from "@/lib/admin/types";
 
 /**
- * Gráficos propios sin librerías (portados del admin de Tu Chamba):
- * columnas por día, columnas por hora, línea SVG y barras horizontales.
- * Tooltips por hover (CSS) en escritorio; la línea además responde al
- * toque, mostrando la info del día seleccionado.
+ * Home-grown, library-free charts (ported from the Tu Chamba admin): columns
+ * per day, columns per hour, SVG line and horizontal bars. Hover tooltips (CSS)
+ * on desktop; the line chart also responds to taps, showing the info for the
+ * selected day.
  */
 
 const DAY_LABEL = new Intl.DateTimeFormat("es-BO", {
@@ -22,7 +22,7 @@ function dayLabel(date: string): string {
   return DAY_LABEL.format(new Date(`${date}T00:00:00Z`));
 }
 
-/** Tarjeta contenedora de un gráfico; con href se vuelve enlace. */
+/** Chart container card; becomes a link when given href. */
 export function ChartCard({
   title,
   subtitle,
@@ -56,7 +56,7 @@ export function ChartCard({
   return <div className="card p-5">{body}</div>;
 }
 
-/** Columnas por día con tooltip; etiqueta visible solo en el máximo. */
+/** Columns per day with tooltip; label shown only on the maximum. */
 export function DailyColumns({
   data,
   unit = "visitas",
@@ -87,7 +87,7 @@ export function DailyColumns({
   );
 }
 
-/** Columnas de 24 horas (eje etiquetado cada 3 h). */
+/** 24-hour columns (axis labeled every 3 h). */
 export function HourlyColumns({
   data,
   unit = "visitas",
@@ -124,9 +124,9 @@ export function HourlyColumns({
 }
 
 /**
- * Línea + área en SVG (escala a cualquier ancho). Hover muestra el tooltip
- * en escritorio; al tocar/clicar se fija el día más cercano (tocar de nuevo
- * el mismo lo oculta) sin activar el enlace de la tarjeta contenedora.
+ * SVG line + area (scales to any width). Hover shows the tooltip on desktop;
+ * tapping/clicking pins the nearest day (tapping the same one again hides it)
+ * without triggering the parent card's link.
  */
 export function DailyLine({
   data,
@@ -147,7 +147,7 @@ export function DailyLine({
     .join(" ");
 
   function handleTap(e: React.MouseEvent<HTMLDivElement>) {
-    // No navegar cuando el gráfico vive dentro de una ChartCard con href.
+    // Do not navigate when the chart lives inside a ChartCard with href.
     e.preventDefault();
     e.stopPropagation();
     if (points.length === 0) return;
@@ -216,8 +216,8 @@ export function DailyLine({
 }
 
 /**
- * Barras horizontales con etiqueta y valor. Si un dato trae `today`, se muestra
- * además el conteo de hoy junto al total (p. ej. "11 vistas · 2 hoy").
+ * Horizontal bars with label and value. If a datum has `today`, today's count
+ * is also shown next to the total (e.g. "11 vistas · 2 hoy").
  */
 export function HorizontalBars({
   data,

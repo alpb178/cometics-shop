@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { RefreshCw } from "lucide-react";
 import { cn } from "@/lib/admin/admin-utils";
 
-/** Recarga los datos de la página (router.refresh) con feedback de giro. */
+/** Reloads the page data (router.refresh) with spinning feedback. */
 export function RefreshButton({ className }: { className?: string }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();

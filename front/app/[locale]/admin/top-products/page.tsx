@@ -6,7 +6,7 @@ import { TopProductsTable, type TopProductRow } from "./top-products-table";
 
 export const dynamic = "force-dynamic";
 
-/** Ranking de productos más vistos (equivalente a "Top anuncios" de Tu Chamba). */
+/** Ranking of the most viewed products (equivalent to Tu Chamba's "Top anuncios"). */
 export default async function TopProductsPage() {
   const [top30, top7, products] = await Promise.all([
     getTopProducts(30, 50).catch(() => []),

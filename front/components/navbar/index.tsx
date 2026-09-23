@@ -5,7 +5,7 @@ import { DesktopNavbar } from "./desktop-navbar";
 import { MobileNavbar } from "./mobile-navbar";
 
 export default function Navbar({ locale }: { locale: string }) {
-  // Navbar estática (config en lib/constants/navbar); no depende de la BD.
+  // Static navbar (config in lib/constants/navbar); does not depend on the DB.
   const leftNavbarItems = NAVBAR_ITEMS;
   const logo = NAVBAR_LOGO;
 

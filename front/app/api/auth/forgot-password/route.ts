@@ -23,7 +23,7 @@ export async function POST(req: Request) {
     cache: "no-store"
   });
 
-  // Strapi devuelve 200 incluso si el email no existe (para no filtrar).
+  // Strapi returns 200 even if the email doesn't exist (to avoid leaking it).
   if (!res.ok) {
     const data = await res.json().catch(() => ({}));
     return NextResponse.json(

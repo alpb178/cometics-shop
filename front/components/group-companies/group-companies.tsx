@@ -7,8 +7,8 @@ import { trackEvent } from "@/lib/track-event";
 import { Tilt3D } from "@/components/ui/tilt-3d";
 import { SlideBurst } from "@/components/carrousel/slide-burst";
 
-// Tarjeta de una empresa hermana: imagen destacada con el nombre en overlay,
-// descripción y CTA "Visitar sitio" (enlace externo seguro).
+// Sister company card: featured image with the name overlaid, description and a
+// "Visitar sitio" CTA (safe external link).
 function CompanyCard({ company }: { company: Company }) {
   const track = () => trackEvent("group_click", { label: company.name });
   return (
@@ -57,17 +57,17 @@ function CompanyCard({ company }: { company: Company }) {
   );
 }
 
-// Sección "Sitios de interés" — carrusel con las demás empresas del Grupo CorpSC.
+// "Sitios de interés" section — carousel with the other CorpSC Group companies.
 export function GroupCompanies() {
   const scroller = useRef<HTMLDivElement>(null);
-  // Se incrementa en cada movimiento del carrusel (flecha o auto-avance) para
-  // relanzar la ráfaga de destellos sobre las tarjetas.
+  // Incremented on every carousel move (arrow or auto-advance) to restart the
+  // sparkle burst over the cards.
   const [burst, setBurst] = useState(0);
-  // Punto activo del indicador de cantidad: se deriva de la posición de scroll.
+  // Active dot of the count indicator: derived from the scroll position.
   const [active, setActive] = useState(0);
   const count = GROUP_COMPANIES.length;
 
-  // Lleva la tarjeta `i` al inicio de la vista (usado por los puntos).
+  // Bring card `i` to the start of the view (used by the dots).
   const goTo = (i: number) => {
     const el = scroller.current;
     if (!el) return;
@@ -76,8 +76,8 @@ export function GroupCompanies() {
     setBurst((b) => b + 1);
   };
 
-  // Mantiene el punto activo sincronizado con el scroll (flechas, auto-avance
-  // o arrastre manual). Mapea el rango de scroll a los índices de tarjeta.
+  // Keeps the active dot in sync with the scroll (arrows, auto-advance or
+  // manual drag). Maps the scroll range to card indexes.
   useEffect(() => {
     const el = scroller.current;
     if (!el) return;
@@ -91,9 +91,9 @@ export function GroupCompanies() {
     return () => el.removeEventListener("scroll", onScroll);
   }, [count]);
 
-  // Auto-avance del carrusel: cada 5s pasa a la siguiente "página" y al llegar
-  // al final vuelve al inicio (mismo tiempo de cambio que el carrusel del hero).
-  // Se pausa al pasar el puntero por encima y respeta prefers-reduced-motion.
+  // Carousel auto-advance: every 5s it moves to the next "page" and at the end
+  // goes back to the start (same interval as the hero carousel). It pauses
+  // while the pointer is over it and respects prefers-reduced-motion.
   useEffect(() => {
     const el = scroller.current;
     if (!el) return;
@@ -129,8 +129,8 @@ export function GroupCompanies() {
       aria-label="Sitios de interés del Grupo CorpSC"
       className="mx-auto w-full max-w-screen-2xl px-4 py-12 sm:px-6 lg:px-10"
     >
-      {/* Alinea las tarjetas con la columna de productos: mismo grid que la
-          lista (barra lateral de 220px + productos) con un hueco a la izquierda en lg. */}
+      {/* Align the cards with the products column: same grid as the list
+          (220px sidebar + products) with a gap on the left at lg. */}
       <div className="lg:grid lg:grid-cols-[220px_1fr] lg:gap-x-10">
         <div aria-hidden="true" className="hidden lg:block" />
         <div className="min-w-0">
@@ -151,11 +151,11 @@ export function GroupCompanies() {
           ))}
         </div>
 
-        {/* Ráfaga de destellos al mover el carrusel (no captura clics) */}
+        {/* Sparkle burst when the carousel moves (does not capture clicks) */}
         <SlideBurst trigger={burst} />
       </div>
 
-      {/* Indicador de cantidad (puntos) — mismo estilo que el carrusel del hero */}
+      {/* Count indicator (dots) — same style as the hero carousel */}
       <div className="mt-6 flex justify-center gap-1.5">
         {GROUP_COMPANIES.map((company, i) => (
           <button

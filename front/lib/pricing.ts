@@ -1,13 +1,13 @@
 /**
- * Configuración de precios/envío del storefront.
+ * Storefront pricing/shipping settings.
  *
- * - `markupPercent`: recargo global (invisible) que se aplica a TODO precio de
- *   producto mostrado. El servidor lo re-aplica al crear el pedido sobre el
- *   precio base real, así que display y cobro siempre coinciden.
- * - `provinceShippingCost`: costo fijo de envío a provincia (fuera de SC).
+ * - `markupPercent`: global (invisible) surcharge applied to EVERY product
+ *   price shown. The server re-applies it to the real base price when the order
+ *   is created, so displayed and charged amounts always match.
+ * - `provinceShippingCost`: flat shipping cost to the provinces (outside SC).
  *
- * Se lee del endpoint público `GET /api/pricing-setting`. Si falla, se usan los
- * valores por defecto para no romper la tienda.
+ * Read from the public `GET /api/pricing-setting` endpoint. If it fails, the
+ * defaults are used so the store doesn't break.
  */
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
@@ -28,7 +28,7 @@ export const PRICING_DEFAULTS: PricingSettings = {
   scRadiusKm: 15
 };
 
-/** Distancia Haversine en km. */
+/** Haversine distance in km. */
 export function distanceKm(
   lat1: number,
   lng1: number,
@@ -45,7 +45,7 @@ export function distanceKm(
   return 2 * R * Math.asin(Math.sqrt(a));
 }
 
-/** ¿La coordenada está fuera del área de Santa Cruz? (=> provincia) */
+/** Is the coordinate outside the Santa Cruz area? (=> province) */
 export function isProvinceCoords(
   settings: PricingSettings,
   lat: number,
@@ -58,12 +58,12 @@ export function isProvinceCoords(
 }
 
 /**
- * Precio de venta: base + markup, redondeado SIEMPRE hacia arriba al boliviano
- * (41,12 → 42). Debe dar exactamente lo mismo que `PricingService.applyMarkup`
- * de la API, que es quien recalcula los importes al crear el pedido.
+ * Sale price: base + markup, ALWAYS rounded up to the whole boliviano
+ * (41.12 → 42). Must match the API's `PricingService.applyMarkup` exactly,
+ * since that is what recalculates the amounts when the order is created.
  *
- * El redondeo a 2 decimales previo evita la trampa de la coma flotante: 25 ×
- * 1.12 da 28.000000000000004, y un `ceil` directo cobraría 29.
+ * Rounding to 2 decimals first avoids the floating-point trap: 25 × 1.12 gives
+ * 28.000000000000004, and a direct `ceil` would charge 29.
  */
 export function applyMarkup(
   price: number | null | undefined,
@@ -74,8 +74,8 @@ export function applyMarkup(
 }
 
 /**
- * Precio con la oferta aplicada, con el mismo redondeo hacia arriba. Se calcula
- * sobre el precio de venta (que ya trae el markup).
+ * Price with the discount applied, with the same upward rounding. Computed on
+ * the sale price (which already includes the markup).
  */
 export function applyDiscount(
   price: number | null | undefined,

@@ -59,9 +59,9 @@ export async function strapiSend<T>(
 }
 
 /**
- * POST con el body JSON tal cual, SIN el envoltorio `{ data }`. Necesario para
- * el content-api de users-permissions (`POST /api/users`), que lee los campos
- * (`email`, `username`, `password`, `role`) al nivel raíz del body.
+ * POST with the JSON body as is, WITHOUT the `{ data }` envelope. Required by
+ * the users-permissions content-api (`POST /api/users`), which reads the fields
+ * (`email`, `username`, `password`, `role`) at the body's root level.
  */
 export async function strapiPostRaw<T>(
   path: string,
@@ -77,8 +77,8 @@ export async function strapiPostRaw<T>(
   return (await res.json()) as T;
 }
 
-/** PUT con el body JSON tal cual (sin `{ data }`), para el content-api de
- * users-permissions (`PUT /api/users/:id`). */
+/** PUT with the JSON body as is (no `{ data }`), for the users-permissions
+ * content-api (`PUT /api/users/:id`). */
 export async function strapiPutRaw<T>(path: string, body: unknown): Promise<T> {
   const res = await fetch(`${STRAPI_URL}${path}`, {
     method: "PUT",
@@ -99,7 +99,7 @@ export async function strapiDelete(path: string): Promise<void> {
   if (!res.ok) await parseError(res);
 }
 
-/** Sube uno o varios ficheros a /api/upload y devuelve los media creados. */
+/** Uploads one or more files to /api/upload and returns the created media. */
 export async function uploadFiles(files: File[]): Promise<StrapiMedia[]> {
   const valid = files.filter((f) => f && f.size > 0);
   if (valid.length === 0) return [];
@@ -117,7 +117,7 @@ export async function uploadFiles(files: File[]): Promise<StrapiMedia[]> {
   return (await res.json()) as StrapiMedia[];
 }
 
-/** Login contra users-permissions. No requiere token previo. */
+/** Login against users-permissions. No prior token required. */
 export async function strapiLogin(
   identifier: string,
   password: string
