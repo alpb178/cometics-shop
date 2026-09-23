@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 import { Metadata } from "next";
 import { getMessages, getTranslations, setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
-import { isAppLocale, routing } from "@/i18n/routing";
+import { LOCALE_TAGS, isAppLocale, routing } from "@/i18n/routing";
 import { Providers } from "../providers";
 import { buildDefaultMetadata } from "@/lib/next-metadata";
 import { OrganizationWebSiteJsonLd } from "@/components/seo/json-ld";
@@ -36,7 +36,7 @@ export default async function LocaleLayout({
   const t = await getTranslations({ locale, namespace: "seo" });
 
   return (
-    <html lang={locale} className="light">
+    <html lang={LOCALE_TAGS[locale]} className="light">
       <body
         className={cn(
           libreFranklin.variable,

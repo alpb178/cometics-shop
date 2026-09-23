@@ -6,6 +6,8 @@ import { requireUser } from "@/lib/auth/server";
 import { authFetch } from "@/lib/strapi/auth-fetch";
 import type { Order } from "@/definitions/Order";
 import { formatAmount } from "@/lib/price";
+import { INTL_LOCALES } from "@/i18n/routing";
+import { toAppLocale } from "@/lib/seo-pages";
 
 // Payment methods with a label in `account.orders.paymentMethod`.
 // `bank_transfer` is legacy: orders created before the switch to cash/QR.
@@ -32,7 +34,7 @@ export default async function OrderDetailPage({
   const { id } = await params;
   await requireUser(`/account/orders/${id}`);
   const t = await getTranslations("account.orders");
-  const dateLocale = (await getLocale()) === "en" ? "en-US" : "es-BO";
+  const dateLocale = INTL_LOCALES[toAppLocale(await getLocale())];
 
   // scope=mine: even if the user is staff, the account area can only open
   // the detail of their own orders (404 otherwise).

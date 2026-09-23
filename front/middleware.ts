@@ -41,6 +41,7 @@ function detectLocale(req: NextRequest): AppLocale {
       .filter((entry) => entry.tag && entry.tag !== "*" && entry.q > 0)
       .sort((a, b) => b.q - a.q);
     for (const { tag } of ranked) {
+      // Region variants fall back to the language: pt-BR, pt-PT → pt.
       const primary = tag.split("-")[0];
       if ((locales as readonly string[]).includes(primary)) return primary as AppLocale;
     }

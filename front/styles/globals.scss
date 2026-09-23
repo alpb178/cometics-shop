@@ -199,3 +199,21 @@ body {
     @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium;
   }
 }
+
+// Shared language menu (components/language-switcher): Iris's palette. The
+// current language and the focus ring use a darkened brand green so they keep
+// AA contrast on the white menu (plain --primary is ~2.4:1).
+.lang-switcher-iris {
+  --lang-fg: rgb(var(--foreground));
+  --lang-bg: rgb(var(--background));
+  --lang-border: rgb(var(--border));
+  --lang-menu-bg: rgb(var(--popover));
+  --lang-menu-fg: rgb(var(--popover-foreground));
+  --lang-menu-border: rgb(var(--border));
+  --lang-accent: color-mix(in srgb, rgb(var(--primary)) 55%, black);
+  --lang-hover: rgb(var(--accent) / 0.25);
+}
+
+.dark .lang-switcher-iris {
+  --lang-accent: rgb(var(--accent));
+}

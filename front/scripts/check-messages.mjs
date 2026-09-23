@@ -1,11 +1,12 @@
-// Fails when locales/es and locales/en differ in files or keys, or when a
-// message is empty. Usage: node scripts/check-messages.mjs
+// Fails when the catalogues under locales/ (es, en, pt) differ in files or
+// keys, or when a message is empty. Keep `locales` in sync with i18n/routing.ts.
+// Usage: node scripts/check-messages.mjs
 import { readdirSync, readFileSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..", "locales");
-const locales = ["es", "en"];
+const locales = ["es", "en", "pt"];
 
 function flatten(obj, prefix = "", out = {}) {
   for (const [k, v] of Object.entries(obj)) {
@@ -47,6 +48,6 @@ for (const a of locales) {
   }
 }
 console.log(
-  problems ? `${problems} problem(s)` : `OK — ${Object.keys(catalogs.es).length} keys in es and en`
+  problems ? `${problems} problem(s)` : `OK — ${Object.keys(catalogs.es).length} keys in each of ${locales.join(", ")}`
 );
 process.exit(problems ? 1 : 0);

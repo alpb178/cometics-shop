@@ -7,6 +7,7 @@ import { Controller, useFormContext } from "react-hook-form";
 import { isValidPhoneNumber } from "react-phone-number-input";
 import RPNInput, { type Country } from "react-phone-number-input";
 import esCountryLabels from "react-phone-number-input/locale/es";
+import ptCountryLabels from "react-phone-number-input/locale/pt-BR";
 import "react-phone-number-input/style.css";
 import styles from "./PhoneInput.module.scss";
 
@@ -27,7 +28,9 @@ export function PhoneInput({
 }: Readonly<PhoneInputProps>) {
   const t = useTranslations("auth.form");
   // Country names in the picker follow the page language (library default: English).
-  const countryLabels = useLocale() === "es" ? esCountryLabels : undefined;
+  const locale = useLocale();
+  const countryLabels =
+    locale === "es" ? esCountryLabels : locale === "pt" ? ptCountryLabels : undefined;
   const {
     control,
     formState: { errors }

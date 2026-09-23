@@ -4,9 +4,9 @@ import { Logo } from "@/components/logo/logo";
 import { cn } from "@/lib/utils";
 import { MenuIcon, X } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { Suspense, useState } from "react";
+import { useState } from "react";
 import { TransitionLink as Link } from "@/components/i18n/transition-link";
-import { LocaleSwitcher } from "@/components/i18n/locale-switcher";
+import { LocaleMenu } from "@/components/i18n/locale-menu";
 import { usePathname } from "@/i18n/navigation";
 import type { NavItem } from "@/lib/constants/navbar";
 import { Modal } from "../modal/Modal";
@@ -140,9 +140,12 @@ export const MobileNavbar = ({ leftNavbarItems, logo, locale }: Props) => {
               );
             })}
             <li className="px-5 py-4">
-              <Suspense fallback={null}>
-                <LocaleSwitcher />
-              </Suspense>
+              {/* Opens upwards: the drawer list scrolls and would clip it below. */}
+              <LocaleMenu
+                align="start"
+                placement="top"
+                onSelect={() => setOpen(false)}
+              />
             </li>
           </ul>
         </>

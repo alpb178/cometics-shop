@@ -1,4 +1,5 @@
 import { siteMetadata } from "@/lib/next-metadata";
+import { LOCALE_TAGS, type AppLocale } from "@/i18n/routing";
 
 const SITE_URL = siteMetadata.url;
 
@@ -35,7 +36,7 @@ export function OrganizationWebSiteJsonLd({
         name: "Iris Natural Cosmética",
         description,
         publisher: { "@id": `${SITE_URL}/#organization` },
-        inLanguage: locale,
+        inLanguage: LOCALE_TAGS[locale as AppLocale] ?? locale,
         potentialAction: {
           "@type": "SearchAction",
           target: {

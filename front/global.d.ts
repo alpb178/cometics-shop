@@ -13,7 +13,7 @@ import type seo from "./locales/es/seo.json";
 import type { routing } from "./i18n/routing";
 
 // Type-checks message keys (`t("cart.title")`) and locales against the Spanish
-// catalogue; scripts/check-messages.mjs keeps the English one in sync.
+// catalogue; scripts/check-messages.mjs keeps the English and Portuguese ones in sync.
 declare module "next-intl" {
   interface AppConfig {
     Locale: (typeof routing.locales)[number];

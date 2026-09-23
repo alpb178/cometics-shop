@@ -1,15 +1,18 @@
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
-import { DEFAULT_LOCALE, isAppLocale, locales, type AppLocale } from "@/i18n/routing";
-import { siteMetadata } from "./next-metadata";
+import {
+  DEFAULT_LOCALE,
+  LOCALE_TAGS,
+  isAppLocale,
+  locales,
+  type AppLocale
+} from "@/i18n/routing";
+import { OG_LOCALES, siteMetadata } from "./next-metadata";
 
 const BASE = siteMetadata.url;
 
 /** Open Graph locale per app locale. */
-export const OG_LOCALE: Record<AppLocale, string> = {
-  es: "es_BO",
-  en: "en_US"
-};
+export const OG_LOCALE = OG_LOCALES;
 
 export function toAppLocale(value: string | undefined): AppLocale {
   return isAppLocale(value) ? value : DEFAULT_LOCALE;
@@ -34,7 +37,7 @@ export function localizedAlternates(
   locale: AppLocale
 ): NonNullable<Metadata["alternates"]> {
   const languages: Record<string, string> = {};
-  for (const l of locales) languages[l] = localizedUrl(path, l);
+  for (const l of locales) languages[LOCALE_TAGS[l]] = localizedUrl(path, l);
   languages["x-default"] = localizedUrl(path, DEFAULT_LOCALE);
   return { canonical: localizedUrl(path, locale), languages };
 }

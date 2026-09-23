@@ -1,0 +1,12 @@
+{
+  "page": {
+    "imageAlt": "Erro",
+    "title": "Erro ao carregar a página",
+    "description": "Não foi possível carregar o conteúdo da página inicial. Por favor, tente novamente.",
+    "retryLabel": "Tentar carregar a página novamente",
+    "retry": "Tentar novamente"
+  },
+  "toast": {
+    "title": "Algo deu errado"
+  }
+}
