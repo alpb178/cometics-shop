@@ -1,25 +1,22 @@
-import Link from "next/link";
+import { getLocale, getTranslations } from "next-intl/server";
+import { Link } from "@/i18n/navigation";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import { requireUser } from "@/lib/auth/server";
 import { authFetch } from "@/lib/strapi/auth-fetch";
 import type { Order } from "@/definitions/Order";
 import { formatAmount } from "@/lib/price";
+import { INTL_LOCALES } from "@/i18n/routing";
+import { toAppLocale } from "@/lib/seo-pages";
 
-const STATUS_LABELS: Record<Order["status"], string> = {
-  pending_verification: "Pendiente de verificación",
-  confirmed: "Confirmado",
-  shipped: "Enviado",
-  delivered: "Entregado",
-  cancelled: "Cancelado"
-};
+// Payment methods with a label in `account.orders.paymentMethod`.
+// `bank_transfer` is legacy: orders created before the switch to cash/QR.
+const PAYMENT_METHODS = ["cash", "qr", "bank_transfer"] as const;
+type PaymentLabelKey = (typeof PAYMENT_METHODS)[number];
 
-const PAYMENT_LABELS: Record<string, string> = {
-  cash: "Efectivo",
-  qr: "Pago por QR",
-  // Legacy: orders created before the switch to cash/QR.
-  bank_transfer: "Transferencia bancaria"
-};
+function isPaymentLabelKey(value: string): value is PaymentLabelKey {
+  return (PAYMENT_METHODS as readonly string[]).includes(value);
+}
 
 const STRAPI_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -36,6 +33,8 @@ export default async function OrderDetailPage({
 }) {
   const { id } = await params;
   await requireUser(`/account/orders/${id}`);
+  const t = await getTranslations("account.orders");
+  const dateLocale = INTL_LOCALES[toAppLocale(await getLocale())];
 
   // scope=mine: even if the user is staff, the account area can only open
   // the detail of their own orders (404 otherwise).
@@ -55,18 +54,18 @@ export default async function OrderDetailPage({
         href="/account/orders"
         className="text-xs uppercase tracking-[0.16em] text-muted-foreground underline-offset-4 hover:underline"
       >
-        ← Volver a mis pedidos
+        {t("backToOrders")}
       </Link>
 
       <header className="mt-6 mb-10 border-b border-border pb-6">
         <p className="text-xs font-semibold uppercase tracking-[0.22em] text-primary">
-          Pedido #{order.id}
+          {t("orderNumber", { id: order.id })}
         </p>
         <h1 className="font-display text-3xl font-semibold tracking-tight">
-          {STATUS_LABELS[order.status]}
+          {t(`status.${order.status}`)}
         </h1>
         <p className="mt-2 text-sm text-muted-foreground">
-          {new Date(order.createdAt).toLocaleDateString("es-BO", {
+          {new Date(order.createdAt).toLocaleDateString(dateLocale, {
             year: "numeric",
             month: "long",
             day: "numeric"
@@ -77,7 +76,7 @@ export default async function OrderDetailPage({
       <div className="space-y-10">
         <div>
           <h2 className="mb-4 text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
-            Productos
+            {t("products")}
           </h2>
           <ul className="divide-y divide-border border-y border-border">
             {order.items?.map((item, i) => (
@@ -115,12 +114,12 @@ export default async function OrderDetailPage({
         <div className="grid grid-cols-1 gap-8 sm:grid-cols-2">
           <div>
             <h2 className="mb-3 text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
-              Entrega
+              {t("delivery")}
             </h2>
             <p className="text-sm">
               {order.deliveryMethod === "delivery"
-                ? "Envío a domicilio"
-                : "Recoger en tienda"}
+                ? t("deliveryHome")
+                : t("deliveryPickup")}
             </p>
             {order.shippingAddress && (
               <address className="not-italic mt-2 text-sm text-muted-foreground">
@@ -147,11 +146,11 @@ export default async function OrderDetailPage({
                     <br />
                   </>
                 )}
-                Tel: {order.shippingAddress.phone}
+                {t("phoneLine", { phone: order.shippingAddress.phone })}
                 {order.shippingAddress.ci && (
                   <>
                     <br />
-                    CI: {order.shippingAddress.ci}
+                    {t("ciLine", { ci: order.shippingAddress.ci })}
                   </>
                 )}
               </address>
@@ -160,9 +159,13 @@ export default async function OrderDetailPage({
 
           <div>
             <h2 className="mb-3 text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
-              Pago
+              {t("payment")}
             </h2>
-            <p className="text-sm">{PAYMENT_LABELS[order.paymentMethod]}</p>
+            <p className="text-sm">
+              {isPaymentLabelKey(order.paymentMethod)
+                ? t(`paymentMethod.${order.paymentMethod}`)
+                : order.paymentMethod}
+            </p>
             {proofUrl && (
               <a
                 href={proofUrl}
@@ -173,7 +176,7 @@ export default async function OrderDetailPage({
                 <div className="relative h-32 w-32 overflow-hidden border border-border bg-secondary">
                   <Image
                     src={proofUrl}
-                    alt="Comprobante de pago"
+                    alt={t("paymentProofAlt")}
                     fill
                     sizes="128px"
                     className="object-cover"
@@ -187,17 +190,17 @@ export default async function OrderDetailPage({
         <div className="border-t border-border pt-6">
           <dl className="space-y-2 text-sm">
             <div className="flex justify-between">
-              <dt className="text-muted-foreground">Subtotal</dt>
+              <dt className="text-muted-foreground">{t("subtotal")}</dt>
               <dd>Bs {formatAmount(order.subtotal)}</dd>
             </div>
             {order.shippingCost != null && (
               <div className="flex justify-between">
-                <dt className="text-muted-foreground">Envío</dt>
+                <dt className="text-muted-foreground">{t("shipping")}</dt>
                 <dd>Bs {formatAmount(order.shippingCost)}</dd>
               </div>
             )}
             <div className="flex justify-between border-t border-border pt-2 font-semibold">
-              <dt>Total</dt>
+              <dt>{t("total")}</dt>
               <dd>Bs {formatAmount(order.total)}</dd>
             </div>
           </dl>

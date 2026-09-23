@@ -1,9 +1,11 @@
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { DeliveryOption } from "@/container/products/product/components/delivery-options";
 
 export const useDeliveryOption = (
   initialOption: DeliveryOption = "delivery"
 ) => {
+  const t = useTranslations("products.delivery");
   const [deliveryOption, setDeliveryOption] =
     useState<DeliveryOption>(initialOption);
 
@@ -12,15 +14,11 @@ export const useDeliveryOption = (
   };
 
   const getDeliveryText = () => {
-    return deliveryOption === "delivery"
-      ? "envío a domicilio, a cotizar el costo del envío"
-      : "recoger en tienda, a definir el horario";
+    return t(`preference.${deliveryOption}`);
   };
 
   const getButtonText = () => {
-    return deliveryOption === "delivery"
-      ? "Comprar con envío"
-      : "Comprar para recoger";
+    return t(`buy.${deliveryOption}`);
   };
 
   return {

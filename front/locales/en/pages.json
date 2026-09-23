@@ -1,0 +1,112 @@
+{
+  "story": {
+    "eyebrow": "{number} · Our story"
+  },
+  "howItWorks": {
+    "heading": "How it works",
+    "badge": "Simple process",
+    "steps": {
+      "catalog": {
+        "title": "Browse our catalog",
+        "description": "Start by exploring all our products. You can see photos, descriptions, benefits and prices to pick the ones you like best."
+      },
+      "cart": {
+        "title": "Add your products to the cart",
+        "description": "When you find something you love, just add it to the cart. You can choose one or several products."
+      },
+      "delivery": {
+        "title": "Choose how you want to receive your order",
+        "description": "Before confirming, choose whether you prefer home delivery or picking up your order at our store."
+      },
+      "confirm": {
+        "title": "Confirm your order on WhatsApp",
+        "description": "When you're ready, click the WhatsApp button. You'll send us your product list there and we can help you directly."
+      },
+      "quote": {
+        "title": "Get your delivery quote (home delivery only)",
+        "description": "If you want home delivery, we work out the cost based on your location and send you the total to pay."
+      },
+      "pickup": {
+        "title": "Get a confirmation if you're picking up your order",
+        "description": "If you'd rather pick it up, we confirm the address, opening hours and availability so you can drop by hassle-free."
+      },
+      "payment": {
+        "title": "Pay the easy way",
+        "description": "You can pay in cash or by QR code, whichever suits you best."
+      },
+      "receive": {
+        "title": "Receive your products",
+        "description": "If you chose home delivery, we bring your order wherever you are. If you chose pickup, we'll be waiting at our store with your order ready."
+      }
+    }
+  },
+  "about": {
+    "story": {
+      "whoWeAre": {
+        "title": "Who we are",
+        "description": "We are a small business passionate about healthy natural beauty, making products with 100% natural active ingredients. Our team of experienced professionals is committed to our customers, and we are dedicated to making products that respect and care for your skin and the environment."
+      },
+      "mission": {
+        "title": "Mission",
+        "description": "To produce and sell natural, handmade and eco-friendly cosmetics with organic, cruelty-free ingredients, meeting our customers' needs with healthier and more sustainable beauty products."
+      },
+      "vision": {
+        "title": "Vision",
+        "description": "To be a benchmark for innovation and quality in handmade natural cosmetics, offering effective solutions that respect health and the environment; to share the brand's values through meaningful experiences and content; and to use digital marketing to reach a wider audience, including an online store with personalized advice."
+      }
+    }
+  },
+  "policy": {
+    "story": {
+      "collect": {
+        "title": "Do we collect personal information?",
+        "description": "We do not collect personal information from our customers. We do not store names, emails, phone numbers or addresses."
+      },
+      "analyzed": {
+        "title": "What information is analyzed?",
+        "description": "We may analyze browsing data anonymously, such as the pages visited and on-site behavior, solely to improve the experience and performance of the website."
+      },
+      "protect": {
+        "title": "How do we protect information?",
+        "description": "Although we do not store personal data, we take technical measures to keep anonymous information secure and make sure your browsing experience is safe."
+      },
+      "updates": {
+        "title": "What happens if we update this policy?",
+        "description": "Any change will be published in this section of the website. We recommend checking it regularly to stay up to date."
+      }
+    }
+  },
+  "faq": {
+    "heading": "Frequently Asked Questions",
+    "badge": "Your questions answered"
+  },
+  "contact": {
+    "heading": "Contact us",
+    "subHeading": "“Every product is born with a clear purpose, inspired by dedicated research into the benefits nature offers us.”",
+    "badge": "We're here to help",
+    "formTitle": "Send us a message",
+    "sendWhatsapp": "Send via WhatsApp",
+    "alsoFindUs": "You can also find us on:",
+    "visitUs": "Visit us",
+    "whatsappCard": {
+      "title": "WhatsApp us directly",
+      "subtitle": "We reply within minutes"
+    },
+    "form": {
+      "name": "Name",
+      "email": "Email",
+      "comments": "Comments",
+      "send": "Contact us"
+    },
+    "validation": {
+      "required": "{field} is required",
+      "invalidEmail": "Invalid email address",
+      "invalidPhone": "Invalid phone number"
+    },
+    "whatsapp": {
+      "greeting": "Hi, my name is {name}.",
+      "email": "You can reach me at {email}.",
+      "comments": "I'd like to add: \"{comments}\"."
+    }
+  }
+}

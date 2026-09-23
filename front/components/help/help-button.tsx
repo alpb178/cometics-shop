@@ -1,6 +1,7 @@
 "use client";
 
 import { X } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { IconBrandWhatsapp } from "@tabler/icons-react";
@@ -10,6 +11,7 @@ import { logsStrapi } from "@/lib/strapi/logs";
 export const HelpButton = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isCartOpen, setIsCartOpen] = useState(false);
+  const t = useTranslations("nav.help");
 
   // Check if cart drawer is open
   useEffect(() => {
@@ -28,10 +30,7 @@ export const HelpButton = () => {
   }, []);
 
   const generateHelpMessage = () => {
-    let message =
-      "¡Hola! ¿Podrían ayudarme con alguna consulta sobre sus productos o servicios?";
-
-    return message;
+    return t("whatsappMessage");
   };
 
   const handleWhatsAppClick = async () => {
@@ -62,7 +61,7 @@ export const HelpButton = () => {
         whileTap={{ scale: 0.9 }}
         onClick={() => setIsOpen(!isOpen)}
         className="fixed bottom-6 right-6 z-50 w-14 h-14 bg-primary text-primary-foreground rounded-full shadow-lg hover:shadow-xl transition-shadow flex items-center justify-center"
-        aria-label="Help"
+        aria-label={t("buttonLabel")}
       >
         <AnimatePresence mode="wait">
           {isOpen ? (
@@ -104,7 +103,7 @@ export const HelpButton = () => {
             >
               <div className="space-y-2">
                 <h3 className="text-sm font-semibold text-foreground mb-3">
-                  ¿Necesitas ayuda?
+                  {t("title")}
                 </h3>
 
                 <button
@@ -112,15 +111,15 @@ export const HelpButton = () => {
                   className="w-full flex items-center gap-2 px-4 py-2 bg-primary text-foreground rounded-lg hover:bg-primary/90 transition-colors text-sm font-medium"
                 >
                   <IconBrandWhatsapp className="w-5 h-5 text-lg" />
-                  Contactar por WhatsApp
+                  {t("contactWhatsapp")}
                 </button>
 
                 <div className="pt-2 border-t border-border">
                   <p className="text-xs text-muted-foreground">
-                    Horario de atención:
+                    {t("hoursLabel")}
                   </p>
                   <p className="text-xs text-foreground font-medium">
-                    Lunes - Viernes: 10:00 - 18:00
+                    {t("hours")}
                   </p>
                 </div>
               </div>

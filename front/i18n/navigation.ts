@@ -1,4 +1,7 @@
 import { createNavigation } from "next-intl/navigation";
 import { routing } from "./routing";
 
-export const { usePathname, useRouter } = createNavigation(routing);
+// Locale-aware replacements for next/link and next/navigation: they keep the
+// `/es` | `/en` prefix on every internal navigation.
+export const { Link, redirect, usePathname, useRouter, getPathname } =
+  createNavigation(routing);

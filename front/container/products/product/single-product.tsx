@@ -9,7 +9,6 @@ import { trackEvent } from "@/lib/track-event";
 import { FormattedText } from "../../../components/text/formatted-text";
 import { QuantitySelector } from "./components/quantity-selector";
 import { SparklesCore } from "@/components/ui/sparkles";
-import { SHIPPING_POLICY_TEXT } from "@/lib/shipping";
 import Image from "next/image";
 import { useCart } from "@/context/cart-context";
 import { cn } from "@/lib/utils";
@@ -22,10 +21,12 @@ import {
   Store
 } from "lucide-react";
 import { applyDiscount } from "@/lib/pricing";
+import { useTranslations } from "next-intl";
 
 const DESCRIPTION_PREVIEW_CHARS = 700;
 
 export const SingleProduct = ({ product }: { product: Product }) => {
+  const t = useTranslations("products.detail");
   const [activeIndex, setActiveIndex] = useState(0);
   const [quantity, setQuantity] = useState(1);
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
@@ -69,7 +70,7 @@ export const SingleProduct = ({ product }: { product: Product }) => {
       productSlug: product.slug,
       quantity
     });
-    setFeedback(`Añadido al carrito: ${product.name} × ${quantity}`);
+    setFeedback(t("added", { name: product.name, quantity }));
     setTimeout(() => setFeedback(null), 3500);
     try {
       await logsStrapi(
@@ -101,7 +102,7 @@ export const SingleProduct = ({ product }: { product: Product }) => {
                 key={image.url ?? index}
                 type="button"
                 onClick={() => setActiveIndex(index)}
-                aria-label={`Ver imagen ${index + 1} de ${images.length}`}
+                aria-label={t("viewImage", { index: index + 1, total: images.length })}
                 aria-pressed={index === activeIndex}
                 className={cn(
                   "relative aspect-square w-full overflow-hidden border transition-colors",
@@ -208,16 +209,16 @@ export const SingleProduct = ({ product }: { product: Product }) => {
               type="button"
               onClick={handleAddToCart}
               className="flex w-full items-center justify-center gap-2 bg-foreground py-4 text-xs font-semibold uppercase tracking-[0.16em] text-background transition-colors hover:bg-foreground/90"
-              aria-label={`Añadir al carrito: ${product.name}`}
+              aria-label={t("addToCartAria", { name: product.name })}
             >
               <ShoppingBag className="h-4 w-4" strokeWidth={1.75} />
-              Añadir al carrito
+              {t("addToCart")}
             </button>
 
             {quantity > 1 && product.price && (
               <p className="mt-3 flex items-baseline justify-between text-sm text-muted-foreground">
                 <span>
-                  Total ({quantity} {quantity === 1 ? "unidad" : "unidades"})
+                  {t("totalUnits", { quantity })}
                 </span>
                 <span className="font-semibold text-foreground">
                   {formatPrice({
@@ -246,12 +247,12 @@ export const SingleProduct = ({ product }: { product: Product }) => {
               />
               <div>
                 <p className="font-semibold uppercase tracking-[0.12em] text-foreground">
-                  Envío
+                  {t("shipping")}
                 </p>
-                <p className="text-muted-foreground">Entrega 24–72 h</p>
+                <p className="text-muted-foreground">{t("shippingTime")}</p>
                 {/* Same policy as the floating welcome notice. */}
                 <p className="mt-1 leading-relaxed text-muted-foreground">
-                  {SHIPPING_POLICY_TEXT}
+                  {t("shippingPolicy")}
                 </p>
               </div>
             </div>
@@ -262,9 +263,9 @@ export const SingleProduct = ({ product }: { product: Product }) => {
               />
               <div>
                 <p className="font-semibold uppercase tracking-[0.12em] text-foreground">
-                  Recogida
+                  {t("pickup")}
                 </p>
-                <p className="text-muted-foreground">Lista en 24–48 h</p>
+                <p className="text-muted-foreground">{t("pickupTime")}</p>
               </div>
             </div>
           </div>
@@ -275,7 +276,7 @@ export const SingleProduct = ({ product }: { product: Product }) => {
             move while reading it. */}
         <div className="lg:col-start-2 lg:row-start-2 lg:max-h-[60vh] lg:self-start lg:overflow-y-auto lg:pr-3">
           <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.16em] text-foreground">
-            Descripción del producto
+            {t("description")}
           </p>
           <FormattedText
             content={displayedDescription}
@@ -289,11 +290,11 @@ export const SingleProduct = ({ product }: { product: Product }) => {
             >
               {isDescriptionExpanded ? (
                 <>
-                  Ver menos <ChevronUp className="h-4 w-4" />
+                  {t("showLess")} <ChevronUp className="h-4 w-4" />
                 </>
               ) : (
                 <>
-                  Ver más <ChevronDown className="h-4 w-4" />
+                  {t("showMore")} <ChevronDown className="h-4 w-4" />
                 </>
               )}
             </button>

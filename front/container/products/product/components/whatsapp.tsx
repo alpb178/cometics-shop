@@ -3,6 +3,7 @@
 import { Product } from "@/definitions/Product";
 import { IconBrandWhatsapp } from "@tabler/icons-react";
 import { logsStrapi } from "@/lib/strapi/logs";
+import { useTranslations } from "next-intl";
 
 export const WhatsappLink = ({
   product,
@@ -15,15 +16,19 @@ export const WhatsappLink = ({
   getDeliveryText: () => string;
   getButtonText: () => string;
 }) => {
+  const t = useTranslations("products.whatsapp");
   const totalPrice = product.price ? product.price * quantity : 0;
 
-  const message = `Hola, quiero comprar ${quantity} ${
-    quantity === 1 ? "unidad" : "unidades"
-  } del producto ${product.name}${
-    product.price ? ` a ${product.price} ${product.currency} cada uno` : ""
-  }${
-    totalPrice > 0 ? ` (Total: ${totalPrice} ${product.currency})` : ""
-  }. Prefiero ${getDeliveryText()}.`;
+  const message = t("message", {
+    quantity,
+    name: product.name,
+    hasPrice: product.price ? "yes" : "no",
+    price: product.price ?? 0,
+    currency: product.currency ?? "",
+    hasTotal: totalPrice > 0 ? "yes" : "no",
+    total: totalPrice,
+    delivery: getDeliveryText()
+  });
 
   const handleClick = async () => {
     window.open(

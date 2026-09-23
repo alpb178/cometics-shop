@@ -1,0 +1,112 @@
+{
+  "story": {
+    "eyebrow": "{number} · Nossa história"
+  },
+  "howItWorks": {
+    "heading": "Como funciona?",
+    "badge": "Processo simples",
+    "steps": {
+      "catalog": {
+        "title": "Confira nosso catálogo",
+        "description": "Comece explorando todos os nossos produtos. Você pode ver fotos, descrições, benefícios e preços para escolher o que mais gostar."
+      },
+      "cart": {
+        "title": "Adicione seus produtos ao carrinho",
+        "description": "Quando encontrar algo que você ame, é só adicionar ao carrinho. Você pode escolher um ou vários produtos."
+      },
+      "delivery": {
+        "title": "Escolha como quer receber seu pedido",
+        "description": "Antes de confirmar, selecione se prefere a entrega em domicílio ou retirar seu pedido na nossa loja."
+      },
+      "confirm": {
+        "title": "Confirme seu pedido pelo WhatsApp",
+        "description": "Quando estiver pronto, clique no botão do WhatsApp. Lá você nos envia sua lista de produtos e podemos ajudar você diretamente."
+      },
+      "quote": {
+        "title": "Receba o orçamento do frete (só se escolheu entrega em domicílio)",
+        "description": "Se quiser entrega em domicílio, calculamos o valor de acordo com a sua localização e enviamos o total a pagar."
+      },
+      "pickup": {
+        "title": "Receba a confirmação se for retirar seu pedido",
+        "description": "Se preferir retirar, confirmamos o endereço, o horário e a disponibilidade para você passar sem problemas."
+      },
+      "payment": {
+        "title": "Faça seu pagamento de forma simples",
+        "description": "Você pode pagar em dinheiro ou via código QR, como for mais prático para você."
+      },
+      "receive": {
+        "title": "Receba seus produtos",
+        "description": "Se escolheu entrega em domicílio, levamos seu pedido até onde você estiver. Se escolheu retirar, esperamos você na nossa loja com o pedido pronto."
+      }
+    }
+  },
+  "about": {
+    "story": {
+      "whoWeAre": {
+        "title": "Quem somos?",
+        "description": "Somos um empreendimento apaixonado pela beleza natural e saudável: criamos produtos com ativos 100% naturais. Contamos com uma equipe de profissionais experientes e comprometidos com nossos clientes, e nos dedicamos a fabricar produtos que respeitam e cuidam da sua pele e do meio ambiente."
+      },
+      "mission": {
+        "title": "Missão",
+        "description": "Produzir e comercializar cosméticos naturais, artesanais e ecológicos, com ingredientes orgânicos e livres de crueldade animal, buscando atender às necessidades dos nossos clientes com produtos de beleza mais saudáveis e sustentáveis."
+      },
+      "vision": {
+        "title": "Visão",
+        "description": "Ser referência em inovação e qualidade de cosméticos naturais feitos artesanalmente, oferecendo soluções eficazes e respeitosas com a saúde e o meio ambiente; comunicar os valores da marca por meio de experiências e conteúdo de valor; e usar estratégias de marketing digital para alcançar um público mais amplo, inclusive com uma loja on-line com atendimento personalizado."
+      }
+    }
+  },
+  "policy": {
+    "story": {
+      "collect": {
+        "title": "Coletamos informações pessoais?",
+        "description": "Não coletamos informações pessoais dos nossos clientes. Não guardamos nomes, e-mails, telefones nem endereços."
+      },
+      "analyzed": {
+        "title": "Quais informações são analisadas?",
+        "description": "Podemos analisar dados de navegação de forma anônima, como as páginas visitadas e o comportamento no site, apenas para melhorar a experiência e o funcionamento do site."
+      },
+      "protect": {
+        "title": "Como protegemos as informações?",
+        "description": "Embora não guardemos dados pessoais, adotamos medidas técnicas para manter a segurança das informações anônimas e garantir que sua navegação seja segura."
+      },
+      "updates": {
+        "title": "E se atualizarmos esta política?",
+        "description": "Qualquer alteração será publicada nesta seção do site. Recomendamos que você a consulte periodicamente para ficar por dentro das atualizações."
+      }
+    }
+  },
+  "faq": {
+    "heading": "Perguntas Frequentes",
+    "badge": "Tiramos suas dúvidas"
+  },
+  "contact": {
+    "heading": "Fale conosco",
+    "subHeading": "“Cada produto nasce com um propósito claro, inspirado em uma pesquisa dedicada sobre os benefícios que a natureza nos oferece.”",
+    "badge": "Estamos aqui para ajudar",
+    "formTitle": "Envie uma mensagem",
+    "sendWhatsapp": "Enviar pelo WhatsApp",
+    "alsoFindUs": "Você também nos encontra em:",
+    "visitUs": "Visite-nos",
+    "whatsappCard": {
+      "title": "WhatsApp direto",
+      "subtitle": "Respondemos em minutos"
+    },
+    "form": {
+      "name": "Nome",
+      "email": "E-mail",
+      "comments": "Comentários",
+      "send": "Fale conosco"
+    },
+    "validation": {
+      "required": "{field} é obrigatório",
+      "invalidEmail": "E-mail inválido",
+      "invalidPhone": "Número de telefone inválido"
+    },
+    "whatsapp": {
+      "greeting": "Olá, meu nome é {name}.",
+      "email": "Vocês podem me escrever em {email}.",
+      "comments": "Gostaria de acrescentar: \"{comments}\"."
+    }
+  }
+}

@@ -3,6 +3,7 @@
 import { ShoppingCart } from "lucide-react";
 import { motion } from "framer-motion";
 import { logsStrapi } from "@/lib/strapi/logs";
+import { useTranslations } from "next-intl";
 
 export const ButtonAddToCart = ({
   onClick,
@@ -11,6 +12,7 @@ export const ButtonAddToCart = ({
   onClick: () => void;
   name: string;
 }) => {
+  const t = useTranslations("products.buttons");
   const handleAddToCart = async () => {
     onClick();
 
@@ -35,7 +37,7 @@ export const ButtonAddToCart = ({
       className="flex w-full  items-center justify-center gap-1 rounded-full py-3 px-4 font-semibold transition-all duration-200 shadow-md !bg-yellow-300 border-2 hover:shadow-lg"
     >
       <ShoppingCart className="w-4 h-4 md:w-5 md:h-5 " />
-      <span className=" text-xs md:text-lg">Agregar al carrito</span>
+      <span className=" text-xs md:text-lg">{t("addToCart")}</span>
     </motion.button>
   );
 };

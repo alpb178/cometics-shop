@@ -1,12 +1,12 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { Link } from "next-view-transitions";
-import { usePathname } from "next/navigation";
+import { TransitionLink as Link } from "@/components/i18n/transition-link";
+import { usePathname } from "@/i18n/navigation";
 import { ReactNode } from "react";
 
 type Props = {
-  href: never;
+  href: string;
   children: ReactNode;
   className?: string;
   target?: string;

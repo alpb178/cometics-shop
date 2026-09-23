@@ -5,12 +5,14 @@ import { formatPrice } from "@/lib/price";
 import { getImageSrc } from "@/lib/strapi/strapiImage";
 import { Plus, Minus, X, ShoppingBag } from "lucide-react";
 import Image from "next/image";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
+import { useTranslations } from "next-intl";
 import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import { trackEvent } from "@/lib/track-event";
 
-export function CartPage({ locale }: { locale: string }) {
+export function CartPage() {
+  const t = useTranslations("cart");
   const { items, updateQuantity, removeFromCart, getCartTotal, clearCart } =
     useCart();
   const [confirm, setConfirm] = useState<{
@@ -50,13 +52,13 @@ export function CartPage({ locale }: { locale: string }) {
       <header className="mb-8 flex items-end justify-between gap-4 border-b border-border pb-6">
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-            Tu pedido
+            {t("page.eyebrow")}
           </p>
           <h1 className="mt-2 font-display text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
-            Carrito{" "}
+            {t("page.title")}{" "}
             {items.length > 0 && (
               <span className="text-base font-normal text-muted-foreground">
-                ({itemCount} {itemCount === 1 ? "artículo" : "artículos"})
+                {t("page.itemCount", { count: itemCount })}
               </span>
             )}
           </h1>
@@ -67,7 +69,7 @@ export function CartPage({ locale }: { locale: string }) {
             onClick={() => setConfirm({ show: true, clearAll: true })}
             className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
           >
-            Vaciar carrito
+            {t("page.clear")}
           </button>
         )}
       </header>
@@ -79,16 +81,16 @@ export function CartPage({ locale }: { locale: string }) {
             strokeWidth={1.25}
           />
           <p className="mb-2 font-display text-2xl text-foreground">
-            Tu carrito está vacío
+            {t("page.emptyTitle")}
           </p>
           <p className="mb-8 max-w-md text-sm text-muted-foreground">
-            Cuando añadas productos los verás aquí.
+            {t("page.emptyHint")}
           </p>
           <Link
-            href={`/${locale}/`}
+            href="/"
             className="bg-foreground px-8 py-3 text-xs font-semibold uppercase tracking-[0.16em] text-background hover:bg-foreground/90"
           >
-            Ver productos
+            {t("page.browse")}
           </Link>
         </div>
       ) : (
@@ -103,9 +105,11 @@ export function CartPage({ locale }: { locale: string }) {
                   className="flex gap-5 py-6"
                 >
                   <Link
-                    href={`/${locale}/products/${item.product.slug}`}
+                    href={`/products/${item.product.slug}`}
                     className="relative aspect-[3/4] w-24 shrink-0 overflow-hidden bg-secondary sm:w-32"
-                    aria-label={`Ver ${item.product.name}`}
+                    aria-label={t("page.viewProduct", {
+                      name: item.product.name
+                    })}
                   >
                     {item.product.images?.[0] && (
                       <Image
@@ -121,7 +125,7 @@ export function CartPage({ locale }: { locale: string }) {
                   <div className="flex min-w-0 flex-1 flex-col">
                     <div className="flex items-start justify-between gap-4">
                       <Link
-                        href={`/${locale}/products/${item.product.slug}`}
+                        href={`/products/${item.product.slug}`}
                         className="text-sm font-semibold text-foreground hover:underline"
                       >
                         {item.product.name}
@@ -132,7 +136,9 @@ export function CartPage({ locale }: { locale: string }) {
                           setConfirm({ show: true, productId: item.product.id })
                         }
                         className="-mr-1 flex h-8 w-8 items-center justify-center text-muted-foreground hover:text-foreground"
-                        aria-label={`Quitar ${item.product.name}`}
+                        aria-label={t("page.removeProduct", {
+                          name: item.product.name
+                        })}
                       >
                         <X className="h-4 w-4" />
                       </button>
@@ -155,7 +161,7 @@ export function CartPage({ locale }: { locale: string }) {
                       <div
                         className="inline-flex items-center border border-border"
                         role="group"
-                        aria-label="Cantidad"
+                        aria-label={t("page.quantity")}
                       >
                         <button
                           type="button"
@@ -163,7 +169,7 @@ export function CartPage({ locale }: { locale: string }) {
                             handleQuantity(item.product.id, item.quantity, -1)
                           }
                           className="flex h-9 w-9 items-center justify-center text-foreground hover:bg-secondary"
-                          aria-label="Reducir"
+                          aria-label={t("page.decrease")}
                         >
                           <Minus className="h-3.5 w-3.5" />
                         </button>
@@ -176,7 +182,7 @@ export function CartPage({ locale }: { locale: string }) {
                             handleQuantity(item.product.id, item.quantity, 1)
                           }
                           className="flex h-9 w-9 items-center justify-center text-foreground hover:bg-secondary"
-                          aria-label="Aumentar"
+                          aria-label={t("page.increase")}
                         >
                           <Plus className="h-3.5 w-3.5" />
                         </button>
@@ -196,12 +202,14 @@ export function CartPage({ locale }: { locale: string }) {
             <aside className="lg:sticky lg:top-32 lg:h-fit">
               <div className="border border-border p-6">
                 <p className="text-xs font-semibold uppercase tracking-[0.16em] text-foreground">
-                  Resumen
+                  {t("page.summary")}
                 </p>
 
                 <dl className="mt-4 space-y-2 border-t border-border pt-6 text-sm">
                   <div className="flex items-center justify-between">
-                    <dt className="text-muted-foreground">Subtotal</dt>
+                    <dt className="text-muted-foreground">
+                      {t("page.subtotal")}
+                    </dt>
                     <dd className="font-medium text-foreground">
                       {formatPrice({
                         price: getCartTotal(),
@@ -211,7 +219,7 @@ export function CartPage({ locale }: { locale: string }) {
                   </div>
                   <div className="flex items-center justify-between border-t border-border pt-4">
                     <dt className="text-base font-semibold text-foreground">
-                      Total
+                      {t("page.total")}
                     </dt>
                     <dd className="text-base font-bold text-foreground">
                       {formatPrice({
@@ -227,12 +235,12 @@ export function CartPage({ locale }: { locale: string }) {
                     href="/checkout"
                     className="block w-full bg-foreground px-6 py-4 text-center text-xs font-semibold uppercase tracking-[0.16em] text-background transition-colors hover:bg-foreground/90"
                   >
-                    Ir a checkout
+                    {t("checkout")}
                   </Link>
                 </div>
 
                 <p className="mt-4 text-xs text-muted-foreground">
-                  Elegirás el método de entrega y de pago en el checkout.
+                  {t("page.checkoutHint")}
                 </p>
               </div>
             </aside>
@@ -260,13 +268,13 @@ export function CartPage({ locale }: { locale: string }) {
               <div className="w-full max-w-md bg-background p-6 shadow-2xl">
                 <p className="font-display text-xl text-foreground">
                   {confirm.clearAll
-                    ? "¿Vaciar el carrito?"
-                    : "¿Quitar este producto?"}
+                    ? t("page.confirmClearTitle")
+                    : t("page.confirmRemoveTitle")}
                 </p>
                 <p className="mt-2 text-sm text-muted-foreground">
                   {confirm.clearAll
-                    ? "Se eliminarán todos los artículos del carrito."
-                    : "El artículo se eliminará de tu carrito."}
+                    ? t("page.confirmClearText")
+                    : t("page.confirmRemoveText")}
                 </p>
                 <div className="mt-6 flex justify-end gap-3">
                   <button
@@ -274,14 +282,14 @@ export function CartPage({ locale }: { locale: string }) {
                     onClick={() => setConfirm({ show: false })}
                     className="border border-foreground/20 px-5 py-2.5 text-xs font-semibold uppercase tracking-[0.14em] text-foreground hover:border-foreground"
                   >
-                    Cancelar
+                    {t("cancel")}
                   </button>
                   <button
                     type="button"
                     onClick={onConfirm}
                     className="bg-foreground px-5 py-2.5 text-xs font-semibold uppercase tracking-[0.14em] text-background hover:bg-foreground/90"
                   >
-                    Confirmar
+                    {t("confirm")}
                   </button>
                 </div>
               </div>

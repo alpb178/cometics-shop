@@ -1,0 +1,50 @@
+{
+  "productsError": "We couldn't load the products. Please try again later.",
+  "hero": {
+    "sectionLabel": "Iris Natural — welcome",
+    "eyebrow": "Iris Natural · Cosmetics",
+    "title": "The power of nature, made into cosmetics",
+    "subtitle": "Natural formulas designed to care for and enhance the beauty of every skin type. Lovingly made in Santa Cruz de la Sierra, Bolivia.",
+    "exploreProducts": "Explore products",
+    "viewStoreOnMap": "See the store on the map",
+    "carousel": "carousel",
+    "previous": "Previous",
+    "next": "Next",
+    "slide": "Slide {number}"
+  },
+  "shippingNotice": {
+    "text": "When you order on our website, <strong>delivery is free up to the 10th ring road.</strong> Other areas and departments of Bolivia have an extra charge of Bs. 17."
+  },
+  "shippingWelcome": {
+    "shipping": "When you order through our website, delivery of all our products is free within the 10th ring road of Santa Cruz de la Sierra. Deliveries beyond the 10th ring road and to other departments of Bolivia have an extra charge of Bs. 17.",
+    "payment": "You can also choose to pay in cash on delivery or by QR code to reserve your order.",
+    "continue": "Continue"
+  },
+  "groupCompanies": {
+    "sectionLabel": "CorpSC Group sites of interest",
+    "visitSite": "Visit site",
+    "visitSiteLabel": "Visit the {name} website (opens in a new tab)",
+    "goTo": "Go to {name}"
+  },
+  "groupTicker": {
+    "label": "Sites of interest"
+  },
+  "companies": {
+    "corpsc": {
+      "description": "Get your website or custom app built at the best prices.",
+      "tagline": "We turn your ideas into digital products"
+    },
+    "dando-muela": {
+      "description": "An app to connect with people. Download it and start chatting.",
+      "tagline": "Meet people and chat"
+    },
+    "tu-chamba": {
+      "description": "The Bolivian job board to find and post jobs quickly and safely.",
+      "tagline": "Jobs in Bolivia"
+    },
+    "invoices": {
+      "description": "A portal to create and manage your invoices quickly and easily.",
+      "tagline": "PDF invoices in minutes"
+    }
+  }
+}

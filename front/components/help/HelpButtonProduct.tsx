@@ -1,12 +1,14 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { useTranslations } from "next-intl";
 import { IconBrandWhatsapp } from "@tabler/icons-react";
 import { onSendWhatsAppMessage } from "@/lib/utils";
 import { logsStrapi } from "@/lib/strapi/logs";
 
 export const HelpButtonProduct = ({ productName }: { productName: string }) => {
-  const message = `¡Hola! ¿Podrían ayudarme con alguna consulta sobre el producto ${productName}?`;
+  const t = useTranslations("nav.help");
+  const message = t("productWhatsappMessage", { productName });
 
   const handleWhatsAppClick = async () => {
     onSendWhatsAppMessage(message);

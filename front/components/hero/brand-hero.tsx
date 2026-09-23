@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import Link from "next/link";
+import { useTranslations } from "next-intl";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { ArrowRight, ChevronLeft, ChevronRight, MapPin } from "lucide-react";
@@ -15,6 +15,7 @@ const CAROUSEL_IMAGES = [
 ];
 
 const HeroCarousel = ({ images }: { images: string[] }) => {
+  const t = useTranslations("home.hero");
   const [index, setIndex] = useState(0);
   const [paused, setPaused] = useState(false);
 
@@ -36,7 +37,7 @@ const HeroCarousel = ({ images }: { images: string[] }) => {
       className="relative h-full w-full overflow-hidden bg-background"
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
-      aria-roledescription="carousel"
+      aria-roledescription={t("carousel")}
     >
       {images.map((src, i) => (
         <div
@@ -65,7 +66,7 @@ const HeroCarousel = ({ images }: { images: string[] }) => {
           <button
             type="button"
             onClick={goPrev}
-            aria-label="Anterior"
+            aria-label={t("previous")}
             className="absolute left-2 top-1/2 z-10 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-foreground/10 text-foreground backdrop-blur-sm transition hover:bg-foreground/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
           >
             <ChevronLeft className="h-4 w-4" />
@@ -73,7 +74,7 @@ const HeroCarousel = ({ images }: { images: string[] }) => {
           <button
             type="button"
             onClick={goNext}
-            aria-label="Siguiente"
+            aria-label={t("next")}
             className="absolute right-2 top-1/2 z-10 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-foreground/10 text-foreground backdrop-blur-sm transition hover:bg-foreground/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
           >
             <ChevronRight className="h-4 w-4" />
@@ -87,7 +88,7 @@ const HeroCarousel = ({ images }: { images: string[] }) => {
             key={i}
             type="button"
             onClick={() => setIndex(i)}
-            aria-label={`Slide ${i + 1}`}
+            aria-label={t("slide", { number: i + 1 })}
             aria-current={i === index}
             className={`h-1.5 rounded-full transition-all ${
               i === index ? "w-6 bg-primary" : "w-1.5 bg-foreground/30"
@@ -100,10 +101,11 @@ const HeroCarousel = ({ images }: { images: string[] }) => {
 };
 
 export const BrandHero = () => {
+  const t = useTranslations("home.hero");
   return (
     <section
       className="relative mx-auto grid w-full max-w-screen-2xl grid-cols-1 lg:grid-cols-2"
-      aria-label="Iris Natural — bienvenida"
+      aria-label={t("sectionLabel")}
     >
       <div className="order-2 flex flex-col justify-center gap-6 px-6 py-12 sm:px-10 sm:py-16 lg:order-1 lg:px-16 lg:py-24">
         <motion.p
@@ -112,7 +114,7 @@ export const BrandHero = () => {
           transition={{ duration: 0.5 }}
           className="text-xs font-semibold uppercase tracking-[0.22em] text-primary"
         >
-          Iris Natural · Cosmética
+          {t("eyebrow")}
         </motion.p>
 
         <motion.h1
@@ -121,7 +123,7 @@ export const BrandHero = () => {
           transition={{ duration: 0.6, delay: 0.05 }}
           className="font-display text-4xl font-semibold leading-[1.05] tracking-tight text-foreground sm:text-5xl lg:text-6xl"
         >
-          El poder de la naturaleza, hecho cosmética
+          {t("title")}
         </motion.h1>
 
         <motion.p
@@ -130,8 +132,7 @@ export const BrandHero = () => {
           transition={{ duration: 0.6, delay: 0.1 }}
           className="max-w-xl text-base leading-relaxed text-muted-foreground sm:text-lg"
         >
-          Fórmulas naturales pensadas para cuidar y realzar la belleza de cada
-          piel. Hechas con dedicación en Santa Cruz de la Sierra, Bolivia.
+          {t("subtitle")}
         </motion.p>
 
         <motion.div
@@ -140,23 +141,23 @@ export const BrandHero = () => {
           transition={{ duration: 0.6, delay: 0.15 }}
           className="flex flex-wrap items-center gap-6"
         >
-          <Link
+          <a
             href="#productos"
             className="group inline-flex items-center gap-3 bg-foreground px-7 py-4 text-xs font-semibold uppercase tracking-[0.16em] text-background transition-colors hover:bg-foreground/90"
           >
-            Explorar productos
+            {t("exploreProducts")}
             <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
-          </Link>
+          </a>
           {process.env.NEXT_PUBLIC_LOCATION_URL && (
-            <Link
+            <a
               href={process.env.NEXT_PUBLIC_LOCATION_URL}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-2 text-sm font-medium text-foreground underline-offset-4 hover:underline"
             >
               <MapPin className="h-4 w-4 text-primary" />
-              Ver tienda en el mapa
-            </Link>
+              {t("viewStoreOnMap")}
+            </a>
           )}
         </motion.div>
       </div>

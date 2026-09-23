@@ -1,5 +1,6 @@
 import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
+import { getLocale } from "next-intl/server";
+import { redirect } from "@/i18n/navigation";
 import { SESSION_COOKIE } from "./session";
 import { isStaffUser } from "@/lib/admin/staff";
 import type { User } from "@/definitions/User";
@@ -31,11 +32,18 @@ export async function getCurrentUser(): Promise<User | null> {
   }
 }
 
+/**
+ * `redirectTo` is an unprefixed path (`/account`); the sign-in page pushes it
+ * through the locale-aware router, which adds the prefix back.
+ */
 export async function requireUser(redirectTo: string): Promise<User> {
   const user = await getCurrentUser();
   if (!user) {
-    const target = `/sign-in?redirect=${encodeURIComponent(redirectTo)}`;
-    redirect(target);
+    const locale = await getLocale();
+    return redirect({
+      href: { pathname: "/sign-in", query: { redirect: redirectTo } },
+      locale
+    });
   }
   return user;
 }

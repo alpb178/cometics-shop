@@ -1,0 +1,50 @@
+{
+  "productsError": "No se pudieron cargar los productos. Por favor, intenta más tarde.",
+  "hero": {
+    "sectionLabel": "Iris Natural — bienvenida",
+    "eyebrow": "Iris Natural · Cosmética",
+    "title": "El poder de la naturaleza, hecho cosmética",
+    "subtitle": "Fórmulas naturales pensadas para cuidar y realzar la belleza de cada piel. Hechas con dedicación en Santa Cruz de la Sierra, Bolivia.",
+    "exploreProducts": "Explorar productos",
+    "viewStoreOnMap": "Ver tienda en el mapa",
+    "carousel": "carrusel",
+    "previous": "Anterior",
+    "next": "Siguiente",
+    "slide": "Imagen {number}"
+  },
+  "shippingNotice": {
+    "text": "Al hacer pedido por la web <strong>el envío de los productos es gratis hasta el 10.º anillo.</strong> Otras zonas y departamentos de Bolivia se cobra Bs. 17 adicionales."
+  },
+  "shippingWelcome": {
+    "shipping": "Al realizar su pedido a través de nuestra página web, el envío de todos nuestros productos es gratuito dentro del 10.º anillo de Santa Cruz de la Sierra. Para envíos a zonas fuera del 10.º anillo y a otros departamentos de Bolivia, se aplica una tarifa adicional de Bs. 17.",
+    "payment": "Además, puede elegir pagar en efectivo al momento de la entrega o mediante QR para reservar su pedido.",
+    "continue": "Continuar"
+  },
+  "groupCompanies": {
+    "sectionLabel": "Sitios de interés del Grupo CorpSC",
+    "visitSite": "Visitar sitio",
+    "visitSiteLabel": "Visitar el sitio de {name} (se abre en una pestaña nueva)",
+    "goTo": "Ir a {name}"
+  },
+  "groupTicker": {
+    "label": "Sitios de interés"
+  },
+  "companies": {
+    "corpsc": {
+      "description": "Crear tu web, app a tu medida con los mejores precios.",
+      "tagline": "Convertimos tus ideas en productos digitales"
+    },
+    "dando-muela": {
+      "description": "App para conectar con personas. Descárgala y empieza a chatear.",
+      "tagline": "Conoce gente y chatea"
+    },
+    "tu-chamba": {
+      "description": "El portal boliviano para encontrar y publicar empleos de forma rápida y segura.",
+      "tagline": "Empleos en Bolivia"
+    },
+    "invoices": {
+      "description": "Portal para generar y gestionar tus facturas de forma rápida y sencilla.",
+      "tagline": "Factura en PDF en minutos"
+    }
+  }
+}

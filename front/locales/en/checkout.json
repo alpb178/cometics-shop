@@ -1,0 +1,128 @@
+{
+  "emptyCart": {
+    "title": "Your cart is empty",
+    "body": "Add some products before heading to checkout."
+  },
+  "header": {
+    "eyebrow": "Checkout",
+    "title": "Complete your order"
+  },
+  "steps": {
+    "method": "Method",
+    "delivery": "Delivery",
+    "payment": "Payment",
+    "indicator": "{n} · {label}"
+  },
+  "back": {
+    "toDelivery": "Back to delivery",
+    "toMethod": "Back to delivery method"
+  },
+  "method": {
+    "title": "Delivery method",
+    "deliveryLabel": "Home delivery",
+    "deliveryDescription": "We bring your order wherever you are. Free delivery up to the 10th ring road; outside that area there is an extra charge of Bs. 17.",
+    "pickupLabel": "In-store pickup",
+    "pickupDescription": "Come by the store when your order is ready: after 12 hours, between 10:00 and 20:00."
+  },
+  "zone": {
+    "title": "Delivery area",
+    "santaCruz": "Santa Cruz",
+    "province": "Provinces (outside SC)",
+    "detecting": "Detecting your location…",
+    "detect": "Detect my location",
+    "denied": "We couldn't get your location. Please choose your area manually.",
+    "provinceShipping": "Shipping to the provinces (to the bus terminal): Bs {amount}."
+  },
+  "map": {
+    "title": "Delivery location",
+    "hint": "Mark on the map where we should deliver (in case you're not at home)."
+  },
+  "shipping": {
+    "title": "Shipping details",
+    "savedTab": "Saved addresses",
+    "newTab": "Use a new one",
+    "phoneLine": "Phone: {phone}",
+    "ciLine": "ID: {ci}",
+    "ci": "ID card number (CI)",
+    "ciRequired": "Required for shipments outside Santa Cruz",
+    "ciHelp": "You'll need it to collect the package at the bus terminal or courier.",
+    "zone": "Area",
+    "department": "Department",
+    "saveForLater": "Save these details for future purchases"
+  },
+  "contact": {
+    "title": "Contact details",
+    "fullName": "Full name",
+    "phone": "Phone",
+    "required": "Required",
+    "pickupInfo": "You'll pick up your order at the store; we'll let you know when it's ready. Here's where we are:"
+  },
+  "payment": {
+    "title": "Payment method",
+    "cash": "Cash",
+    "qr": "QR payment",
+    "onlyQr": "For shipments outside Santa Cruz we only accept <strong>QR payment</strong> (the order is sent by courier and must be paid in advance).",
+    "exactAmount": "Exact amount to pay",
+    "qrAmountHint": "The QR code doesn't include the amount: enter it manually in your banking app.",
+    "cashAmountHint": "Have the exact amount ready in cash to pay on delivery or at pickup.",
+    "copied": "Copied!",
+    "copyAmount": "Copy amount",
+    "cashTitle": "Cash payment",
+    "cashPickup": "Pay in cash when you pick up your order at the store.",
+    "cashDelivery": "Pay in cash when you receive your order (cash on delivery).",
+    "cashExact": "Please have the exact amount ready: Bs {amount}.",
+    "zoomQr": "Enlarge QR code to scan",
+    "qrAlt": "Payment QR code",
+    "qrHelp": "Tap the QR code to enlarge it. Scan it with your banking app, then upload the receipt.",
+    "qrMissing": "The QR code hasn't been set up yet. Please contact the store.",
+    "proofTitle": "Proof of payment",
+    "uploadProof": "Upload a photo of the receipt",
+    "proofAlt": "Receipt",
+    "removeProof": "Remove receipt",
+    "reference": "Receipt / transaction number (optional)",
+    "referencePlaceholder": "e.g. 000123456789",
+    "referenceHelp": "Copy it from your banking app to speed up verification.",
+    "qrZoomedLabel": "Enlarged payment QR code",
+    "close": "Close",
+    "qrZoomedHint": "Exact amount: Bs {amount} · Tap outside the QR code to close"
+  },
+  "summary": {
+    "title": "Your order",
+    "subtotal": "Subtotal",
+    "provinceShipping": "Shipping to the provinces",
+    "total": "Total",
+    "continue": "Continue",
+    "continueToPayment": "Continue to payment",
+    "submitting": "Sending…",
+    "submit": "Place order",
+    "verifyNote": "We'll verify your receipt and confirm your order as soon as it's ready."
+  },
+  "errors": {
+    "selectSavedAddress": "Please select a saved address.",
+    "markLocation": "Please mark your delivery location on the map.",
+    "createOrder": "We couldn't create the order.",
+    "generic": "Something went wrong."
+  },
+  "locationPicker": {
+    "locating": "Getting your location…",
+    "error": "We couldn't get your location. Please mark the spot manually.",
+    "hintWithPin": "Tap the map or drag the pin to your delivery location",
+    "hintNoPin": "Tap the map to mark your delivery location",
+    "useMyLocation": "Use my current location",
+    "expand": "Enlarge map",
+    "expandedLabel": "Enlarged delivery location map",
+    "expandedTitle": "Delivery location",
+    "close": "Close map"
+  },
+  "storeMap": {
+    "whatsappShare": "Iris Natural location{address}: {url}",
+    "expand": "Enlarge map",
+    "viewOnMap": "View location on the map",
+    "shareWhatsapp": "Share location via WhatsApp",
+    "expandedLabel": "Enlarged store map",
+    "expandedTitle": "Store location",
+    "share": "Share",
+    "close": "Close map"
+  },
+  "sessionExpired": "Your session has expired. Please sign in again."
+}

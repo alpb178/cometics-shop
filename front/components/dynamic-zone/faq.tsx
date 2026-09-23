@@ -3,6 +3,7 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { ChevronDown, HelpCircle } from "lucide-react";
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { FormattedText } from "../text/formatted-text";
 
 export const FAQ = ({
@@ -13,6 +14,7 @@ export const FAQ = ({
   faqs: { question: string; answer: string }[];
 }) => {
   const [openIndex, setOpenIndex] = useState<number | null>(0);
+  const t = useTranslations("pages.faq");
 
   return (
     <section className="relative py-16 md:py-24 overflow-hidden">
@@ -32,7 +34,7 @@ export const FAQ = ({
           <div className="inline-flex items-center gap-2 px-4 py-1.5 mb-4 bg-pink-100 rounded-full">
             <HelpCircle className="w-4 h-4 text-pink-600" />
             <span className="text-xs md:text-sm font-semibold text-pink-700 uppercase tracking-wider">
-              Resolvemos tus dudas
+              {t("badge")}
             </span>
           </div>
           <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900">

@@ -1,3 +1,7 @@
+"use client";
+
+import { useTranslations } from "next-intl";
+
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 function GoogleIcon({ className }: { className?: string }) {
@@ -27,18 +31,15 @@ function GoogleIcon({ className }: { className?: string }) {
  * "Continue with Google" button. Starts the Strapi OAuth flow
  * (users-permissions) by redirecting to `/api/connect/google`.
  */
-export function GoogleButton({
-  label = "Continuar con Google"
-}: {
-  label?: string;
-}) {
+export function GoogleButton({ label }: { label?: string }) {
+  const t = useTranslations("auth.google");
   return (
     <a
       href={`${API_URL}/api/connect/google`}
       className="flex w-full items-center justify-center gap-3 border border-border bg-background px-6 py-4 text-xs font-semibold uppercase tracking-[0.16em] text-foreground transition-colors hover:bg-muted"
     >
       <GoogleIcon className="h-5 w-5" />
-      {label}
+      {label ?? t("continue")}
     </a>
   );
 }

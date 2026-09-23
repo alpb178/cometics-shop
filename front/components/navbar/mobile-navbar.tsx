@@ -3,31 +3,31 @@
 import { Logo } from "@/components/logo/logo";
 import { cn } from "@/lib/utils";
 import { MenuIcon, X } from "lucide-react";
-import { Link } from "next-view-transitions";
-import { Fragment, useState } from "react";
-import { usePathname } from "next/navigation";
+import { useTranslations } from "next-intl";
+import { useState } from "react";
+import { TransitionLink as Link } from "@/components/i18n/transition-link";
+import { LocaleMenu } from "@/components/i18n/locale-menu";
+import { usePathname } from "@/i18n/navigation";
+import type { NavItem } from "@/lib/constants/navbar";
 import { Modal } from "../modal/Modal";
 import { CartIcon } from "../cart/cart-icon";
 import { useAuth } from "@/context/auth-context";
 
 type Props = {
-  leftNavbarItems: {
-    URL: string;
-    text: string;
-    target?: string;
-    children?: { URL: string; text: string }[];
-  }[];
+  leftNavbarItems: NavItem[];
   logo: any;
   locale: string;
 };
 
 export const MobileNavbar = ({ leftNavbarItems, logo, locale }: Props) => {
   const [open, setOpen] = useState(false);
+  // Locale-free path (`/faq`), comparable with the item URLs.
   const pathname = usePathname();
   const { user, logout } = useAuth();
+  const t = useTranslations("nav");
 
   const normalize = (p?: string) =>
-    !p ? "/" : p.replace(/^\/(en|es)/, "") || "/";
+    !p ? "/" : p.replace(/\/$/, "") || "/";
 
   return (
     <div
@@ -38,7 +38,7 @@ export const MobileNavbar = ({ leftNavbarItems, logo, locale }: Props) => {
         <button
           onClick={() => setOpen(true)}
           className="-ml-2 flex h-10 w-10 items-center justify-center text-foreground hover:bg-secondary"
-          aria-label="Abrir menú"
+          aria-label={t("openMenu")}
         >
           <MenuIcon className="h-5 w-5" strokeWidth={1.5} />
         </button>
@@ -50,7 +50,7 @@ export const MobileNavbar = ({ leftNavbarItems, logo, locale }: Props) => {
 
       <div className="flex items-center justify-end">
         <CartIcon
-          href={`/${locale}/cart`}
+          href="/cart"
           className="!rounded-none !p-0 !h-10 !w-10 !bg-transparent hover:!bg-secondary"
         />
       </div>
@@ -68,7 +68,7 @@ export const MobileNavbar = ({ leftNavbarItems, logo, locale }: Props) => {
             <button
               onClick={() => setOpen(false)}
               className="flex h-10 w-10 items-center justify-center text-foreground hover:bg-secondary"
-              aria-label="Cerrar menú"
+              aria-label={t("closeMenu")}
             >
               <X className="h-5 w-5" strokeWidth={1.5} />
             </button>
@@ -83,18 +83,18 @@ export const MobileNavbar = ({ leftNavbarItems, logo, locale }: Props) => {
                       user.email}
                   </div>
                   <Link
-                    href={`/${locale}/account`}
+                    href="/account"
                     onClick={() => setOpen(false)}
                     className="block px-5 py-3 text-sm hover:bg-secondary"
                   >
-                    Mi cuenta
+                    {t("myAccount")}
                   </Link>
                   <Link
-                    href={`/${locale}/account/orders`}
+                    href="/account/orders"
                     onClick={() => setOpen(false)}
                     className="block px-5 py-3 text-sm hover:bg-secondary"
                   >
-                    Mis pedidos
+                    {t("myOrders")}
                   </Link>
                   <button
                     type="button"
@@ -104,76 +104,49 @@ export const MobileNavbar = ({ leftNavbarItems, logo, locale }: Props) => {
                     }}
                     className="block w-full px-5 py-3 text-left text-sm hover:bg-secondary"
                   >
-                    Cerrar sesión
+                    {t("signOut")}
                   </button>
                 </>
               ) : (
                 <Link
-                  href={`/${locale}/sign-in`}
+                  href="/sign-in"
                   onClick={() => setOpen(false)}
                   className="block px-5 py-4 text-sm font-semibold uppercase tracking-[0.14em] hover:bg-secondary"
                 >
-                  Iniciar sesión / Registrarse
+                  {t("signInOrSignUp")}
                 </Link>
               )}
             </li>
-            {leftNavbarItems.map((navItem: any) => {
+            {leftNavbarItems.map((navItem) => {
               const isActive =
                 normalize(pathname) === normalize(navItem.URL);
 
               return (
-                <Fragment key={navItem.URL}>
-                  {navItem.children && navItem.children.length > 0 ? (
-                    <li className="border-b border-border">
-                      <p className="px-5 pt-5 pb-2 text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
-                        {navItem.text}
-                      </p>
-                      <ul>
-                        {navItem.children.map((child: any) => {
-                          const childActive =
-                            normalize(pathname) === normalize(child.URL);
-                          return (
-                            <li key={child.URL}>
-                              <Link
-                                href={`/${locale}${child.URL}`}
-                                onClick={() => setOpen(false)}
-                                className={cn(
-                                  "block px-5 py-3 text-sm",
-                                  childActive
-                                    ? "font-semibold text-foreground"
-                                    : "text-foreground hover:bg-secondary"
-                                )}
-                                aria-current={
-                                  childActive ? "page" : undefined
-                                }
-                              >
-                                {child.text}
-                              </Link>
-                            </li>
-                          );
-                        })}
-                      </ul>
-                    </li>
-                  ) : (
-                    <li>
-                      <Link
-                        href={`/${locale}${navItem.URL}`}
-                        onClick={() => setOpen(false)}
-                        className={cn(
-                          "block border-b border-border px-5 py-4 text-sm font-semibold uppercase tracking-[0.14em]",
-                          isActive
-                            ? "bg-secondary text-foreground"
-                            : "text-foreground hover:bg-secondary"
-                        )}
-                        aria-current={isActive ? "page" : undefined}
-                      >
-                        {navItem.text}
-                      </Link>
-                    </li>
-                  )}
-                </Fragment>
+                <li key={navItem.URL}>
+                  <Link
+                    href={navItem.URL}
+                    onClick={() => setOpen(false)}
+                    className={cn(
+                      "block border-b border-border px-5 py-4 text-sm font-semibold uppercase tracking-[0.14em]",
+                      isActive
+                        ? "bg-secondary text-foreground"
+                        : "text-foreground hover:bg-secondary"
+                    )}
+                    aria-current={isActive ? "page" : undefined}
+                  >
+                    {t(`items.${navItem.labelKey}`)}
+                  </Link>
+                </li>
               );
             })}
+            <li className="px-5 py-4">
+              {/* Opens upwards: the drawer list scrolls and would clip it below. */}
+              <LocaleMenu
+                align="start"
+                placement="top"
+                onSelect={() => setOpen(false)}
+              />
+            </li>
           </ul>
         </>
       </Modal>

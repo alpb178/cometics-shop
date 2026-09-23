@@ -1,0 +1,70 @@
+{
+  "eyebrow": "My account",
+  "home": {
+    "email": "Email",
+    "phone": "Phone",
+    "myOrders": "My orders",
+    "myAddresses": "My addresses"
+  },
+  "addresses": {
+    "backToAccount": "← My account",
+    "backToAddresses": "← My addresses",
+    "title": "My addresses",
+    "newAddress": "New address",
+    "editAddress": "Edit address",
+    "empty": "You don't have any saved addresses yet.",
+    "default": "Default",
+    "phoneLine": "Phone: {phone}",
+    "edit": "Edit",
+    "delete": "Delete",
+    "deleting": "Deleting…",
+    "confirmDelete": "Delete this address?"
+  },
+  "addressForm": {
+    "fullName": "Full name",
+    "phone": "Phone",
+    "line1": "Address",
+    "line2": "Landmark / apartment (optional)",
+    "city": "City",
+    "department": "Department",
+    "notes": "Notes (optional)",
+    "required": "Required",
+    "makeDefault": "Use as my default address",
+    "saving": "Saving…",
+    "saveNew": "Save address",
+    "saveChanges": "Save changes",
+    "cancel": "Cancel",
+    "saveError": "We couldn't save the address.",
+    "genericError": "Something went wrong."
+  },
+  "orders": {
+    "title": "My orders",
+    "empty": "You don't have any orders yet.",
+    "startShopping": "Start shopping",
+    "orderNumber": "Order #{id}",
+    "backToOrders": "← Back to my orders",
+    "products": "Products",
+    "delivery": "Delivery",
+    "deliveryHome": "Home delivery",
+    "deliveryPickup": "In-store pickup",
+    "phoneLine": "Phone: {phone}",
+    "ciLine": "ID: {ci}",
+    "payment": "Payment",
+    "paymentProofAlt": "Proof of payment",
+    "subtotal": "Subtotal",
+    "shipping": "Shipping",
+    "total": "Total",
+    "status": {
+      "pending_verification": "Pending verification",
+      "confirmed": "Confirmed",
+      "shipped": "Shipped",
+      "delivered": "Delivered",
+      "cancelled": "Cancelled"
+    },
+    "paymentMethod": {
+      "cash": "Cash",
+      "qr": "QR payment",
+      "bank_transfer": "Bank transfer"
+    }
+  }
+}

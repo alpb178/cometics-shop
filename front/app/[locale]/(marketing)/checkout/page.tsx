@@ -1,3 +1,4 @@
+import { getTranslations } from "next-intl/server";
 import { requireUser } from "@/lib/auth/server";
 import { authFetch } from "@/lib/strapi/auth-fetch";
 import { CheckoutForm } from "@/components/checkout/checkout-form";
@@ -29,6 +30,7 @@ async function loadAddresses(): Promise<Address[]> {
 
 export default async function CheckoutPage() {
   const user = await requireUser("/checkout");
+  const t = await getTranslations("checkout");
   const [paymentInfo, addresses, meRes] = await Promise.all([
     loadPaymentInfo(),
     loadAddresses(),
@@ -38,7 +40,7 @@ export default async function CheckoutPage() {
     return (
       <section className="mx-auto w-full max-w-md px-6 py-24 text-center">
         <p className="text-sm text-muted-foreground">
-          Tu sesión ha expirado. Inicia sesión de nuevo.
+          {t("sessionExpired")}
         </p>
       </section>
     );

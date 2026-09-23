@@ -1,5 +1,6 @@
 "use client";
 
+import { useLocale } from "next-intl";
 import { Footer } from "../components/footer/footer";
 import { HelpButton } from "../components/help/help-button";
 import { ShippingWelcome } from "@/components/shipping/shipping-welcome";
@@ -11,14 +12,15 @@ interface LayoutAppProps {
 }
 
 export default function LayoutApp({ children }: LayoutAppProps) {
+  const locale = useLocale();
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <GroupTicker />
-      <Navbar locale="en" />
+      <Navbar locale={locale} />
 
       <div className="flex-1">{children}</div>
 
-      <Footer locale="en" />
+      <Footer locale={locale} />
       <HelpButton />
       <ShippingWelcome />
     </div>

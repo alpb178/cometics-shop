@@ -1,6 +1,7 @@
 "use client";
 
 import { ExternalLink } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useEffect, useRef, useState } from "react";
 import { Company, GROUP_COMPANIES } from "@/lib/companies";
 import { trackEvent } from "@/lib/track-event";
@@ -10,6 +11,7 @@ import { SlideBurst } from "@/components/carrousel/slide-burst";
 // Sister company card: featured image with the name overlaid, description and a
 // "Visitar sitio" CTA (safe external link).
 function CompanyCard({ company }: { company: Company }) {
+  const t = useTranslations("home");
   const track = () => trackEvent("group_click", { label: company.name });
   return (
     <article className="flex h-full flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-sm transition-shadow hover:shadow-md">
@@ -39,7 +41,7 @@ function CompanyCard({ company }: { company: Company }) {
 
       <div className="flex flex-1 flex-col p-6">
         <p className="mb-6 flex-1 text-sm leading-relaxed text-muted-foreground">
-          {company.description}
+          {t(`companies.${company.slug}.description`)}
         </p>
         <a
           href={company.url}
@@ -47,9 +49,9 @@ function CompanyCard({ company }: { company: Company }) {
           rel="noopener noreferrer"
           onClick={track}
           className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground transition-colors hover:opacity-90 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
-          aria-label={`Visitar el sitio de ${company.name} (se abre en una pestaña nueva)`}
+          aria-label={t("groupCompanies.visitSiteLabel", { name: company.name })}
         >
-          Visitar sitio
+          {t("groupCompanies.visitSite")}
           <ExternalLink className="h-4 w-4" />
         </a>
       </div>
@@ -59,6 +61,7 @@ function CompanyCard({ company }: { company: Company }) {
 
 // "Sitios de interés" section — carousel with the other CorpSC Group companies.
 export function GroupCompanies() {
+  const t = useTranslations("home");
   const scroller = useRef<HTMLDivElement>(null);
   // Incremented on every carousel move (arrow or auto-advance) to restart the
   // sparkle burst over the cards.
@@ -126,7 +129,7 @@ export function GroupCompanies() {
 
   return (
     <section
-      aria-label="Sitios de interés del Grupo CorpSC"
+      aria-label={t("groupCompanies.sectionLabel")}
       className="mx-auto w-full max-w-screen-2xl px-4 py-12 sm:px-6 lg:px-10"
     >
       {/* Align the cards with the products column: same grid as the list
@@ -162,7 +165,7 @@ export function GroupCompanies() {
             key={company.slug}
             type="button"
             onClick={() => goTo(i)}
-            aria-label={`Ir a ${company.name}`}
+            aria-label={t("groupCompanies.goTo", { name: company.name })}
             aria-current={i === active}
             className={`h-1.5 rounded-full transition-all ${
               i === active

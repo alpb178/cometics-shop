@@ -5,6 +5,7 @@ import {
 } from "@/hooks/useEntranceAnimation";
 import { motion } from "framer-motion";
 import { Sparkles } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { Card } from "./card";
 
 export const HowItWorks = ({
@@ -17,6 +18,7 @@ export const HowItWorks = ({
   steps: any;
 }) => {
   const { ref, isInView } = useEntranceAnimation();
+  const t = useTranslations("pages.howItWorks");
   const total = steps?.length ?? 0;
 
   return (
@@ -41,7 +43,7 @@ export const HowItWorks = ({
           <div className="inline-flex items-center gap-2 px-4 py-1.5 mb-4 bg-pink-100 rounded-full">
             <Sparkles className="w-4 h-4 text-pink-600" />
             <span className="text-xs md:text-sm font-semibold text-pink-700 uppercase tracking-wider">
-              Proceso simple
+              {t("badge")}
             </span>
           </div>
           <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-4">
