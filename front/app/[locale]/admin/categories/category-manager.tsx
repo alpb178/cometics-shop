@@ -186,7 +186,7 @@ export function CategoryManager({ categories }: { categories: Category[] }) {
         onPage={setPage}
       />
 
-      {/* Crear */}
+      {/* Create */}
       {createOpen && (
         <Modal title="Nueva categoría" onClose={() => setCreateOpen(false)}>
           <form
@@ -235,7 +235,7 @@ export function CategoryManager({ categories }: { categories: Category[] }) {
         </Modal>
       )}
 
-      {/* Editar */}
+      {/* Edit */}
       {editTarget && (
         <Modal
           title={`Editar · ${editTarget.name}`}

@@ -26,7 +26,7 @@ export class AddressesController {
   constructor(private readonly addressesService: AddressesService) {}
 
   @Get()
-  @ApiOperation({ summary: "Direcciones del usuario autenticado" })
+  @ApiOperation({ summary: "Addresses of the authenticated user" })
   async find(
     @CurrentUser() user: AuthenticatedUser,
     @Query() query: Record<string, unknown>,
@@ -39,7 +39,7 @@ export class AddressesController {
   }
 
   @Post()
-  @ApiOperation({ summary: "Crear dirección para el usuario autenticado" })
+  @ApiOperation({ summary: "Create an address for the authenticated user" })
   async create(
     @CurrentUser() user: AuthenticatedUser,
     @Body("data") data: AddressDto,
@@ -48,7 +48,7 @@ export class AddressesController {
   }
 
   @Put(":id")
-  @ApiOperation({ summary: "Actualizar dirección propia" })
+  @ApiOperation({ summary: "Update own address" })
   async update(
     @CurrentUser() user: AuthenticatedUser,
     @Param("id", ParseIntPipe) id: number,
@@ -58,7 +58,7 @@ export class AddressesController {
   }
 
   @Delete(":id")
-  @ApiOperation({ summary: "Eliminar dirección propia" })
+  @ApiOperation({ summary: "Delete own address" })
   async delete(
     @CurrentUser() user: AuthenticatedUser,
     @Param("id", ParseIntPipe) id: number,

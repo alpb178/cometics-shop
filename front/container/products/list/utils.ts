@@ -5,7 +5,7 @@ export const groupProductsByCategory = (products: Product[]) => {
   const withoutCategory: Product[] = [];
 
   products?.forEach((product) => {
-    // Un producto puede tener varias categorías; aparece bajo cada una.
+    // A product can have several categories; it appears under each one.
     const names = (product?.categories ?? [])
       .map((c) => c?.name?.trim())
       .filter((n): n is string => !!n);

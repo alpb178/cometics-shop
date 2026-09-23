@@ -12,8 +12,8 @@ export function getImageSrc(url: string | undefined): string {
 }
 
 /**
- * Inserta una transformación de tamaño en una URL de Cloudinary.
- * Si la URL no es de Cloudinary (p. ej. Strapi/local), la devuelve sin tocar.
+ * Inserts a size transformation into a Cloudinary URL.
+ * If the URL is not a Cloudinary one (e.g. Strapi/local), it is returned as is.
  *
  * @example
  * cloudinaryResize(url, 1088, 976)

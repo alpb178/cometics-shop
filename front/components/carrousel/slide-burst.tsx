@@ -6,18 +6,17 @@ import Particles, { initParticlesEngine } from "@tsparticles/react";
 import { loadSlim } from "@tsparticles/slim";
 import { useEffect, useMemo, useState } from "react";
 
-// El engine de tsparticles es global; lo inicializamos una sola vez y
-// compartimos la promesa entre montajes (igual que hace SparklesCore, pero
-// sin recargar el slim en cada instancia).
+// The tsparticles engine is global; we initialize it only once and share the
+// promise across mounts (as SparklesCore does, but without reloading the slim
+// bundle for each instance).
 let enginePromise: Promise<void> | null = null;
 
 /**
- * Ráfaga de destellos de un solo disparo que se reproduce sobre el carrusel
- * cada vez que cambia el slide. Se re-monta con `key={trigger}` para relanzar
- * la animación; las partículas tienen vida limitada (`life.count = 1`) así que
- * aparecen, se dispersan y desaparecen. No captura clics (`pointer-events-none`)
- * para no bloquear los botones de navegación, y se desactiva si el usuario
- * prefiere movimiento reducido.
+ * One-shot sparkle burst played over the carousel every time the slide changes.
+ * It is remounted with `key={trigger}` to restart the animation; particles have
+ * a limited life (`life.count = 1`) so they appear, scatter and vanish. It does
+ * not capture clicks (`pointer-events-none`) so it does not block the
+ * navigation buttons, and it is disabled if the user prefers reduced motion.
  */
 export const SlideBurst = ({
   trigger,

@@ -21,9 +21,9 @@ export class UploadController {
   @UseInterceptors(
     FilesInterceptor("files", 10, { limits: { fileSize: 10 * 1024 * 1024 } }),
   )
-  @ApiOperation({ summary: "Subir ficheros a Cloudinary (multipart, campo files)" })
+  @ApiOperation({ summary: "Upload files to Cloudinary (multipart, files field)" })
   upload(@UploadedFiles() files: Express.Multer.File[]) {
-    // Respuesta = array plano, como el plugin upload de Strapi
+    // Response = flat array, like Strapi's upload plugin
     return this.uploadService.uploadFiles(files ?? []);
   }
 }

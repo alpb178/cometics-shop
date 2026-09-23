@@ -26,7 +26,7 @@ export class TrackingController {
 
   @Post("page-visits/track")
   @HttpCode(204)
-  @ApiOperation({ summary: "Registrar visita (público, 204 sin cuerpo)" })
+  @ApiOperation({ summary: "Record a visit (public, 204 with no body)" })
   async trackVisit(
     @Body() body: Record<string, unknown>,
     @Headers("user-agent") userAgent?: string,
@@ -43,7 +43,7 @@ export class TrackingController {
 
   @Post("store-events/track")
   @HttpCode(204)
-  @ApiOperation({ summary: "Registrar evento de tienda (público, 204)" })
+  @ApiOperation({ summary: "Record a store event (public, 204)" })
   async trackEvent(@Body() body: Record<string, unknown>) {
     const type = clip(body?.type, 32);
     if (!type || !(ALLOWED_EVENT_TYPES as readonly string[]).includes(type)) {
@@ -62,7 +62,7 @@ export class TrackingController {
   @Get("page-visits/stats")
   @UseGuards(JwtAuthGuard, StaffGuard)
   @ApiBearerAuth()
-  @ApiOperation({ summary: "Totales de visitas (solo staff)" })
+  @ApiOperation({ summary: "Visit totals (staff only)" })
   async stats() {
     return { data: await this.trackingService.getStats() };
   }
@@ -70,7 +70,7 @@ export class TrackingController {
   @Get("page-visits/top")
   @UseGuards(JwtAuthGuard, StaffGuard)
   @ApiBearerAuth()
-  @ApiOperation({ summary: "Rutas más visitadas (solo staff)" })
+  @ApiOperation({ summary: "Most visited paths (staff only)" })
   async top(@Query("days") days?: string, @Query("limit") limit?: string) {
     return {
       data: await this.trackingService.getTopPaths({
@@ -83,7 +83,7 @@ export class TrackingController {
   @Get("page-visits/sources")
   @UseGuards(JwtAuthGuard, StaffGuard)
   @ApiBearerAuth()
-  @ApiOperation({ summary: "Fuentes de tráfico (solo staff)" })
+  @ApiOperation({ summary: "Traffic sources (staff only)" })
   async sources(@Query("days") days?: string) {
     return {
       data: await this.trackingService.getTopSources({
@@ -95,7 +95,7 @@ export class TrackingController {
   @Get("page-visits/daily")
   @UseGuards(JwtAuthGuard, StaffGuard)
   @ApiBearerAuth()
-  @ApiOperation({ summary: "Visitas por día (solo staff)" })
+  @ApiOperation({ summary: "Visits per day (staff only)" })
   async daily(@Query("days") days?: string) {
     return {
       data: await this.trackingService.getDailyVisits(
@@ -107,7 +107,7 @@ export class TrackingController {
   @Get("page-visits/hourly")
   @UseGuards(JwtAuthGuard, StaffGuard)
   @ApiBearerAuth()
-  @ApiOperation({ summary: "Visitas de hoy por hora (solo staff)" })
+  @ApiOperation({ summary: "Today's visits per hour (staff only)" })
   async hourly() {
     return { data: await this.trackingService.getHourlyVisits() };
   }
@@ -116,10 +116,10 @@ export class TrackingController {
   @UseGuards(JwtAuthGuard, StaffGuard)
   @ApiBearerAuth()
   @ApiOperation({
-    summary: "Productos más vistos (solo staff)",
+    summary: "Most viewed products (staff only)",
     description:
-      "Con `?period=today` la ventana es el día en curso en Bolivia (desde " +
-      "las 00:00) e ignora `days`; si no, son los últimos `days` días.",
+      "With `?period=today` the window is the current day in Bolivia (since " +
+      "00:00) and `days` is ignored; otherwise it's the last `days` days.",
   })
   async topProducts(
     @Query("days") days?: string,
@@ -137,7 +137,7 @@ export class TrackingController {
 
   @Get("store-events/product-views")
   @ApiOperation({
-    summary: "Personas que han visto el detalle de cada producto (público)",
+    summary: "People who have viewed each product's detail page (public)",
   })
   async productViews() {
     return { data: await this.trackingService.getProductViewCounts() };
@@ -146,7 +146,7 @@ export class TrackingController {
   @Get("store-events/group-clicks")
   @UseGuards(JwtAuthGuard, StaffGuard)
   @ApiBearerAuth()
-  @ApiOperation({ summary: "Clics en 'Sitios de interés' por sitio (solo staff)" })
+  @ApiOperation({ summary: "Clicks on 'Sitios de interés' cards, per site (staff only)" })
   async groupClicks(
     @Query("days") days?: string,
     @Query("limit") limit?: string,
@@ -162,7 +162,7 @@ export class TrackingController {
   @Get("store-events/recent")
   @UseGuards(JwtAuthGuard, StaffGuard)
   @ApiBearerAuth()
-  @ApiOperation({ summary: "Eventos recientes de la tienda (solo staff)" })
+  @ApiOperation({ summary: "Recent store events (staff only)" })
   async recent(@Query("limit") limit?: string, @Query("type") type?: string) {
     const cleanType = clip(type, 32);
     return {

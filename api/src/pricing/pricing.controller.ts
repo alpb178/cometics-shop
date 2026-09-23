@@ -30,7 +30,7 @@ export class PricingController {
   ) {}
 
   @Get()
-  @ApiOperation({ summary: "Configuración de precios y envío (single type)" })
+  @ApiOperation({ summary: "Pricing and shipping settings (single type)" })
   async find() {
     return { data: await this.pricingService.getSettings() };
   }
@@ -38,7 +38,7 @@ export class PricingController {
   @Put()
   @UseGuards(JwtAuthGuard, StaffGuard)
   @ApiBearerAuth()
-  @ApiOperation({ summary: "Actualizar configuración (solo staff)" })
+  @ApiOperation({ summary: "Update settings (staff only)" })
   async update(@Body("data") data: UpdatePricingDto) {
     const existing = await this.prisma.pricing_settings.findFirst({
       orderBy: { id: "asc" },

@@ -3,7 +3,7 @@
 import { useState, useTransition } from "react";
 import { Loader2 } from "lucide-react";
 
-/** Botón que ejecuta una server action tras confirmar. */
+/** Button that runs a server action after confirmation. */
 export function ConfirmButton({
   action,
   confirmMessage,

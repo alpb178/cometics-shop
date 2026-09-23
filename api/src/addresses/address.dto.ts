@@ -18,8 +18,8 @@ export class AddressDto {
   @IsOptional() @IsString() @MaxLength(30) ci?: string;
   @IsOptional() @IsString() notes?: string;
   @IsOptional() @IsBoolean() isDefault?: boolean;
-  // Último punto marcado en el mapa para esta dirección. El checkout lo usa
-  // como posición inicial del pin en la siguiente compra.
+  // Last point picked on the map for this address. The checkout uses it as
+  // the pin's starting position on the next purchase.
   @IsOptional() @IsNumber() @Min(-90) @Max(90) lat?: number;
   @IsOptional() @IsNumber() @Min(-180) @Max(180) lng?: number;
 }

@@ -14,10 +14,10 @@ const ALLOWED_TYPES = [
 type EventType = (typeof ALLOWED_TYPES)[number];
 
 /**
- * Recibe interacciones del storefront (same-origin) y las reenvía a Strapi.
- * Comparte la cookie de sesión anónima `iris_sid` con `/api/track` para poder
- * correlacionar eventos y visitas sin datos personales. Best-effort: nunca
- * rompe la navegación.
+ * Receives storefront interactions (same-origin) and forwards them to Strapi.
+ * Shares the anonymous session cookie `iris_sid` with `/api/track` so events
+ * and visits can be correlated without personal data. Best-effort: it never
+ * breaks navigation.
  */
 export async function POST(req: Request) {
   let body: {
@@ -72,7 +72,7 @@ export async function POST(req: Request) {
       cache: "no-store"
     });
   } catch {
-    // Best-effort: no propagar errores de tracking.
+    // Best-effort: don't propagate tracking errors.
   }
 
   return res;

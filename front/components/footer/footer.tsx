@@ -16,7 +16,7 @@ const POLICY_LINKS: FooterLink[] = [
   { text: "Política de privacidad", URL: "/policy-privacy" }
 ];
 
-// Iconos en color de marca (currentColor = text-primary del enlace).
+// Icons in the brand color (currentColor = the link's text-primary).
 const SOCIAL_ICON: Record<string, React.ReactNode> = {
   facebook: <IconBrandFacebook className="size-5" />,
   instagram: <IconBrandInstagram className="size-5" />,

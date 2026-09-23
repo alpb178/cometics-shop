@@ -1,5 +1,5 @@
-// Contenido estático del CMS (antes venía de la API vía dynamic zones).
-// Se mantiene el aspecto visual reutilizando los componentes de render.
+// Static CMS content (it used to come from the API via dynamic zones).
+// The look is preserved by reusing the render components.
 
 type StoryItem = {
   tittle: string;
@@ -122,7 +122,7 @@ export interface SocialLink {
   link: { URL: string };
 }
 
-/** Fuente única de las redes sociales (footer y contacto). */
+/** Single source for social networks (footer and contact). */
 export const SOCIAL_LINKS: SocialLink[] = [
   {
     name: "facebook",

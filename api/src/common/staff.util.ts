@@ -14,7 +14,7 @@ export interface AuthenticatedUser {
 
 const STAFF_ROLE_TYPES = new Set(["admin", "staff"]);
 
-/** Misma regla que back/src/utils/staff.ts: email en STAFF_EMAILS o rol admin/staff. */
+/** Same rule as back/src/utils/staff.ts: email in STAFF_EMAILS or admin/staff role. */
 export function isStaffUser(user: AuthenticatedUser | null | undefined): boolean {
   if (!user) return false;
   const staffEmails = (process.env.STAFF_EMAILS ?? "")

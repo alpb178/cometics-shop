@@ -6,8 +6,8 @@ import { loadSlim } from "@tsparticles/slim";
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 
-// El engine de tsparticles es global: cacheamos la promesa para no recargar
-// el bundle slim en cada montaje (esto se re-monta al cambiar de miniatura).
+// The tsparticles engine is global: we cache the promise so the slim bundle is
+// not reloaded on every mount (this remounts when the thumbnail changes).
 let enginePromise: Promise<void> | null = null;
 
 // Function to resolve CSS variables to actual color values
@@ -74,10 +74,10 @@ export const SparklesCore = (props: ParticlesProps) => {
     }
   }, [particleColor]);
 
-  // El contenedor entra con un fundido cuando las partículas ya están
-  // cargadas. Se hace con estado y no con `useAnimation` (controles
-  // imperativos): esa API dejó de exportarse en el bundle de framer-motion que
-  // usa el proyecto y rompía el componente al montarse.
+  // The container fades in once the particles are loaded. It is done with state
+  // rather than `useAnimation` (imperative controls): that API is no longer
+  // exported in the framer-motion bundle the project uses and broke the
+  // component on mount.
   const [loaded, setLoaded] = useState(false);
 
   const particlesLoaded = async (container?: Container) => {

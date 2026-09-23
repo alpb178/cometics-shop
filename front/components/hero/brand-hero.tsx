@@ -57,7 +57,7 @@ const HeroCarousel = ({ images }: { images: string[] }) => {
         </div>
       ))}
 
-      {/* Ráfaga de destellos al cambiar de slide (debajo de flechas/indicadores) */}
+      {/* Sparkle burst on slide change (below arrows/indicators) */}
       <SlideBurst trigger={index} className="z-[5]" />
 
       {images.length > 1 && (

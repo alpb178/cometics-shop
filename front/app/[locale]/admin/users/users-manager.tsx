@@ -45,14 +45,14 @@ function roleLabel(role: AppRole): string {
   return role.name;
 }
 
-/** Origen de la cuenta: Google (OAuth) o correo (registro local). */
+/** Account origin: Google (OAuth) or email (local sign-up). */
 function providerMeta(provider: string | null) {
   if (provider === "google")
     return { label: "Google", className: "bg-red-50 text-red-700" };
   return { label: "Correo", className: "bg-neutral-100 text-neutral-600" };
 }
 
-/** Cuenta creada por correo (registro local): gestiona su propia contraseña. */
+/** Account created by email (local sign-up): manages its own password. */
 function isEmailAccount(provider: string | null): boolean {
   return !provider || provider === "local";
 }
@@ -82,7 +82,7 @@ export function UsersManager({
   const [confirmBulk, setConfirmBulk] = useState(false);
 
   const [newPassword, setNewPassword] = useState("");
-  // Estado del formulario de edición (precargado al abrir).
+  // Edit form state (prefilled on open).
   const [editForm, setEditForm] = useState({ username: "", email: "", role: 0 });
 
   const selectableRoles = roles.filter(
@@ -309,7 +309,7 @@ export function UsersManager({
         onPage={setPage}
       />
 
-      {/* Crear usuario */}
+      {/* Create user */}
       {createOpen && (
         <Modal title="Nuevo usuario" onClose={() => setCreateOpen(false)}>
           <form
@@ -402,7 +402,7 @@ export function UsersManager({
         </Modal>
       )}
 
-      {/* Editar usuario */}
+      {/* Edit user */}
       {editUser && (
         <Modal
           title={`Editar · ${editUser.username}`}
@@ -495,7 +495,7 @@ export function UsersManager({
         </Modal>
       )}
 
-      {/* Setear contraseña */}
+      {/* Set password */}
       {pwdUser && (
         <Modal
           title={`Contraseña · ${pwdUser.username}`}
@@ -547,7 +547,7 @@ export function UsersManager({
         </Modal>
       )}
 
-      {/* Ver detalles */}
+      {/* View details */}
       {detailUser && (
         <Modal title="Detalles del usuario" onClose={() => setDetailUser(null)}>
           <dl className="space-y-2 text-sm">
@@ -580,7 +580,7 @@ export function UsersManager({
         </Modal>
       )}
 
-      {/* Eliminar individual */}
+      {/* Delete single */}
       <ConfirmDialog
         open={Boolean(deleteTarget)}
         title="Eliminar usuario"
@@ -604,7 +604,7 @@ export function UsersManager({
         }}
       />
 
-      {/* Eliminar seleccionados */}
+      {/* Delete selected */}
       <ConfirmDialog
         open={confirmBulk}
         title="Eliminar seleccionados"

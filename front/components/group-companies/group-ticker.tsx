@@ -4,16 +4,15 @@ import { GROUP_COMPANIES } from "@/lib/companies";
 import { groupSiteUrl, siteDomain } from "@/lib/group-ticker";
 import { trackEvent } from "@/lib/track-event";
 
-// Cintillo del Grupo CorpSC: franja fina sobre la navbar con los sitios
-// hermanos desplazándose en bucle. Usa la paleta de la matriz (azul marino de
-// CorpSC) y no la de la tienda a propósito: es la misma franja en los cuatro
-// sitios del grupo, así se lee como "barra del grupo" y no como parte del
-// header de Iris Natural.
+// CorpSC Group ticker: a thin strip above the navbar with the sister sites
+// scrolling in a loop. It uses the parent company palette (CorpSC navy blue)
+// rather than the store's on purpose: it is the same strip on all four group
+// sites, so it reads as the "group bar" and not as part of the Iris Natural
+// header.
 //
-// La pista lleva la lista duplicada y se desplaza -50%: al terminar la primera
-// copia, la segunda está exactamente donde empezó la primera, así el bucle no
-// tiene salto. La copia duplicada va oculta para lectores de pantalla y fuera
-// del orden de tabulación.
+// The track holds the list twice and moves -50%: when the first copy ends, the
+// second is exactly where the first started, so the loop has no jump. The
+// duplicate copy is hidden from screen readers and out of the tab order.
 export function GroupTicker() {
   return (
     <aside className="gt" aria-label="Sitios de interés">
@@ -57,9 +56,9 @@ function TickerRow({ duplicate = false }: { duplicate?: boolean }) {
   );
 }
 
-// Estilos propios en vez de utilidades de Tailwind: la animación y la máscara
-// del cintillo son idénticas en los cuatro sitios del grupo, y así el bloque se
-// copia entre repos sin depender de la config de Tailwind de cada uno.
+// Own styles instead of Tailwind utilities: the ticker animation and mask are
+// identical on all four group sites, and this way the block can be copied
+// between repos without depending on each one's Tailwind config.
 const CSS = `
 .gt {
   position: relative;

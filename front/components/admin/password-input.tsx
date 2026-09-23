@@ -5,8 +5,8 @@ import { Eye, EyeOff } from "lucide-react";
 import { cn } from "@/lib/admin/admin-utils";
 
 /**
- * Campo de contraseña con botón para mostrar/ocultar el texto.
- * Reenvía todas las props de <input> salvo `type` (lo controla el toggle).
+ * Password field with a button to show/hide the text. Forwards every <input>
+ * prop except `type` (controlled by the toggle).
  */
 export function PasswordInput({
   className,

@@ -22,7 +22,7 @@ const PAGE_SIZE = 10;
 
 const round2 = (n: number) => Math.round(n * 100) / 100;
 const bs = (n: number) => `Bs ${round2(n).toLocaleString("es-BO")}`;
-// Cabecera alineada a la derecha, para que coincida con las celdas numéricas.
+// Right-aligned header, to match the numeric cells.
 const right = (label: string) => (
   <span className="block text-right">{label}</span>
 );
@@ -50,9 +50,9 @@ export function SalesTable({
       setPage(1);
     };
 
-  // El subtotal guardado ya incluye el markup de la plataforma; lo revertimos
-  // con el markup actual para separar precio original y ganancia de plataforma
-  // (misma lógica que los KPIs del inicio).
+  // The stored subtotal already includes the platform markup; we revert it
+  // with the current markup to separate original price and platform earnings
+  // (same logic as the dashboard KPIs).
   const rows = useMemo(
     () =>
       orders.map((o) => {
@@ -89,7 +89,7 @@ export function SalesTable({
     });
   }, [rows, q, status]);
 
-  // Totales sobre lo filtrado, excluyendo pedidos cancelados (no son ventas).
+  // Totals over the filtered rows, excluding cancelled orders (they aren't sales).
   const totals = useMemo(
     () =>
       filtered.reduce(
@@ -132,7 +132,7 @@ export function SalesTable({
 
   return (
     <div>
-      {/* Resumen (pedidos no cancelados) */}
+      {/* Summary (non-cancelled orders) */}
       <div className="mb-6 grid grid-cols-2 gap-4 xl:grid-cols-4">
         <SummaryTile
           icon={ShoppingBag}

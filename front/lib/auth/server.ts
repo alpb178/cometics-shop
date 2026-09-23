@@ -21,9 +21,9 @@ export async function getCurrentUser(): Promise<User | null> {
     });
     if (!res.ok) return null;
     const user = (await res.json()) as User;
-    // Marca de staff según el rol (`role.type` admin/staff). Se resuelve en el
-    // servidor y se expone como booleano para que el cliente decida si mostrar
-    // el acceso al panel.
+    // Staff flag based on the role (`role.type` admin/staff). Resolved on the
+    // server and exposed as a boolean so the client can decide whether to show
+    // the panel link.
     user.isStaff = isStaffUser({ role: user.role });
     return user;
   } catch {

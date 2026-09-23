@@ -4,11 +4,11 @@ import { SESSION_COOKIE, sessionCookieOptions } from "@/lib/auth/session";
 const STRAPI_URL = process.env.NEXT_PUBLIC_API_URL;
 
 /**
- * Callback del front para el login con Google.
+ * Front-end callback for Google sign-in.
  *
- * Strapi redirige aquí tras el OAuth con `?access_token=<token_google>`.
- * Intercambiamos ese token por el JWT de Strapi vía
- * `/api/auth/google/callback` y guardamos la sesión en la cookie httpOnly.
+ * Strapi redirects here after OAuth with `?access_token=<google_token>`.
+ * We exchange that token for the Strapi JWT via
+ * `/api/auth/google/callback` and store the session in the httpOnly cookie.
  */
 export async function GET(req: Request) {
   const url = new URL(req.url);

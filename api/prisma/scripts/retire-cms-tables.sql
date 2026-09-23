@@ -1,21 +1,21 @@
--- Retiro de las tablas legado de Strapi y de la plantilla landing.
+-- Retirement of the legacy Strapi tables and the landing template.
 --
--- DESTRUCTIVO Y DE UNA SOLA VEZ: se corre a mano por base de datos, NO en el
--- deploy. Vivía en `align-prod-schema.sql`, que se ejecuta en cada build; ahí
--- era un no-op mientras las tablas no existieran, pero dejaba DDL destructivo
--- en el camino crítico del deploy: si alguna de estas tablas volviera a existir
--- (una migración futura, la restauración de un backup), el siguiente deploy la
--- habría borrado sin avisar.
+-- DESTRUCTIVE AND ONE-OFF: run by hand per database, NOT on deploy. It used to
+-- live in `align-prod-schema.sql`, which runs on every build; there it was a
+-- no-op as long as the tables didn't exist, but it left destructive DDL on the
+-- deploy's critical path: if any of these tables ever came back (a future
+-- migration, a backup restore), the next deploy would have dropped it without
+-- warning.
 --
---   Uso:  psql "$DATABASE_URL" -f prisma/scripts/retire-cms-tables.sql
+--   Usage:  psql "$DATABASE_URL" -f prisma/scripts/retire-cms-tables.sql
 --
--- Idempotente (IF EXISTS), así que repetirlo no falla. Hacer backup antes.
+-- Idempotent (IF EXISTS), so re-running it doesn't fail. Take a backup first.
 
--- Retirar las tablas legado de Strapi que la API no usa (admin_* y strapi_*).
--- CASCADE elimina también las FKs created_by_id/updated_by_id que apuntaban a
--- admin_users desde las tablas de negocio (las columnas se conservan, sin
--- constraint; la API no las usa). Idempotente (IF EXISTS). Ver schema.prisma
--- (ya no declara estos modelos).
+-- Retire the legacy Strapi tables the API doesn't use (admin_* and strapi_*).
+-- CASCADE also drops the created_by_id/updated_by_id FKs that pointed to
+-- admin_users from the business tables (the columns are kept, without a
+-- constraint; the API doesn't use them). Idempotent (IF EXISTS). See
+-- schema.prisma (it no longer declares these models).
 DROP TABLE IF EXISTS
   admin_permissions_role_lnk, admin_users_roles_lnk, admin_permissions,
   admin_roles, admin_users,
@@ -30,10 +30,10 @@ DROP TABLE IF EXISTS
   strapi_workflows_stages, strapi_workflows
 CASCADE;
 
--- Retirar los componentes de la plantilla landing de Strapi que la app NUNCA
--- renderiza (el módulo de contenido solo maneja una lista blanca de tipos y el
--- front usa UI estática). Vacíos y sin referencias en código. Idempotente.
--- Se conservan los componentes SÍ usados (shared.section, navbar, footer,
+-- Retire the Strapi landing-template components the app NEVER renders (the
+-- content module only handles an allowlist of types and the front uses static
+-- UI). Empty and unreferenced in code. Idempotent.
+-- The components that ARE used are kept (shared.section, navbar, footer,
 -- dynamic-zone.faq/how-it-works/story-panel/form-next-to-section, seo, form…).
 DROP TABLE IF EXISTS
   components_cards_graph_cards_cmps, components_cards_graph_cards,
@@ -57,12 +57,12 @@ DROP TABLE IF EXISTS
   components_shared_users
 CASCADE;
 
--- Retirar la infraestructura legado de Strapi que la API no usa: content-type
--- product_pages (sin consumidores), i18n_locale, log_products (audit), la
--- librería de carpetas de media (upload_folders + links; los archivos se sirven
--- vía files_related_mph, no por carpetas) y los permisos de users-permissions
--- (up_permissions; el guard de staff va por email, no por estos permisos).
--- Sin FKs entrantes desde tablas conservadas. Idempotente.
+-- Retire the legacy Strapi infrastructure the API doesn't use: the
+-- product_pages content-type (no consumers), i18n_locale, log_products (audit),
+-- the media folder library (upload_folders + links; files are served through
+-- files_related_mph, not by folder) and the users-permissions permissions
+-- (up_permissions; the staff guard goes by email, not by these permissions).
+-- No incoming FKs from kept tables. Idempotent.
 DROP TABLE IF EXISTS
   product_pages_cmps, product_pages,
   i18n_locale, log_products,
@@ -70,19 +70,19 @@ DROP TABLE IF EXISTS
   up_permissions_role_lnk, up_permissions
 CASCADE;
 
--- Retirar navbar y SEO de la BD: el front usa navbar estática
--- (lib/constants/navbar) y SEO estática (lib/seo-pages), y se quitaron del
--- content module de la API. El footer sí se conserva (sí se renderiza).
+-- Retire navbar and SEO from the DB: the front uses a static navbar
+-- (lib/constants/navbar) and static SEO (lib/seo-pages), and they were removed
+-- from the API's content module. The footer is kept (it is rendered).
 DROP TABLE IF EXISTS
   components_global_navbars_cmps, components_global_navbars_logo_lnk,
   components_global_navbars, components_shared_seos
 CASCADE;
 
--- Retirar TODO el contenido CMS: el front ahora lo maneja estático (páginas
--- about/contact/faq/how-it-works/policy-privacy y footer hardcodeados). Se
--- quitó el ContentController de la API. SE CONSERVAN: faqs (editable en
--- backoffice, /faq las lee de /api/faqs), social_networks(+_cmps) y
--- components_shared_links (redes sociales), y components_order_items (pedidos).
+-- Retire ALL CMS content: the front now handles it statically (hardcoded
+-- about/contact/faq/how-it-works/policy-privacy pages and footer). The API's
+-- ContentController was removed. KEPT: faqs (editable in the backoffice, /faq
+-- reads them from /api/faqs), social_networks(+_cmps) and
+-- components_shared_links (social networks), and components_order_items (orders).
 DROP TABLE IF EXISTS
   pages_cmps, pages, globals_cmps, globals,
   components_dynamic_zone_faqs_faqs_lnk, components_dynamic_zone_faqs,

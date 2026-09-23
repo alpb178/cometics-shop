@@ -9,8 +9,9 @@ import {
 import { cn } from "@/lib/utils";
 
 /**
- * Envoltorio con inclinación 3D al mover el cursor (perspectiva + rotateX/Y),
- * suavizada con springs. En táctil no aplica (no hay hover) y no estorba.
+ * Wrapper with a 3D tilt on cursor move (perspective + rotateX/Y), smoothed
+ * with springs. It does not apply on touch devices (no hover) and stays out of
+ * the way.
  */
 export function Tilt3D({
   children,
@@ -20,9 +21,9 @@ export function Tilt3D({
 }: {
   children: React.ReactNode;
   className?: string;
-  /** Inclinación máxima en grados. */
+  /** Maximum tilt in degrees. */
   max?: number;
-  /** Escala al hover. */
+  /** Scale on hover. */
   scale?: number;
 }) {
   const px = useMotionValue(0);

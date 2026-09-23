@@ -1,8 +1,8 @@
-// Skeleton del checkout: refleja el layout real de
-// `components/checkout/checkout-form.tsx` (sección `max-w-6xl`, header con
-// indicador de 3 pasos y aviso de envío, grid `[1fr_360px]` con el paso 1 —
-// tarjetas de método de entrega — y el aside "Tu pedido") para que no haya
-// salto de layout al cargar el contenido real.
+// Checkout skeleton: mirrors the real layout of
+// `components/checkout/checkout-form.tsx` (`max-w-6xl` section, header with the
+// 3-step indicator and shipping notice, `[1fr_360px]` grid with step 1 —
+// delivery method cards — and the "Tu pedido" aside) so there is no layout
+// shift when the real content loads.
 export default function CheckoutLoading() {
   return (
     <section className="mx-auto w-full max-w-6xl animate-pulse px-6 py-12 lg:py-16">

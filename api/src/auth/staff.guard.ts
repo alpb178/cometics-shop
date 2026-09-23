@@ -8,8 +8,8 @@ import {
 import { isStaffUser } from "../common/staff.util";
 
 /**
- * Equivalente a ensureStaff() del backend Strapi: 401 sin usuario,
- * 403 si el usuario no es staff. Usar siempre detrás de JwtAuthGuard.
+ * Equivalent of the Strapi backend's ensureStaff(): 401 without a user,
+ * 403 if the user isn't staff. Always use it behind JwtAuthGuard.
  */
 @Injectable()
 export class StaffGuard implements CanActivate {

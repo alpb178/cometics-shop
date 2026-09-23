@@ -8,9 +8,9 @@ import { generateDocumentId } from "../common/strapi.util";
 import { PrismaService } from "../prisma/prisma.service";
 
 /**
- * Equivalente a POST /api/upload del plugin de Strapi con provider Cloudinary:
- * sube el fichero y crea la fila en `files` con la misma forma de datos
- * (url, formats.thumbnail, hash, provider, size en KB…).
+ * Equivalent of the Strapi plugin's POST /api/upload with the Cloudinary
+ * provider: uploads the file and creates the `files` row with the same data
+ * shape (url, formats.thumbnail, hash, provider, size in KB…).
  */
 @Injectable()
 export class UploadService {
@@ -52,7 +52,7 @@ export class UploadService {
         .end(file.buffer);
     });
 
-    // Miniatura estilo Strapi (245px) vía transformación de Cloudinary
+    // Strapi-style thumbnail (245px) via a Cloudinary transformation
     const formats = isImage
       ? {
           thumbnail: {

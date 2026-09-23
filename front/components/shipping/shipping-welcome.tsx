@@ -6,19 +6,19 @@ import { Truck } from "lucide-react";
 import { WELCOME_NOTICE_PARAGRAPHS } from "@/lib/shipping";
 
 const COOKIE_NAME = "iris_shipping_notice";
-// Un año: el aviso es informativo, no tiene sentido repetirlo cada sesión.
+// One year: the notice is informational, no point repeating it every session.
 const COOKIE_MAX_AGE = 60 * 60 * 24 * 365;
 
 /**
- * Aviso flotante de bienvenida con la política de envío. Se muestra solo en la
- * primera visita: al pulsar "Continuar" se guarda una cookie y no vuelve a
- * aparecer.
+ * Floating welcome notice with the shipping policy. Shown only on the first
+ * visit: pressing "Continuar" stores a cookie and it does not appear again.
  */
 export const ShippingWelcome = () => {
   const [open, setOpen] = useState(false);
 
-  // La cookie solo se puede leer en cliente, así que el aviso nunca se pinta
-  // en el HTML del servidor: aparece tras montar y solo si no está marcada.
+  // The cookie can only be read on the client, so the notice is never painted
+  // in the server HTML: it appears after mounting and only if it is not
+  // flagged.
   useEffect(() => {
     const seen = document.cookie
       .split("; ")
@@ -43,8 +43,9 @@ export const ShippingWelcome = () => {
   return (
     <AnimatePresence>
       {open && (
-        // El contenedor posiciona y el hijo anima: si framer-motion escribiera
-        // el transform sobre el mismo nodo que lo centra, lo pisaría.
+        // The container positions and the child animates: if framer-motion
+        // wrote the transform on the same node that centers it, it would
+        // overwrite it.
         <div className="pointer-events-none fixed inset-x-4 top-20 z-[60] flex justify-center sm:top-24">
           <motion.div
             role="dialog"
@@ -61,8 +62,8 @@ export const ShippingWelcome = () => {
                 className="mt-0.5 h-5 w-5 shrink-0 text-primary"
                 strokeWidth={1.75}
               />
-              {/* El id envuelve los dos párrafos: aria-labelledby apunta aquí y
-                  el nombre accesible del diálogo debe incluir ambos. */}
+              {/* The id wraps both paragraphs: aria-labelledby points here
+                  and the dialog's accessible name must include both. */}
               <div id="shipping-welcome-text" className="space-y-2">
                 {WELCOME_NOTICE_PARAGRAPHS.map((paragraph) => (
                   <p

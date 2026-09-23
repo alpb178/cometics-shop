@@ -25,7 +25,7 @@ export class OrderItemInputDto {
   @IsInt() @Min(1) productId!: number;
   @IsInt() @Min(1) quantity!: number;
   @IsOptional() @IsString() imageUrl?: string;
-  // name/slug/price los manda el front pero se recalculan server-side
+  // name/slug/price are sent by the front but recomputed server-side
   @IsOptional() @IsString() name?: string;
   @IsOptional() @IsString() slug?: string;
   @IsOptional() @IsNumber() price?: number;
@@ -50,12 +50,12 @@ export class CreateOrderDto {
 
   @IsOptional() @IsString() @MaxLength(120) paymentReference?: string;
 
-  // Entradas del cálculo de envío; se verifican, no se confía en ellas
+  // Shipping calculation inputs; they're verified, not trusted
   @IsOptional() @IsNumber() destLat?: number | null;
   @IsOptional() @IsNumber() destLng?: number | null;
   @IsOptional() @IsBoolean() isProvince?: boolean;
 
-  // El front los envía pero siempre se recalculan server-side
+  // The front sends them but they're always recomputed server-side
   @IsOptional() @IsNumber() subtotal?: number;
   @IsOptional() @IsNumber() total?: number;
 }

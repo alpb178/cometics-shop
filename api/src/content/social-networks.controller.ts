@@ -14,34 +14,34 @@ export class SocialNetworksController {
 
   @Get()
   @ApiOperation({
-    summary: "Redes sociales (status=draft para el backoffice)",
+    summary: "Social networks (status=draft for the backoffice)",
     description:
-      "`status=draft` devuelve todas las redes (vista del backoffice), una por " +
-      "documento; sin él, solo las publicadas (vista pública).",
+      "`status=draft` returns every network (backoffice view), one per " +
+      "document; without it, only the published ones (public view).",
   })
   async find(@Query() query: Record<string, unknown>) {
-    // `status=draft` significaba lo contrario que en products: allí es "todas
-    // las filas" (vista admin) y aquí devolvía SOLO las filas borrador. Con el
-    // draft & publish heredado eso funcionaba de casualidad —cada red tiene
-    // fila borrador y publicada—, pero una red que existiera solo publicada era
-    // invisible en el backoffice. Ahora draft = todas, deduplicando por
-    // documento y prefiriendo la fila publicada.
+    // `status=draft` used to mean the opposite of products: there it is "all
+    // rows" (admin view) and here it returned ONLY the draft rows. With the
+    // inherited draft & publish that worked by accident —every network has a
+    // draft and a published row—, but a network that only existed as published
+    // was invisible in the backoffice. Now draft = all, deduplicated by
+    // document and preferring the published row.
     const all = query.status === "draft";
     const rows = await this.prisma.social_networks.findMany({
       where: all ? {} : { published_at: { not: null } },
-      // published_at desc deja primero la fila publicada de cada documento
-      // (NULLS LAST), que es la que refleja lo que ve la tienda.
+      // published_at desc puts each document's published row first
+      // (NULLS LAST), which is the one that reflects what the store shows.
       orderBy: [{ published_at: { sort: "desc", nulls: "last" } }, { id: "asc" }],
       take: parsePageSize(nestedQuery(query, "pagination", "pageSize"), 100),
     });
     const seen = new Set<string>();
     const unique = rows.filter((r) => {
-      if (!r.document_id) return true; // sin documento: se mantiene individual
+      if (!r.document_id) return true; // no document: kept as an individual row
       if (seen.has(r.document_id)) return false;
       seen.add(r.document_id);
       return true;
     });
-    unique.sort((a, b) => a.id - b.id); // orden de presentación estable
+    unique.sort((a, b) => a.id - b.id); // stable display order
     const data = await Promise.all(
       unique.map((r) => this.componentsService.serializeSocialNetwork(r)),
     );

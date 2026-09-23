@@ -1,22 +1,22 @@
-// Empresas del Grupo CorpSC que se muestran como "sitios de interés" en la
-// home. Fuente única, editable. Iris Natural NO se lista a sí misma; en su
-// lugar figura Tu Chamba (cada sitio del grupo enlaza a sus hermanos).
+// CorpSC Group companies shown as "sites of interest" on the home page. Single,
+// editable source. Iris Natural does NOT list itself; Tu Chamba appears in its
+// place (each group site links to its siblings).
 
 export interface Company {
   slug: string;
   name: string;
   description: string;
-  // Descripción corta que acompaña al enlace en el cintillo (la larga no
-  // entra en la franja).
+  // Short description shown next to the link in the ticker (the long one
+  // doesn't fit in the strip).
   tagline: string;
-  // Acento de la marca en el cintillo. No se reutiliza `background` porque
-  // ese color es el de la captura (casi negro en varias marcas) y sobre el
-  // azul marino de la franja el punto no se vería.
+  // Brand accent in the ticker. `background` is not reused because that is the
+  // screenshot's color (almost black for several brands) and the dot would not
+  // be visible on the strip's navy blue.
   accent: string;
   url: string;
-  // Imagen destacada en /public/empresas.
+  // Featured image in /public/empresas.
   image: string;
-  // Color de fondo mientras carga la imagen (evita un flash en blanco).
+  // Background color while the image loads (avoids a white flash).
   background: string;
 }
 

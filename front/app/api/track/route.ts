@@ -6,10 +6,10 @@ const SESSION_COOKIE = "iris_sid";
 const ONE_YEAR = 60 * 60 * 24 * 365;
 
 /**
- * Recibe las visitas del storefront (same-origin) y las reenvía a Strapi.
- * Gestiona un identificador de sesión anónimo (cookie httpOnly) para poder
- * distinguir visitantes sin exponer datos personales. El tracking nunca debe
- * romper la navegación: los errores hacia Strapi se ignoran.
+ * Receives storefront visits (same-origin) and forwards them to Strapi.
+ * Manages an anonymous session identifier (httpOnly cookie) to tell visitors
+ * apart without exposing personal data. Tracking must never break
+ * navigation: errors towards Strapi are ignored.
  */
 export async function POST(req: Request) {
   let body: { path?: string; referrer?: string };
@@ -54,7 +54,7 @@ export async function POST(req: Request) {
       cache: "no-store"
     });
   } catch {
-    // El tracking es best-effort: no propagar errores.
+    // Tracking is best-effort: don't propagate errors.
   }
 
   return res;

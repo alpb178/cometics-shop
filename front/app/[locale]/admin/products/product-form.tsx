@@ -10,7 +10,7 @@ import { setProductVisibleAction } from "./actions";
 
 type SaveAction = (formData: FormData) => Promise<void>;
 
-/** Máximo de fotos en la galería (las ya guardadas cuentan). */
+/** Maximum photos in the gallery (already saved ones count). */
 const MAX_GALLERY = 3;
 
 export function ProductForm({
@@ -26,7 +26,7 @@ export function ProductForm({
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [savingVisible, startVisible] = useTransition();
-  // Estado optimista del flag visible (para que el toggle responda al instante).
+  // Optimistic state for the visible flag (so the toggle responds instantly).
   const [visible, setVisible] = useState(product?.visible ?? true);
 
   function toggleVisible() {
@@ -39,13 +39,13 @@ export function ProductForm({
         await setProductVisibleAction(product.documentId, next);
         router.refresh();
       } catch (e) {
-        setVisible(!next); // revertir si falla
+        setVisible(!next); // revert on failure
         setError(e instanceof Error ? e.message : "Error");
       }
     });
   }
 
-  // Imagen principal
+  // Main image
   const [keepImageId, setKeepImageId] = useState<number | null>(
     product?.image?.id ?? null
   );
@@ -53,12 +53,12 @@ export function ProductForm({
     mediaUrl(product?.image ?? null, "small")
   );
 
-  // Galería
+  // Gallery
   const [keepGallery, setKeepGallery] = useState<StrapiMedia[]>(
     product?.images ?? []
   );
-  // Fotos nuevas: se acumulan de una en una en el estado (el input se vacía
-  // tras cada selección) y se añaden a mano al FormData al enviar.
+  // New photos: accumulated one by one in state (the input is cleared after
+  // each selection) and appended to the FormData manually on submit.
   const [newGallery, setNewGallery] = useState<{ file: File; url: string }[]>(
     []
   );
@@ -75,7 +75,7 @@ export function ProductForm({
 
   function onGalleryChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
-    // El input se vacía siempre para poder volver a elegir la misma foto.
+    // Always clear the input so the same photo can be picked again.
     e.target.value = "";
     if (!file || galleryFull) return;
     setNewGallery((g) => [...g, { file, url: URL.createObjectURL(file) }]);
@@ -99,10 +99,10 @@ export function ProductForm({
       const formData = new FormData(e.currentTarget);
       for (const { file } of newGallery) formData.append("newGallery", file);
       await action(formData);
-      // En éxito el server action redirige; si no, refrescamos.
+      // On success the server action redirects; otherwise, refresh.
       router.refresh();
     } catch (err) {
-      // redirect() lanza un error especial NEXT_REDIRECT que debemos propagar.
+      // redirect() throws a special NEXT_REDIRECT error that we must rethrow.
       if (err instanceof Error && err.message === "NEXT_REDIRECT") throw err;
       setError(
         err instanceof Error ? err.message : "No se pudo guardar el producto"
@@ -113,7 +113,7 @@ export function ProductForm({
 
   return (
     <form onSubmit={onSubmit} className="grid gap-6 lg:grid-cols-3">
-      {/* Columna principal */}
+      {/* Main column */}
       <div className="space-y-5 lg:col-span-2">
         <div className="card p-5">
           <div>
@@ -215,7 +215,7 @@ export function ProductForm({
           </div>
         </div>
 
-        {/* Galería */}
+        {/* Gallery */}
         <div className="card p-5">
           <p className="label">
             Galería de fotos{" "}
@@ -297,7 +297,7 @@ export function ProductForm({
         </div>
       </div>
 
-      {/* Columna lateral: imagen principal + acciones */}
+      {/* Side column: main image + actions */}
       <div className="space-y-5">
         <div className="card p-5">
           <p className="label">Imagen principal</p>

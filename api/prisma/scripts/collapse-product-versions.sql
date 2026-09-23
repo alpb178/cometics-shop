@@ -1,29 +1,29 @@
--- Colapsa el draft & publish heredado de Strapi a UNA sola fila por producto.
+-- Collapses the draft & publish inherited from Strapi into ONE row per product.
 --
--- Superviviente por document_id = la de updated_at más reciente (la última
--- editada); desempate: preferir borrador (published_at NULL) y luego id mayor.
--- Las filas sin document_id se dejan intactas.
+-- Survivor per document_id = the one with the most recent updated_at (the last
+-- edited); tie-break: prefer the draft (published_at NULL), then the higher id.
+-- Rows without a document_id are left untouched.
 --
--- DESTRUCTIVO: hacer backup antes y ejecutar primero en develop.
---   pg_dump de: products, files_related_mph, products_categories_lnk,
+-- DESTRUCTIVE: take a backup first and run it on develop first.
+--   pg_dump of: products, files_related_mph, products_categories_lnk,
 --   components_dynamic_zone_related_products_products_lnk
 --
--- Orden recomendado: desplegar primero el código (que ya deduplica en
--- findMany y ya no filtra por published_at) y DESPUÉS correr esta limpieza.
+-- Recommended order: deploy the code first (it already dedupes in findMany
+-- and no longer filters by published_at) and THEN run this cleanup.
 
 -- ─────────────────────────── PRE-FLIGHT (read-only) ───────────────────────────
--- Ejecutar y revisar ANTES de la limpieza.
+-- Run and review BEFORE the cleanup.
 
--- 1) Huérfanos sin document_id (no se tocan):
+-- 1) Orphans without a document_id (left untouched):
 --   SELECT count(*) FROM products WHERE document_id IS NULL;
 
--- 2) Documentos con más de una fila (a colapsar):
+-- 2) Documents with more than one row (to collapse):
 --   SELECT document_id, count(*) FROM products WHERE document_id IS NOT NULL
 --     GROUP BY 1 HAVING count(*) > 1 ORDER BY 2 DESC;
 
--- 3) ¿Algún link de "productos relacionados" apunta a una fila PERDEDORA?
---    Si devuelve > 0, re-apuntar esos links al id superviviente ANTES de borrar
---    (esa FK es onDelete Cascade y se perdería la asociación).
+-- 3) Does any "related products" link point to a LOSING row?
+--    If it returns > 0, re-point those links to the surviving id BEFORE deleting
+--    (that FK is onDelete Cascade and the association would be lost).
 --   SELECT count(*) FROM components_dynamic_zone_related_products_products_lnk
 --   WHERE product_id IN (
 --     SELECT id FROM (
@@ -34,7 +34,7 @@
 --       FROM products WHERE document_id IS NOT NULL
 --     ) x WHERE rn > 1);
 
--- ──────────────────────────────── LIMPIEZA ────────────────────────────────
+-- ──────────────────────────────── CLEANUP ────────────────────────────────
 BEGIN;
 
 CREATE TEMP TABLE product_losers ON COMMIT DROP AS
@@ -47,20 +47,20 @@ SELECT id FROM (
                     id DESC
          ) AS rn
   FROM products
-  WHERE document_id IS NOT NULL       -- excluye huérfanos: no se colapsan
+  WHERE document_id IS NOT NULL       -- excludes orphans: they aren't collapsed
 ) r
 WHERE rn > 1;
 
--- Media morph de los perdedores (esta tabla no tiene FK con cascade).
+-- Media morph of the losers (this table has no cascading FK).
 DELETE FROM files_related_mph
 WHERE related_type = 'api::product.product'
   AND related_id IN (SELECT id FROM product_losers);
 
--- Filas perdedoras (cascade: products_categories_lnk y el lnk de related_products).
+-- Losing rows (cascade: products_categories_lnk and the related_products lnk).
 DELETE FROM products
 WHERE id IN (SELECT id FROM product_losers);
 
--- Los supervivientes quedan siempre publicados (el front los ve al instante).
+-- Survivors are always left published (the front sees them right away).
 UPDATE products
 SET published_at = now()
 WHERE published_at IS NULL
@@ -68,7 +68,7 @@ WHERE published_at IS NULL
 
 COMMIT;
 
--- ─────────────────────────── VERIFICACIÓN (post) ───────────────────────────
--- Debe devolver 0 filas:
+-- ─────────────────────────── VERIFICATION (post) ───────────────────────────
+-- Must return 0 rows:
 --   SELECT document_id, count(*) FROM products WHERE document_id IS NOT NULL
 --     GROUP BY 1 HAVING count(*) > 1;

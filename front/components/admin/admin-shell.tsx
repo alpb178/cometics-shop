@@ -24,7 +24,7 @@ import {
 } from "lucide-react";
 import type { AuthUser } from "@/lib/admin/types";
 
-// Navegación del panel.
+// Panel navigation.
 const NAV: {
   href: string;
   label: string;
@@ -44,10 +44,10 @@ const NAV: {
 ];
 
 /**
- * Layout del panel con el mismo comportamiento que el AdminLayout de
- * Tu Chamba: riel de iconos colapsado que se expande superpuesto al
- * contenido — con hover/focus en escritorio (solo CSS) y con el botón ☰
- * en táctil (estado "pinned") — más cabecera sticky con menú de usuario.
+ * Panel layout with the same behavior as Tu Chamba's AdminLayout: a collapsed
+ * icon rail that expands over the content — on hover/focus on desktop (CSS
+ * only) and with the ☰ button on touch devices ("pinned" state) — plus a sticky
+ * header with a user menu.
  */
 export function DashboardShell({
   user,
@@ -59,28 +59,28 @@ export function DashboardShell({
   const pathname = usePathname();
   const router = useRouter();
   const { logout } = useAuth();
-  // Logout unificado con el storefront: borra la cookie `iris_session` vía
-  // /api/auth/logout y devuelve al login de la web.
+  // Logout shared with the storefront: clears the `iris_session` cookie via
+  // /api/auth/logout and returns to the website login.
   async function handleLogout() {
     await logout();
     router.push("/sign-in");
     router.refresh();
   }
-  // El menú vive colapsado como riel. Se expande con hover (CSS) o ☰.
+  // The menu lives collapsed as a rail. It expands on hover (CSS) or with ☰.
   const [pinned, setPinned] = useState(false);
-  // Al elegir una opción el menú se cierra al instante, aunque el cursor
-  // siga encima: se apaga la expansión por hover hasta que el mouse salga.
+  // Picking an option closes the menu right away, even if the cursor is still
+  // over it: hover expansion is disabled until the mouse leaves.
   const [hoverEnabled, setHoverEnabled] = useState(true);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
 
-  // Al navegar, el menú vuelve a colapsarse.
+  // The menu collapses again on navigation.
   useEffect(() => {
     setPinned(false);
     setUserMenuOpen(false);
   }, [pathname]);
 
-  // Escape también lo colapsa (y suelta el foco del ☰, que de otro modo
-  // mantendría el riel expandido vía focus-within).
+  // Escape also collapses it (and releases focus from ☰, which would otherwise
+  // keep the rail expanded via focus-within).
   useEffect(() => {
     if (!pinned) return;
     const onKey = (e: KeyboardEvent) => {
@@ -98,11 +98,11 @@ export function DashboardShell({
 
   return (
     <div className="flex min-h-screen bg-neutral-50 text-neutral-900">
-      {/* Hueco del riel en el layout: el aside real es fijo y al expandirse
-          se superpone al contenido sin empujarlo. */}
+      {/* Rail placeholder in the layout: the real aside is fixed and, when
+          it expands, overlays the content without pushing it. */}
       <div className="w-16 shrink-0" aria-hidden="true" />
 
-      {/* Fondo oscurecido solo en modo fijado (táctil). */}
+      {/* Dimmed backdrop only in pinned (touch) mode. */}
       <div
         aria-hidden="true"
         onClick={() => setPinned(false)}
@@ -111,15 +111,15 @@ export function DashboardShell({
         }`}
       />
 
-      {/* Expansión con la curva "emphasized" de Material; anima también la
-          sombra para que no aparezca de golpe al final. */}
+      {/* Expansion uses Material's "emphasized" curve; the shadow is
+          animated too so it does not pop in at the end. */}
       <aside
         onMouseLeave={() => setHoverEnabled(true)}
         className={`group fixed inset-y-0 left-0 z-50 flex flex-col overflow-hidden border-r border-outline-variant bg-surface-container-low transition-[width,box-shadow] duration-300 ease-[cubic-bezier(0.2,0,0,1)] ${
           hoverEnabled ? "hover:w-64 hover:shadow-xl focus-within:w-64" : ""
         } ${expanded ? "w-64 shadow-xl" : "w-16"}`}
       >
-        {/* Cabecera del riel: ☰ fija el menú en táctil. */}
+        {/* Rail header: ☰ pins the menu on touch devices. */}
         <div className="flex h-16 shrink-0 items-center gap-2 border-b border-outline-variant px-3">
           <button
             type="button"
@@ -130,8 +130,8 @@ export function DashboardShell({
           >
             {expanded ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
           </button>
-          {/* La etiqueta aparece con retardo (cuando el ancho ya avanzó) y
-              se desvanece sin retardo al colapsar. */}
+          {/* The label fades in with a delay (once the width has grown) and
+              fades out with no delay when collapsing. */}
           <p
             className={`whitespace-nowrap text-sm font-medium text-neutral-500 transition-opacity duration-200 ease-out group-hover:opacity-100 group-hover:delay-100 group-focus-within:opacity-100 group-focus-within:delay-100 ${
               expanded ? "opacity-100" : "opacity-0"
@@ -152,8 +152,9 @@ export function DashboardShell({
                 href={href}
                 title={label}
                 onClick={(e) => {
-                  // Cierra el menú al elegir una opción (también si se
-                  // navega a la página actual, donde pathname no cambia).
+                  // Close the menu when an option is picked (also when
+                  // navigating to the current page, where pathname does not
+                  // change).
                   setPinned(false);
                   setHoverEnabled(false);
                   e.currentTarget.blur();
@@ -167,8 +168,8 @@ export function DashboardShell({
                 <span className="flex h-6 w-6 shrink-0 items-center justify-center">
                   <Icon className="h-5 w-5" />
                 </span>
-                {/* Solo visible con el menú expandido; entra con retardo,
-                    siguiendo al ancho, y sale sin él. */}
+                {/* Only visible with the menu expanded; enters with a delay,
+                    following the width, and leaves without it. */}
                 <span
                   className={`whitespace-nowrap text-sm transition-opacity duration-200 ease-out group-hover:opacity-100 group-hover:delay-100 group-focus-within:opacity-100 group-focus-within:delay-100 ${
                     expanded ? "opacity-100" : "opacity-0"
@@ -206,7 +207,7 @@ export function DashboardShell({
             </span>
           </Link>
 
-          {/* Avatar del usuario: al hacer click se abre el menú de sesión. */}
+          {/* User avatar: clicking it opens the session menu. */}
           <div className="relative">
             <button
               type="button"
@@ -224,7 +225,7 @@ export function DashboardShell({
 
             {userMenuOpen && (
               <>
-                {/* Click fuera cierra el menú. */}
+                {/* Clicking outside closes the menu. */}
                 <div
                   aria-hidden="true"
                   className="fixed inset-0 z-40"

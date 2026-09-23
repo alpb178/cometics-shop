@@ -6,9 +6,9 @@ import { AuthenticatedUser } from "../common/staff.util";
 import { UsersService } from "../users/users.service";
 
 /**
- * Valida los JWT firmados con el mismo JWT_SECRET que usa Strapi
- * (payload `{ id }`), de modo que los tokens ya emitidos por Strapi
- * siguen siendo válidos durante la migración.
+ * Validates JWTs signed with the same JWT_SECRET Strapi uses
+ * (payload `{ id }`), so tokens already issued by Strapi stay valid
+ * during the migration.
  */
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {

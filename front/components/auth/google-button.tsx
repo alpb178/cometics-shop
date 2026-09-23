@@ -24,8 +24,8 @@ function GoogleIcon({ className }: { className?: string }) {
 }
 
 /**
- * Botón de "Continuar con Google". Inicia el flujo OAuth de Strapi
- * (users-permissions) redirigiendo a `/api/connect/google`.
+ * "Continue with Google" button. Starts the Strapi OAuth flow
+ * (users-permissions) by redirecting to `/api/connect/google`.
  */
 export function GoogleButton({
   label = "Continuar con Google"

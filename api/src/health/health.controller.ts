@@ -8,13 +8,13 @@ export class HealthController {
   constructor(private readonly healthService: HealthService) {}
 
   @Get()
-  @ApiOperation({ summary: "Estado del servicio" })
+  @ApiOperation({ summary: "Service status" })
   check() {
     return this.healthService.check();
   }
 
   @Get("db")
-  @ApiOperation({ summary: "Estado de la conexión a la base de datos" })
+  @ApiOperation({ summary: "Database connection status" })
   checkDatabase() {
     return this.healthService.checkDatabase();
   }

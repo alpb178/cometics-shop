@@ -19,8 +19,8 @@ import { strapiError } from "../common/strapi-error";
 import { UsersService } from "./users.service";
 
 /**
- * Réplica de los endpoints de users-permissions que usan los clientes.
- * Ojo: cuerpos y respuestas PLANOS (sin envoltorio { data }), como el plugin.
+ * Replica of the users-permissions endpoints the clients use.
+ * Note: FLAT bodies and responses (no { data } envelope), like the plugin.
  */
 @ApiTags("users")
 @ApiBearerAuth()
@@ -30,7 +30,7 @@ export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Get("users/me")
-  @ApiOperation({ summary: "Usuario autenticado (con role)" })
+  @ApiOperation({ summary: "Authenticated user (with role)" })
   async me(@CurrentUser() user: AuthenticatedUser) {
     const row = await this.usersService.getUserWithRole(user.id);
     if (!row) throw new NotFoundException();
@@ -38,7 +38,7 @@ export class UsersController {
   }
 
   @Put("users/me")
-  @ApiOperation({ summary: "Actualizar perfil propio (firstName, lastName, phone)" })
+  @ApiOperation({ summary: "Update own profile (firstName, lastName, phone)" })
   async updateMe(
     @CurrentUser() user: AuthenticatedUser,
     @Body() body: { firstName?: string; lastName?: string; phone?: string },
@@ -53,14 +53,14 @@ export class UsersController {
 
   @Get("users")
   @UseGuards(StaffGuard)
-  @ApiOperation({ summary: "Listar usuarios (solo staff) — array plano" })
+  @ApiOperation({ summary: "List users (staff only) — flat array" })
   listUsers() {
     return this.usersService.listUsersWithRole();
   }
 
   @Post("users")
   @UseGuards(StaffGuard)
-  @ApiOperation({ summary: "Crear usuario (solo staff)" })
+  @ApiOperation({ summary: "Create user (staff only)" })
   async createUser(
     @Body()
     body: {
@@ -88,7 +88,7 @@ export class UsersController {
 
   @Put("users/:id")
   @UseGuards(StaffGuard)
-  @ApiOperation({ summary: "Actualizar usuario (solo staff)" })
+  @ApiOperation({ summary: "Update user (staff only)" })
   async updateUser(
     @Param("id", ParseIntPipe) id: number,
     @Body()
@@ -108,7 +108,7 @@ export class UsersController {
 
   @Delete("users/:id")
   @UseGuards(StaffGuard)
-  @ApiOperation({ summary: "Eliminar usuario (solo staff)" })
+  @ApiOperation({ summary: "Delete user (staff only)" })
   async deleteUser(@Param("id", ParseIntPipe) id: number) {
     const deleted = await this.usersService.deleteUser(id);
     return this.usersService.serializeUser(deleted);
@@ -116,7 +116,7 @@ export class UsersController {
 
   @Get("users-permissions/roles")
   @UseGuards(StaffGuard)
-  @ApiOperation({ summary: "Roles disponibles (solo staff)" })
+  @ApiOperation({ summary: "Available roles (staff only)" })
   async roles() {
     const roles = await this.usersService.getRoles();
     return {

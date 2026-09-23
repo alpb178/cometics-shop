@@ -61,9 +61,9 @@ export default async function fetchContentType(
     }
     const jsonData: StrapiResponse = await response.json();
 
-    // Markup global invisible: los precios de producto se muestran con el
-    // recargo ya aplicado. El servidor lo re-aplica al crear el pedido, así que
-    // display y cobro coinciden.
+    // Invisible global markup: product prices are shown with the surcharge
+    // already applied. The server re-applies it when the order is created, so
+    // displayed and charged amounts match.
     if (contentType.startsWith("products") && jsonData?.data) {
       const { markupPercent } = await getPricingSettings();
       if (markupPercent) {

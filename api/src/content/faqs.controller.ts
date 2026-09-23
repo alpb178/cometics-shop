@@ -32,7 +32,7 @@ export class FaqsController {
   constructor(private readonly prisma: PrismaService) {}
 
   @Get()
-  @ApiOperation({ summary: "Listar FAQs (público)" })
+  @ApiOperation({ summary: "List FAQs (public)" })
   async find(@Query() query: Record<string, unknown>) {
     const take = parsePageSize(nestedQuery(query, "pagination", "pageSize"), 100);
     const rows = await this.prisma.faqs.findMany({
@@ -49,7 +49,7 @@ export class FaqsController {
   @Post()
   @UseGuards(JwtAuthGuard, StaffGuard)
   @ApiBearerAuth()
-  @ApiOperation({ summary: "Crear FAQ (solo staff)" })
+  @ApiOperation({ summary: "Create FAQ (staff only)" })
   async create(@Body("data") data: FaqDto) {
     const now = new Date();
     const row = await this.prisma.faqs.create({
@@ -60,7 +60,7 @@ export class FaqsController {
         locale: "en",
         created_at: now,
         updated_at: now,
-        published_at: now, // draft & publish desactivado en este content-type
+        published_at: now, // draft & publish disabled on this content-type
       },
     });
     return { data: this.serialize(row) };
@@ -69,7 +69,7 @@ export class FaqsController {
   @Put(":documentId")
   @UseGuards(JwtAuthGuard, StaffGuard)
   @ApiBearerAuth()
-  @ApiOperation({ summary: "Actualizar FAQ (solo staff)" })
+  @ApiOperation({ summary: "Update FAQ (staff only)" })
   async update(@Param("documentId") documentId: string, @Body("data") data: FaqDto) {
     const row = await this.findByDocumentId(documentId);
     const updated = await this.prisma.faqs.update({
@@ -82,7 +82,7 @@ export class FaqsController {
   @Delete(":documentId")
   @UseGuards(JwtAuthGuard, StaffGuard)
   @ApiBearerAuth()
-  @ApiOperation({ summary: "Eliminar FAQ (solo staff)" })
+  @ApiOperation({ summary: "Delete FAQ (staff only)" })
   async delete(@Param("documentId") documentId: string) {
     const row = await this.findByDocumentId(documentId);
     await this.prisma.faqs.deleteMany({ where: { document_id: documentId } });

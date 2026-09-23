@@ -35,7 +35,7 @@ export default async function LocaleLayout({
       >
         <OrganizationWebSiteJsonLd />
         <PageTracker />
-        {/* No pinta nada: manda la visita y los clics al hub del grupo. */}
+        {/* Renders nothing: sends the visit and clicks to the group hub. */}
         <HubAnalytics />
         <Providers locale={locale} messages={messages}>
           {children}

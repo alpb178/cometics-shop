@@ -5,6 +5,6 @@ export const dynamic = "force-dynamic";
 
 export default async function CategoriesPage() {
   const categories = await listCategories();
-  // El PageHeader (con el botón "Nueva categoría") lo renderiza el manager.
+  // The PageHeader (with the "Nueva categoría" button) is rendered by the manager.
   return <CategoryManager categories={categories} />;
 }

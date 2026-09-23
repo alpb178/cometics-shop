@@ -6,10 +6,10 @@ import type { LucideIcon } from "lucide-react";
 import { cn } from "@/lib/admin/admin-utils";
 
 /**
- * Kit de UI del backoffice. La familia de tabla (DataTable, AdminTable,
- * TableSkeleton, Skeleton) es la MISMA del admin de Tu Chamba, copiada
- * verbatim — sus tokens de color (surface/outline/primary) están mapeados
- * a la paleta de Iris en tailwind.config.ts.
+ * Back-office UI kit. The table family (DataTable, AdminTable, TableSkeleton,
+ * Skeleton) is the SAME as in the Tu Chamba admin, copied verbatim — its color
+ * tokens (surface/outline/primary) are mapped to the Iris palette in
+ * tailwind.config.ts.
  */
 
 export function DataTable({
@@ -67,10 +67,10 @@ export function TableSkeleton({
   );
 }
 
-// Tabla estándar del panel: encapsula los cuatro estados de una tabla con
-// datos remotos. Primera carga -> skeleton; recarga con datos previos ->
-// tabla atenuada (transición suave, sin parpadeo); error -> mensaje; sin
-// filas -> una fila de "sin datos" dentro de la propia tabla.
+// Standard panel table: wraps the four states of a table with remote data.
+// First load -> skeleton; reload with previous data -> dimmed table (smooth
+// transition, no flicker); error -> message; no rows -> a "no data" row inside
+// the table itself.
 export function AdminTable({
   headers,
   loading = false,
@@ -126,7 +126,7 @@ export function Badge({
   return <span className={cn("badge", className)}>{children}</span>;
 }
 
-/** Botón de acción por fila, solo icono, con tooltip accesible. */
+/** Icon-only per-row action button with an accessible tooltip. */
 export function IconButton({
   icon: Icon,
   label,
@@ -157,7 +157,7 @@ export function IconButton({
   );
 }
 
-/** Checkbox de selección de filas. */
+/** Row selection checkbox. */
 export function SelectCheckbox({
   label,
   ...props
@@ -175,7 +175,7 @@ export function SelectCheckbox({
   );
 }
 
-/** Buscador con icono. */
+/** Search box with icon. */
 export function SearchInput({
   value,
   onChange,
@@ -206,7 +206,7 @@ export interface FilterOption {
   label: string;
 }
 
-/** Select de filtro compacto. */
+/** Compact filter select. */
 export function FilterSelect({
   value,
   onChange,
@@ -239,7 +239,7 @@ export function FilterSelect({
   );
 }
 
-/** Modal genérico (overlay + tarjeta). */
+/** Generic modal (overlay + card). */
 export function Modal({
   title,
   onClose,
@@ -277,7 +277,7 @@ export function Modal({
   );
 }
 
-/** Diálogo de confirmación para acciones destructivas (sustituye a window.confirm). */
+/** Confirmation dialog for destructive actions (replaces window.confirm). */
 export function ConfirmDialog({
   open,
   title,

@@ -46,7 +46,7 @@ export function Providers({
             <CartProvider>
               <ThemeProvider>
                 {children}
-                {/* Dentro del ThemeProvider: el toaster sigue el tema activo */}
+                {/* Inside ThemeProvider: the toaster follows the active theme */}
                 <ErrorToaster />
               </ThemeProvider>
               <SpeedInsights />
