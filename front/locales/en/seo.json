@@ -1,0 +1,41 @@
+{
+  "site": {
+    "title": "Iris Natural Cosmética | Natural products in Santa Cruz, Bolivia",
+    "description": "Shop for natural personal care and beauty products. Natural cosmetics in Santa Cruz de la Sierra, Bolivia.",
+    "ogDescription": "At Iris Natural Cosmética we believe in the power of nature to care for and enhance beauty. Santa Cruz de la Sierra, Bolivia.",
+    "keywords": "Natural cosmetics, Natural beauty, Personal care, Natural products, Santa Cruz Bolivia, Natural oils, Skin care, Hair care"
+  },
+  "pages": {
+    "home": {
+      "title": "Home",
+      "description": "Discover quality natural products for your personal care. Iris Natural Cosmética, Santa Cruz de la Sierra, Bolivia."
+    },
+    "contact": {
+      "title": "Contact",
+      "description": "Get in touch. Iris Natural Cosmética, Santa Cruz de la Sierra, Bolivia. Opening hours, address and WhatsApp."
+    },
+    "about": {
+      "title": "About us",
+      "description": "Meet Iris Natural Cosmética. Natural personal care products in Santa Cruz, Bolivia."
+    },
+    "faq": {
+      "title": "FAQ",
+      "description": "Frequently asked questions about natural products, shipping and orders. Iris Natural Cosmética."
+    },
+    "how-it-works": {
+      "title": "How it works",
+      "description": "How to buy and receive your natural products. Ordering and delivery process, Iris Natural Cosmética."
+    },
+    "cart": {
+      "title": "Cart",
+      "description": "Your shopping cart. Review your products and complete your order."
+    },
+    "policy-privacy": {
+      "title": "Privacy Policy",
+      "description": "Privacy policy and data processing. Iris Natural Cosmética."
+    }
+  },
+  "product": {
+    "fallbackTitle": "Product"
+  }
+}

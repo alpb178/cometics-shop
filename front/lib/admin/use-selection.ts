@@ -3,8 +3,8 @@
 import { useCallback, useState } from "react";
 
 /**
- * Selección por lotes que se conserva al cambiar de página o filtro
- * (mismo comportamiento que useSelection del admin de Tu Chamba).
+ * Batch selection that persists across page or filter changes
+ * (same behavior as useSelection in the Tu Chamba admin).
  */
 export function useSelection(pageIds: string[]) {
   const [selected, setSelected] = useState<Set<string>>(new Set());

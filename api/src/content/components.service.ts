@@ -2,10 +2,9 @@ import { Injectable } from "@nestjs/common";
 import { PrismaService } from "../prisma/prisma.service";
 
 /**
- * Serialización de redes sociales (alias/name + su link). El resto del
- * contenido CMS de Strapi (páginas, navbar, footer, dynamic zones) se retiró:
- * el front lo maneja de forma estática. Solo queda lo que consume
- * SocialNetworksController.
+ * Social network serialization (alias/name + its link). The rest of Strapi's
+ * CMS content (pages, navbar, footer, dynamic zones) was retired: the front
+ * handles it statically. Only what SocialNetworksController consumes remains.
  */
 @Injectable()
 export class ComponentsService {

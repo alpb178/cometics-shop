@@ -1,4 +1,5 @@
-import Link from "next/link";
+import { getTranslations } from "next-intl/server";
+import { Link } from "@/i18n/navigation";
 import { notFound } from "next/navigation";
 import { requireUser } from "@/lib/auth/server";
 import { authFetch } from "@/lib/strapi/auth-fetch";
@@ -12,6 +13,7 @@ export default async function EditAddressPage({
 }) {
   const { id } = await params;
   await requireUser(`/account/addresses/${id}/edit`);
+  const t = await getTranslations("account");
 
   const res = await authFetch(`/api/addresses/${id}`);
   if (!res.ok) return notFound();
@@ -24,15 +26,15 @@ export default async function EditAddressPage({
         href="/account/addresses"
         className="text-xs uppercase tracking-[0.16em] text-muted-foreground underline-offset-4 hover:underline"
       >
-        ← Mis direcciones
+        {t("addresses.backToAddresses")}
       </Link>
 
       <header className="mt-6 mb-10 border-b border-border pb-6">
         <p className="text-xs font-semibold uppercase tracking-[0.22em] text-primary">
-          Mi cuenta
+          {t("eyebrow")}
         </p>
         <h1 className="font-display text-3xl font-semibold tracking-tight">
-          Editar dirección
+          {t("addresses.editAddress")}
         </h1>
       </header>
 

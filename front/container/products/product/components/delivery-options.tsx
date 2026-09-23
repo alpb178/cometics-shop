@@ -2,6 +2,7 @@
 
 import { RadioGroup, RadioItem, RadioButton } from "../../../../components/ui/radio-group";
 import { DeliveryInfo } from "./delivery-info";
+import { useTranslations } from "next-intl";
 
 export type DeliveryOption = "delivery" | "pickup";
 
@@ -18,10 +19,11 @@ export const DeliveryOptions = ({
   className,
   showInfo = true
 }: DeliveryOptionsProps) => {
+  const t = useTranslations("products.delivery");
   return (
     <div className={className}>
       <label className="block text-sm font-medium text-foreground mb-3">
-        Opción de entrega:
+        {t("optionLabel")}
       </label>
       <RadioGroup
         value={value}
@@ -36,7 +38,7 @@ export const DeliveryOptions = ({
           />
           <label className="cursor-pointer">
             <span className="text-sm text-foreground">
-              🚚 Envío a domicilio
+              🚚 {t("delivery.title")}
             </span>
           </label>
         </RadioItem>
@@ -49,7 +51,7 @@ export const DeliveryOptions = ({
           />
           <label className="cursor-pointer">
             <span className="text-sm text-foreground">
-              🏪 Recoger en tienda
+              🏪 {t("pickup.title")}
             </span>
           </label>
         </RadioItem>

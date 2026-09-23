@@ -1,7 +1,9 @@
 "use client";
 
 import Image from "next/image";
-import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
+import { useRouter } from "@/i18n/navigation";
+import { errorMessage } from "@/lib/auth/client";
 import { Fragment, useCallback, useEffect, useMemo, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { Upload, X, MapPin, ArrowLeft } from "lucide-react";
@@ -48,6 +50,7 @@ export function CheckoutForm({
   paymentInfo: PaymentInfo | null;
   savedAddresses: Address[];
 }) {
+  const t = useTranslations("checkout");
   const router = useRouter();
   const { items, getCartTotal, clearCart } = useCart();
   const { refresh } = useAuth();
@@ -62,8 +65,8 @@ export function CheckoutForm({
     }
   });
 
-  // Paso del wizard: 1 = método de entrega, 2 = datos de entrega, 3 = pago.
-  // Mejora la experiencia en móvil.
+  // Wizard step: 1 = delivery method, 2 = delivery details, 3 = payment.
+  // Improves the mobile experience.
   const [step, setStep] = useState<1 | 2 | 3>(1);
 
   const defaultAddress = savedAddresses[0] ?? null;
@@ -85,7 +88,7 @@ export function CheckoutForm({
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Configuración de precios/envío y zona de entrega.
+  // Pricing/shipping configuration and delivery zone.
   const [pricing, setPricing] = useState<PricingSettings>(PRICING_DEFAULTS);
   const [isProvince, setIsProvince] = useState(false);
   const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(
@@ -99,7 +102,7 @@ export function CheckoutForm({
     getPricingSettings().then(setPricing);
   }, []);
 
-  // Dentro de Santa Cruz mostramos el mapa para fijar el punto de entrega.
+  // Inside Santa Cruz we show the map to pin the delivery point.
   const showMap = deliveryMethod === "delivery" && !isProvince;
 
   const requestLocation = useCallback(() => {
@@ -121,8 +124,8 @@ export function CheckoutForm({
     );
   }, [pricing]);
 
-  // Último punto guardado para el destino elegido: solo existe si se está usando
-  // una dirección guardada que ya tenga punto.
+  // Last saved point for the chosen destination: only exists when a saved
+  // address that already has a point is being used.
   const savedCoords = useMemo(() => {
     if (addressMode !== "saved") return null;
     const addr = savedAddresses.find((a) => a.id === selectedAddressId);
@@ -130,18 +133,20 @@ export function CheckoutForm({
     return { lat: addr.lat, lng: addr.lng };
   }, [addressMode, savedAddresses, selectedAddressId]);
 
-  // El pin sigue al destino elegido: salta al punto de la dirección nueva, y se
-  // vacía si esa dirección no tiene ninguno. Antes solo se asignaba cuando había
-  // punto, así que al pasar a una dirección sin él el pin conservaba el de la
-  // anterior — y al confirmar se guardaba ese punto ajeno en ella.
+  // The pin follows the chosen destination: it jumps to the point of the new
+  // address, and is cleared if that address has none. It used to be assigned
+  // only when there was a point, so switching to an address without one kept
+  // the previous address's pin — and on confirm that foreign point was saved
+  // into it.
   useEffect(() => {
     setCoords(savedCoords);
   }, [savedCoords]);
 
-  // Sin punto para el destino elegido se pide la ubicación real del dispositivo.
-  // Antes se pre-centraba el pin en el centro de Santa Cruz, así que quien no
-  // tocaba el mapa enviaba un punto que no eligió. El propio `geoStatus` evita
-  // reintentos: "locating" corta la re-entrada y "denied" no vuelve a pedirlo.
+  // With no point for the chosen destination, the device's real location is
+  // requested. The pin used to be pre-centered on downtown Santa Cruz, so
+  // anyone who did not touch the map sent a point they never chose. `geoStatus`
+  // itself prevents retries: "locating" blocks re-entry and "denied" does not
+  // ask again.
   useEffect(() => {
     if (!showMap || coords || savedCoords) return;
     if (geoStatus === "locating" || geoStatus === "denied") return;
@@ -157,15 +162,15 @@ export function CheckoutForm({
 
   const qrUrl = mediaUrl(paymentInfo?.qrImage?.url);
 
-  // Fuera de Santa Cruz (envío a provincia) solo se acepta QR: el pedido viaja
-  // por terminal/mensajería, así que debe prepagarse.
+  // Outside Santa Cruz (shipping to the provinces) only QR is accepted: the
+  // order travels by bus terminal/courier, so it must be prepaid.
   const onlyQr = deliveryMethod === "delivery" && isProvince;
 
   const paymentOptions: { value: PaymentMethod; label: string }[] = onlyQr
-    ? [{ value: "qr", label: "Pago por QR" }]
+    ? [{ value: "qr", label: t("payment.qr") }]
     : [
-        { value: "cash", label: "Efectivo" },
-        { value: "qr", label: "Pago por QR" }
+        { value: "cash", label: t("payment.cash") },
+        { value: "qr", label: t("payment.qr") }
       ];
 
   useEffect(() => {
@@ -199,7 +204,7 @@ export function CheckoutForm({
       setAmountCopied(true);
       setTimeout(() => setAmountCopied(false), 2000);
     } catch {
-      // clipboard no disponible: el monto igual está visible en pantalla.
+      // Clipboard unavailable: the amount is visible on screen anyway.
     }
   }
 
@@ -209,14 +214,14 @@ export function CheckoutForm({
     if (typeof window !== "undefined") window.scrollTo({ top: 0 });
   }
 
-  // Valida el paso 2 (datos de entrega) antes de pasar al pago.
+  // Validate step 2 (delivery details) before moving on to payment.
   async function goToPayment() {
     setError(null);
     if (deliveryMethod === "delivery") {
       const useSaved = addressMode === "saved" && savedAddresses.length > 0;
       if (useSaved) {
         if (selectedAddressId == null) {
-          setError("Selecciona una dirección guardada.");
+          setError(t("errors.selectSavedAddress"));
           return;
         }
       } else {
@@ -227,11 +232,11 @@ export function CheckoutForm({
         if (!ok) return;
       }
       if (!isProvince && !coords) {
-        setError("Marca tu ubicación de entrega en el mapa.");
+        setError(t("errors.markLocation"));
         return;
       }
     } else {
-      // Recojo en tienda: pedimos nombre y teléfono de contacto.
+      // Store pickup: we ask for a contact name and phone.
       const ok = await methods.trigger(["fullName", "phone"]);
       if (!ok) return;
     }
@@ -251,14 +256,14 @@ export function CheckoutForm({
         deliveryMethod === "delivery" && addressMode === "saved";
       const useNew = deliveryMethod === "delivery" && addressMode === "new";
 
-      // Se adjunta un contacto (nombre + teléfono) al pedido tanto para envío a
-      // domicilio (dirección nueva) como para recojo en tienda. Dentro de Santa
-      // Cruz solo nombre y teléfono; fuera de Santa Cruz además CI, zona y
-      // departamento (zona -> `city`, departamento -> `department`).
+      // A contact (name + phone) is attached to the order both for home
+      // delivery (new address) and for store pickup. Inside Santa Cruz only
+      // name and phone; outside Santa Cruz also CI, zone and department (zone
+      // -> `city`, department -> `department`).
       const collectContact = useNew || isPickup;
-      // El punto del mapa se guarda con la dirección para que el pin arranque
-      // ahí la próxima vez. Solo aplica a envío dentro de Santa Cruz, que es
-      // donde se marca en el mapa.
+      // The map point is saved with the address so the pin starts there next
+      // time. Only applies to delivery inside Santa Cruz, which is where it is
+      // marked on the map.
       const pointFields =
         useNew && !isProvince && coords
           ? { lat: coords.lat, lng: coords.lng }
@@ -292,9 +297,9 @@ export function CheckoutForm({
         }
       }
 
-      // Dirección guardada cuyo punto ha cambiado: se actualiza para que la
-      // siguiente compra arranque en el último lugar que eligió el cliente. Si
-      // falla no se corta el pedido: es una comodidad, no un requisito.
+      // Saved address whose point changed: it is updated so the next purchase
+      // starts at the last place the customer chose. A failure does not stop
+      // the order: it is a convenience, not a requirement.
       if (
         useSaved &&
         selectedAddressId != null &&
@@ -307,9 +312,10 @@ export function CheckoutForm({
           credentials: "include",
           body: JSON.stringify({ data: { lat: coords.lat, lng: coords.lng } })
         }).catch((e) => {
-          // No corta el pedido, pero tampoco se silencia: si esto falla, la
-          // próxima compra vuelve a arrancar sin punto y sin pista de por qué.
-          console.error("No se pudo guardar el punto de la dirección", e);
+          // Does not stop the order, but it is not silenced either: if this
+          // fails, the next purchase starts again with no point and no clue
+          // why.
+          console.error("Could not save the address point", e);
         });
       }
 
@@ -333,8 +339,8 @@ export function CheckoutForm({
         })),
         subtotal,
         total,
-        // Zona de entrega: el servidor verifica con las coords si están; si no,
-        // usa este flag como respaldo.
+        // Delivery zone: the server checks with the coords if present;
+        // otherwise it uses this flag as a fallback.
         isProvince: deliveryMethod === "delivery" ? isProvince : false,
         destLat: coords?.lat ?? null,
         destLng: coords?.lng ?? null
@@ -351,36 +357,36 @@ export function CheckoutForm({
       });
       const data = await res.json();
       if (!res.ok) {
-        throw new Error(data?.error || "No se pudo crear el pedido.");
+        throw new Error(data?.error || t("errors.createOrder"));
       }
 
-      // Éxito: navegamos primero (manteniendo `submitting` en true) para que la
-      // UI no parpadee al estado "carrito vacío" al limpiar el carrito antes de
-      // que complete el redirect. El carrito se vacía y la sesión se refresca
-      // sin bloquear la navegación al detalle del pedido.
+      // Success: we navigate first (keeping `submitting` true) so the UI does
+      // not flash the "empty cart" state when the cart is cleared before the
+      // redirect completes. The cart is cleared and the session refreshed
+      // without blocking navigation to the order detail.
       router.push(`/account/orders/${data.orderId}`);
       router.refresh();
       clearCart();
       refresh().catch(() => {});
     } catch (err) {
-      // Solo reactivamos el botón en error; en el camino de éxito nos vamos de
-      // la página, así que dejamos `submitting` en true y el loading visible.
-      setError(err instanceof Error ? err.message : "Algo salió mal.");
+      // We only re-enable the button on error; on the success path we leave the
+      // page, so `submitting` stays true and the loading state visible.
+      setError(errorMessage(err, t("errors.generic")));
       setSubmitting(false);
     }
   });
 
-  // No mostramos "carrito vacío" mientras se envía el pedido: tras confirmar el
-  // pago vaciamos el carrito, y sin este guard la pantalla parpadearía a "vacío"
-  // antes de que complete el redirect al detalle del pedido.
+  // Do not show "empty cart" while the order is being submitted: after the
+  // payment is confirmed we clear the cart, and without this guard the screen
+  // would flash "empty" before the redirect to the order detail completes.
   if (items.length === 0 && !submitting) {
     return (
       <section className="mx-auto w-full max-w-md px-6 py-24 text-center">
         <h1 className="font-display text-2xl font-semibold">
-          Tu carrito está vacío
+          {t("emptyCart.title")}
         </h1>
         <p className="mt-2 text-sm text-muted-foreground">
-          Añade productos antes de pasar por el checkout.
+          {t("emptyCart.body")}
         </p>
       </section>
     );
@@ -390,19 +396,19 @@ export function CheckoutForm({
     <section className="mx-auto w-full max-w-6xl px-6 py-12 lg:py-16">
       <header className="mb-8 border-b border-border pb-6">
         <p className="text-xs font-semibold uppercase tracking-[0.22em] text-primary">
-          Checkout
+          {t("header.eyebrow")}
         </p>
         <h1 className="font-display text-3xl font-semibold tracking-tight">
-          Finaliza tu pedido
+          {t("header.title")}
         </h1>
-        {/* Indicador de pasos: los pasos ya completados son clickeables para
-            volver atrás; avanzar solo se puede con los botones (validan). */}
+        {/* Step indicator: completed steps are clickable to go back; moving
+            forward is only possible with the buttons (they validate). */}
         <div className="mt-4 flex items-center gap-3 text-xs font-semibold uppercase tracking-[0.14em]">
           {(
             [
-              { n: 1, label: "Método" },
-              { n: 2, label: "Entrega" },
-              { n: 3, label: "Pago" }
+              { n: 1, label: t("steps.method") },
+              { n: 2, label: t("steps.delivery") },
+              { n: 3, label: t("steps.payment") }
             ] as const
           ).map((s, i) => (
             <Fragment key={s.n}>
@@ -419,7 +425,7 @@ export function CheckoutForm({
                       : "cursor-default text-muted-foreground"
                 }
               >
-                {s.n} · {s.label}
+                {t("steps.indicator", { n: s.n, label: s.label })}
               </button>
             </Fragment>
           ))}
@@ -440,30 +446,28 @@ export function CheckoutForm({
                 className="-mb-6 flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground hover:text-foreground"
               >
                 <ArrowLeft className="h-4 w-4" />
-                {step === 3 ? "Volver a entrega" : "Volver al método de entrega"}
+                {step === 3 ? t("back.toDelivery") : t("back.toMethod")}
               </button>
             )}
 
-            {/* ==================== PASO 1: MÉTODO DE ENTREGA ==================== */}
+            {/* ==================== STEP 1: DELIVERY METHOD ==================== */}
             {step === 1 && (
               <section>
                 <h2 className="mb-4 text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
-                  Método de entrega
+                  {t("method.title")}
                 </h2>
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                   {(
                     [
                       {
                         value: "delivery",
-                        label: "Envío a domicilio",
-                        description:
-                          "Te llevamos el pedido hasta donde estés. Envío gratuito hasta el 10.º anillo; fuera de esta zona se adiciona Bs. 17."
+                        label: t("method.deliveryLabel"),
+                        description: t("method.deliveryDescription")
                       },
                       {
                         value: "pickup",
-                        label: "Recoger en tienda",
-                        description:
-                          "Pasa por la tienda cuando tu pedido esté listo: luego de 12 horas, entre las 10:00 y las 20:00."
+                        label: t("method.pickupLabel"),
+                        description: t("method.pickupDescription")
                       }
                     ] as const
                   ).map((opt) => (
@@ -493,20 +497,20 @@ export function CheckoutForm({
               </section>
             )}
 
-            {/* ==================== PASO 2: DATOS DE ENTREGA ==================== */}
+            {/* ==================== STEP 2: DELIVERY DETAILS ==================== */}
             {step === 2 && (
               <>
                 {deliveryMethod === "delivery" && (
                   <section>
                     <h2 className="mb-4 text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
-                      Zona de entrega
+                      {t("zone.title")}
                     </h2>
                     <div className="flex flex-col gap-3">
                       <div className="flex gap-2 border border-border p-1 text-xs">
                         {(
                           [
-                            { value: false, label: "Santa Cruz" },
-                            { value: true, label: "Provincia (fuera de SC)" }
+                            { value: false, label: t("zone.santaCruz") },
+                            { value: true, label: t("zone.province") }
                           ] as const
                         ).map((opt) => (
                           <button
@@ -530,19 +534,19 @@ export function CheckoutForm({
                       >
                         <MapPin className="h-4 w-4" />
                         {geoStatus === "locating"
-                          ? "Detectando ubicación…"
-                          : "Detectar mi ubicación"}
+                          ? t("zone.detecting")
+                          : t("zone.detect")}
                       </button>
                       {geoStatus === "denied" && (
                         <p className="text-xs text-muted-foreground">
-                          No pudimos obtener tu ubicación. Selecciona tu zona
-                          manualmente.
+                          {t("zone.denied")}
                         </p>
                       )}
                       {isProvince && (
                         <p className="text-xs text-muted-foreground">
-                          Envío a provincia (a la terminal): Bs{" "}
-                          {formatAmount(pricing.provinceShippingCost)}.
+                          {t("zone.provinceShipping", {
+                            amount: formatAmount(pricing.provinceShippingCost)
+                          })}
                         </p>
                       )}
                     </div>
@@ -552,10 +556,10 @@ export function CheckoutForm({
                 {showMap && (
                   <section>
                     <h2 className="mb-2 text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
-                      Ubicación de entrega
+                      {t("map.title")}
                     </h2>
                     <p className="mb-3 text-xs text-muted-foreground">
-                      Marca en el mapa dónde entregar (por si no estás en casa).
+                      {t("map.hint")}
                     </p>
                     <LocationPicker
                       value={coords}
@@ -571,15 +575,15 @@ export function CheckoutForm({
                 {deliveryMethod === "delivery" && (
                   <section>
                     <h2 className="mb-4 text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
-                      Datos de envío
+                      {t("shipping.title")}
                     </h2>
 
                     {savedAddresses.length > 0 && (
                       <div className="mb-4 flex gap-2 border border-border p-1 text-xs">
                         {(
                           [
-                            { value: "saved", label: "Direcciones guardadas" },
-                            { value: "new", label: "Usar una nueva" }
+                            { value: "saved", label: t("shipping.savedTab") },
+                            { value: "new", label: t("shipping.newTab") }
                           ] as const
                         ).map((tab) => (
                           <button
@@ -618,11 +622,11 @@ export function CheckoutForm({
                               />
                               <p className="font-semibold">{addr.fullName}</p>
                               <p className="mt-1 text-xs text-muted-foreground">
-                                Tel: {addr.phone}
+                                {t("shipping.phoneLine", { phone: addr.phone })}
                                 {addr.ci && (
                                   <>
                                     <br />
-                                    CI: {addr.ci}
+                                    {t("shipping.ciLine", { ci: addr.ci })}
                                   </>
                                 )}
                                 {(addr.city || addr.department) && (
@@ -643,41 +647,39 @@ export function CheckoutForm({
                         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                           <TextInput
                             name="fullName"
-                            label="Nombre completo"
+                            label={t("contact.fullName")}
                             required
-                            validation={{ required: "Requerido" }}
+                            validation={{ required: t("contact.required") }}
                           />
-                          <PhoneInput name="phone" label="Teléfono" required />
+                          <PhoneInput name="phone" label={t("contact.phone")} required />
                         </div>
                         {isProvince && (
                           <>
                             <div className="mt-4">
                               <TextInput
                                 name="ci"
-                                label="Carnet de identidad (CI)"
+                                label={t("shipping.ci")}
                                 required
                                 validation={{
-                                  required:
-                                    "Requerido para envíos fuera de Santa Cruz"
+                                  required: t("shipping.ciRequired")
                                 }}
                               />
                               <p className="mt-1 text-xs text-muted-foreground">
-                                Necesario para reclamar el envío en la
-                                terminal/mensajería.
+                                {t("shipping.ciHelp")}
                               </p>
                             </div>
                             <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
                               <TextInput
                                 name="zona"
-                                label="Zona"
+                                label={t("shipping.zone")}
                                 required
-                                validation={{ required: "Requerido" }}
+                                validation={{ required: t("contact.required") }}
                               />
                               <TextInput
                                 name="department"
-                                label="Departamento"
+                                label={t("shipping.department")}
                                 required
-                                validation={{ required: "Requerido" }}
+                                validation={{ required: t("contact.required") }}
                               />
                             </div>
                           </>
@@ -689,7 +691,7 @@ export function CheckoutForm({
                             onChange={(e) => setSaveNewAddress(e.target.checked)}
                             className="h-4 w-4 border-border accent-foreground"
                           />
-                          Guardar estos datos para próximas compras
+                          {t("shipping.saveForLater")}
                         </label>
                       </>
                     )}
@@ -699,20 +701,19 @@ export function CheckoutForm({
                 {deliveryMethod === "pickup" && (
                   <section>
                     <h2 className="mb-4 text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
-                      Datos de contacto
+                      {t("contact.title")}
                     </h2>
                     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                       <TextInput
                         name="fullName"
-                        label="Nombre completo"
+                        label={t("contact.fullName")}
                         required
-                        validation={{ required: "Requerido" }}
+                        validation={{ required: t("contact.required") }}
                       />
-                      <PhoneInput name="phone" label="Teléfono" required />
+                      <PhoneInput name="phone" label={t("contact.phone")} required />
                     </div>
                     <p className="mt-6 mb-3 text-sm text-muted-foreground">
-                      Recoges tu pedido en la tienda; te avisaremos cuando esté
-                      listo. Esta es nuestra ubicación:
+                      {t("contact.pickupInfo")}
                     </p>
                     <StoreMap />
                   </section>
@@ -720,11 +721,11 @@ export function CheckoutForm({
               </>
             )}
 
-            {/* ======================== PASO 3: PAGO ======================== */}
+            {/* ======================== STEP 3: PAYMENT ======================== */}
             {step === 3 && (
               <section>
                 <h2 className="mb-4 text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
-                  Método de pago
+                  {t("payment.title")}
                 </h2>
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                   {paymentOptions.map((opt) => (
@@ -751,11 +752,13 @@ export function CheckoutForm({
 
                 {onlyQr && (
                   <p className="mt-3 text-xs text-muted-foreground">
-                    Para envíos fuera de Santa Cruz solo se acepta{" "}
-                    <span className="font-semibold text-foreground">
-                      pago por QR
-                    </span>{" "}
-                    (el pedido se envía por mensajería y debe estar pagado).
+                    {t.rich("payment.onlyQr", {
+                      strong: (chunks) => (
+                        <span className="font-semibold text-foreground">
+                          {chunks}
+                        </span>
+                      )
+                    })}
                   </p>
                 )}
 
@@ -763,15 +766,15 @@ export function CheckoutForm({
                   <div className="mt-6 flex flex-wrap items-center justify-between gap-3 border border-foreground/20 bg-secondary/50 px-5 py-4">
                     <div>
                       <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">
-                        Monto exacto a pagar
+                        {t("payment.exactAmount")}
                       </p>
                       <p className="font-display text-2xl font-semibold">
                         Bs {formatAmount(total)}
                       </p>
                       <p className="mt-1 text-xs text-muted-foreground">
                         {paymentMethod === "qr"
-                          ? "El QR no lleva el monto: ingrésalo manualmente en tu app bancaria."
-                          : "Prepara el monto exacto en efectivo para pagar al recibir o al recoger."}
+                          ? t("payment.qrAmountHint")
+                          : t("payment.cashAmountHint")}
                       </p>
                     </div>
                     <button
@@ -779,19 +782,19 @@ export function CheckoutForm({
                       onClick={copyAmount}
                       className="shrink-0 border border-foreground px-4 py-2 text-xs font-semibold uppercase tracking-[0.14em] transition-colors hover:bg-foreground hover:text-background"
                     >
-                      {amountCopied ? "¡Copiado!" : "Copiar monto"}
+                      {amountCopied ? t("payment.copied") : t("payment.copyAmount")}
                     </button>
                   </div>
                 )}
 
                 {paymentMethod === "cash" && (
                   <div className="mt-6 space-y-2 border border-border bg-secondary/50 px-5 py-4 text-sm">
-                    <p className="font-medium">Pago en efectivo</p>
+                    <p className="font-medium">{t("payment.cashTitle")}</p>
                     <p className="text-muted-foreground">
                       {deliveryMethod === "pickup"
-                        ? "Paga en efectivo al recoger tu pedido en la tienda."
-                        : "Paga en efectivo al recibir tu pedido (contra entrega)."}{" "}
-                      Ten listo el monto exacto: Bs {formatAmount(total)}.
+                        ? t("payment.cashPickup")
+                        : t("payment.cashDelivery")}{" "}
+                      {t("payment.cashExact", { amount: formatAmount(total) })}
                     </p>
                   </div>
                 )}
@@ -804,24 +807,23 @@ export function CheckoutForm({
                           type="button"
                           onClick={() => setQrZoomed(true)}
                           className="relative h-64 w-64 cursor-zoom-in bg-background transition-transform hover:scale-[1.02]"
-                          aria-label="Ampliar QR para escanear"
+                          aria-label={t("payment.zoomQr")}
                         >
                           <Image
                             src={qrUrl}
-                            alt="QR de pago"
+                            alt={t("payment.qrAlt")}
                             fill
                             sizes="256px"
                             className="object-contain"
                           />
                         </button>
                         <p className="text-center text-xs text-muted-foreground">
-                          Toca el QR para ampliarlo. Escanéalo con tu app
-                          bancaria y sube luego el comprobante.
+                          {t("payment.qrHelp")}
                         </p>
                       </div>
                     ) : (
                       <p className="text-muted-foreground">
-                        El QR todavía no está configurado. Contacta a la tienda.
+                        {t("payment.qrMissing")}
                       </p>
                     )}
                   </div>
@@ -830,13 +832,13 @@ export function CheckoutForm({
                 {paymentMethod === "qr" && (
                   <div className="mt-8">
                     <h3 className="mb-4 text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
-                      Comprobante de pago
+                      {t("payment.proofTitle")}
                     </h3>
 
                     {!proofFile ? (
                       <label className="flex cursor-pointer flex-col items-center justify-center gap-2 border border-dashed border-border bg-secondary/30 px-6 py-10 text-sm text-muted-foreground hover:bg-secondary">
                         <Upload className="h-6 w-6" />
-                        <span>Subir foto del comprobante</span>
+                        <span>{t("payment.uploadProof")}</span>
                         <input
                           type="file"
                           accept="image/*"
@@ -850,7 +852,7 @@ export function CheckoutForm({
                           <div className="relative h-48 w-48 overflow-hidden border border-border">
                             <Image
                               src={proofPreview}
-                              alt="Comprobante"
+                              alt={t("payment.proofAlt")}
                               fill
                               sizes="192px"
                               className="object-cover"
@@ -861,7 +863,7 @@ export function CheckoutForm({
                           type="button"
                           onClick={clearProof}
                           className="absolute -right-2 -top-2 flex h-7 w-7 items-center justify-center rounded-full bg-foreground text-background"
-                          aria-label="Quitar comprobante"
+                          aria-label={t("payment.removeProof")}
                         >
                           <X className="h-4 w-4" />
                         </button>
@@ -873,7 +875,7 @@ export function CheckoutForm({
                         htmlFor="paymentReference"
                         className="mb-2 block text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground"
                       >
-                        Nº de comprobante / transacción (opcional)
+                        {t("payment.reference")}
                       </label>
                       <input
                         id="paymentReference"
@@ -882,12 +884,11 @@ export function CheckoutForm({
                         value={paymentReference}
                         onChange={(e) => setPaymentReference(e.target.value)}
                         maxLength={120}
-                        placeholder="Ej. 000123456789"
+                        placeholder={t("payment.referencePlaceholder")}
                         className="w-full max-w-xs border border-border bg-background px-4 py-3 text-sm focus:border-foreground focus:outline-none"
                       />
                       <p className="mt-1 text-xs text-muted-foreground">
-                        Cópialo desde tu app bancaria para agilizar la
-                        verificación.
+                        {t("payment.referenceHelp")}
                       </p>
                     </div>
                   </div>
@@ -905,7 +906,7 @@ export function CheckoutForm({
           <aside className="lg:sticky lg:top-24 lg:self-start">
             <div className="border border-border bg-secondary/30 p-6">
               <h2 className="mb-4 font-display text-lg font-semibold">
-                Tu pedido
+                {t("summary.title")}
               </h2>
               <ul className="mb-4 divide-y divide-border">
                 {items.map((it) => (
@@ -928,17 +929,17 @@ export function CheckoutForm({
 
               <dl className="space-y-2 border-t border-border pt-4 text-sm">
                 <div className="flex justify-between">
-                  <dt className="text-muted-foreground">Subtotal</dt>
+                  <dt className="text-muted-foreground">{t("summary.subtotal")}</dt>
                   <dd>Bs {formatAmount(subtotal)}</dd>
                 </div>
                 {shippingCost > 0 && (
                   <div className="flex justify-between">
-                    <dt className="text-muted-foreground">Envío a provincia</dt>
+                    <dt className="text-muted-foreground">{t("summary.provinceShipping")}</dt>
                     <dd>Bs {formatAmount(shippingCost)}</dd>
                   </div>
                 )}
                 <div className="flex justify-between border-t border-border pt-2 text-base font-semibold">
-                  <dt>Total</dt>
+                  <dt>{t("summary.total")}</dt>
                   <dd>Bs {formatAmount(total)}</dd>
                 </div>
               </dl>
@@ -949,7 +950,7 @@ export function CheckoutForm({
                   onClick={() => goToStep(2)}
                   className="mt-6 w-full bg-foreground px-6 py-4 text-xs font-semibold uppercase tracking-[0.16em] text-background transition-colors hover:bg-foreground/90"
                 >
-                  Continuar
+                  {t("summary.continue")}
                 </button>
               )}
               {step === 2 && (
@@ -959,7 +960,7 @@ export function CheckoutForm({
                     onClick={goToPayment}
                     className="mt-6 w-full bg-foreground px-6 py-4 text-xs font-semibold uppercase tracking-[0.16em] text-background transition-colors hover:bg-foreground/90"
                   >
-                    Continuar al pago
+                    {t("summary.continueToPayment")}
                   </button>
                   <button
                     type="button"
@@ -967,7 +968,7 @@ export function CheckoutForm({
                     className="mt-3 flex w-full items-center justify-center gap-2 text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground hover:text-foreground"
                   >
                     <ArrowLeft className="h-4 w-4" />
-                    Volver al método de entrega
+                    {t("back.toMethod")}
                   </button>
                 </>
               )}
@@ -978,7 +979,7 @@ export function CheckoutForm({
                     disabled={!canSubmit}
                     className="mt-6 w-full bg-foreground px-6 py-4 text-xs font-semibold uppercase tracking-[0.16em] text-background transition-colors hover:bg-foreground/90 disabled:cursor-not-allowed disabled:opacity-50"
                   >
-                    {submitting ? "Enviando…" : "Confirmar pedido"}
+                    {submitting ? t("summary.submitting") : t("summary.submit")}
                   </button>
                   <button
                     type="button"
@@ -986,11 +987,10 @@ export function CheckoutForm({
                     className="mt-3 flex w-full items-center justify-center gap-2 text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground hover:text-foreground"
                   >
                     <ArrowLeft className="h-4 w-4" />
-                    Volver a entrega
+                    {t("back.toDelivery")}
                   </button>
                   <p className="mt-3 text-xs text-muted-foreground">
-                    Verificaremos tu comprobante y te confirmaremos el pedido en
-                    cuanto esté listo.
+                    {t("summary.verifyNote")}
                   </p>
                 </>
               )}
@@ -1003,7 +1003,7 @@ export function CheckoutForm({
         <div
           role="dialog"
           aria-modal="true"
-          aria-label="QR de pago ampliado"
+          aria-label={t("payment.qrZoomedLabel")}
           onClick={() => setQrZoomed(false)}
           className="fixed inset-0 z-50 flex flex-col items-center justify-center gap-4 bg-black/80 p-6"
         >
@@ -1011,7 +1011,7 @@ export function CheckoutForm({
             type="button"
             onClick={() => setQrZoomed(false)}
             className="absolute right-4 top-4 flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/20"
-            aria-label="Cerrar"
+            aria-label={t("payment.close")}
           >
             <X className="h-5 w-5" />
           </button>
@@ -1021,7 +1021,7 @@ export function CheckoutForm({
           >
             <Image
               src={qrUrl}
-              alt="QR de pago ampliado"
+              alt={t("payment.qrZoomedLabel")}
               fill
               sizes="90vw"
               className="object-contain p-2"
@@ -1029,7 +1029,7 @@ export function CheckoutForm({
             />
           </div>
           <p className="text-center text-sm text-white/80">
-            Monto exacto: Bs {formatAmount(total)} · Toca fuera del QR para cerrar
+            {t("payment.qrZoomedHint", { amount: formatAmount(total) })}
           </p>
         </div>
       )}

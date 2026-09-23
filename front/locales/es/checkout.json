@@ -1,0 +1,128 @@
+{
+  "emptyCart": {
+    "title": "Tu carrito está vacío",
+    "body": "Añade productos antes de pasar por el checkout."
+  },
+  "header": {
+    "eyebrow": "Checkout",
+    "title": "Finaliza tu pedido"
+  },
+  "steps": {
+    "method": "Método",
+    "delivery": "Entrega",
+    "payment": "Pago",
+    "indicator": "{n} · {label}"
+  },
+  "back": {
+    "toDelivery": "Volver a entrega",
+    "toMethod": "Volver al método de entrega"
+  },
+  "method": {
+    "title": "Método de entrega",
+    "deliveryLabel": "Envío a domicilio",
+    "deliveryDescription": "Te llevamos el pedido hasta donde estés. Envío gratuito hasta el 10.º anillo; fuera de esta zona se adiciona Bs. 17.",
+    "pickupLabel": "Recoger en tienda",
+    "pickupDescription": "Pasa por la tienda cuando tu pedido esté listo: luego de 12 horas, entre las 10:00 y las 20:00."
+  },
+  "zone": {
+    "title": "Zona de entrega",
+    "santaCruz": "Santa Cruz",
+    "province": "Provincia (fuera de SC)",
+    "detecting": "Detectando ubicación…",
+    "detect": "Detectar mi ubicación",
+    "denied": "No pudimos obtener tu ubicación. Selecciona tu zona manualmente.",
+    "provinceShipping": "Envío a provincia (a la terminal): Bs {amount}."
+  },
+  "map": {
+    "title": "Ubicación de entrega",
+    "hint": "Marca en el mapa dónde entregar (por si no estás en casa)."
+  },
+  "shipping": {
+    "title": "Datos de envío",
+    "savedTab": "Direcciones guardadas",
+    "newTab": "Usar una nueva",
+    "phoneLine": "Tel: {phone}",
+    "ciLine": "CI: {ci}",
+    "ci": "Carnet de identidad (CI)",
+    "ciRequired": "Requerido para envíos fuera de Santa Cruz",
+    "ciHelp": "Necesario para reclamar el envío en la terminal/mensajería.",
+    "zone": "Zona",
+    "department": "Departamento",
+    "saveForLater": "Guardar estos datos para próximas compras"
+  },
+  "contact": {
+    "title": "Datos de contacto",
+    "fullName": "Nombre completo",
+    "phone": "Teléfono",
+    "required": "Requerido",
+    "pickupInfo": "Recoges tu pedido en la tienda; te avisaremos cuando esté listo. Esta es nuestra ubicación:"
+  },
+  "payment": {
+    "title": "Método de pago",
+    "cash": "Efectivo",
+    "qr": "Pago por QR",
+    "onlyQr": "Para envíos fuera de Santa Cruz solo se acepta <strong>pago por QR</strong> (el pedido se envía por mensajería y debe estar pagado).",
+    "exactAmount": "Monto exacto a pagar",
+    "qrAmountHint": "El QR no lleva el monto: ingrésalo manualmente en tu app bancaria.",
+    "cashAmountHint": "Prepara el monto exacto en efectivo para pagar al recibir o al recoger.",
+    "copied": "¡Copiado!",
+    "copyAmount": "Copiar monto",
+    "cashTitle": "Pago en efectivo",
+    "cashPickup": "Paga en efectivo al recoger tu pedido en la tienda.",
+    "cashDelivery": "Paga en efectivo al recibir tu pedido (contra entrega).",
+    "cashExact": "Ten listo el monto exacto: Bs {amount}.",
+    "zoomQr": "Ampliar QR para escanear",
+    "qrAlt": "QR de pago",
+    "qrHelp": "Toca el QR para ampliarlo. Escanéalo con tu app bancaria y sube luego el comprobante.",
+    "qrMissing": "El QR todavía no está configurado. Contacta a la tienda.",
+    "proofTitle": "Comprobante de pago",
+    "uploadProof": "Subir foto del comprobante",
+    "proofAlt": "Comprobante",
+    "removeProof": "Quitar comprobante",
+    "reference": "Nº de comprobante / transacción (opcional)",
+    "referencePlaceholder": "Ej. 000123456789",
+    "referenceHelp": "Cópialo desde tu app bancaria para agilizar la verificación.",
+    "qrZoomedLabel": "QR de pago ampliado",
+    "close": "Cerrar",
+    "qrZoomedHint": "Monto exacto: Bs {amount} · Toca fuera del QR para cerrar"
+  },
+  "summary": {
+    "title": "Tu pedido",
+    "subtotal": "Subtotal",
+    "provinceShipping": "Envío a provincia",
+    "total": "Total",
+    "continue": "Continuar",
+    "continueToPayment": "Continuar al pago",
+    "submitting": "Enviando…",
+    "submit": "Confirmar pedido",
+    "verifyNote": "Verificaremos tu comprobante y te confirmaremos el pedido en cuanto esté listo."
+  },
+  "errors": {
+    "selectSavedAddress": "Selecciona una dirección guardada.",
+    "markLocation": "Marca tu ubicación de entrega en el mapa.",
+    "createOrder": "No se pudo crear el pedido.",
+    "generic": "Algo salió mal."
+  },
+  "locationPicker": {
+    "locating": "Obteniendo tu ubicación…",
+    "error": "No pudimos obtener tu ubicación. Marca el punto manualmente.",
+    "hintWithPin": "Toca el mapa o arrastra el pin a tu ubicación de entrega",
+    "hintNoPin": "Toca el mapa para marcar tu ubicación de entrega",
+    "useMyLocation": "Usar mi ubicación actual",
+    "expand": "Agrandar mapa",
+    "expandedLabel": "Mapa de ubicación de entrega ampliado",
+    "expandedTitle": "Ubicación de entrega",
+    "close": "Cerrar mapa"
+  },
+  "storeMap": {
+    "whatsappShare": "Ubicación de Iris Natural{address}: {url}",
+    "expand": "Agrandar mapa",
+    "viewOnMap": "Ver ubicación en el mapa",
+    "shareWhatsapp": "Compartir ubicación por WhatsApp",
+    "expandedLabel": "Mapa de la tienda ampliado",
+    "expandedTitle": "Ubicación de la tienda",
+    "share": "Compartir",
+    "close": "Cerrar mapa"
+  },
+  "sessionExpired": "Tu sesión ha expirado. Inicia sesión de nuevo."
+}

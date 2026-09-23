@@ -1,0 +1,128 @@
+{
+  "emptyCart": {
+    "title": "Seu carrinho está vazio",
+    "body": "Adicione produtos antes de ir para o checkout."
+  },
+  "header": {
+    "eyebrow": "Checkout",
+    "title": "Finalize seu pedido"
+  },
+  "steps": {
+    "method": "Método",
+    "delivery": "Entrega",
+    "payment": "Pagamento",
+    "indicator": "{n} · {label}"
+  },
+  "back": {
+    "toDelivery": "Voltar para a entrega",
+    "toMethod": "Voltar para a forma de entrega"
+  },
+  "method": {
+    "title": "Forma de entrega",
+    "deliveryLabel": "Entrega em domicílio",
+    "deliveryDescription": "Levamos o pedido até onde você estiver. Frete grátis até o 10.º anel; fora dessa área, são cobrados Bs. 17 adicionais.",
+    "pickupLabel": "Retirar na loja",
+    "pickupDescription": "Passe na loja quando seu pedido estiver pronto: após 12 horas, entre 10:00 e 20:00."
+  },
+  "zone": {
+    "title": "Área de entrega",
+    "santaCruz": "Santa Cruz",
+    "province": "Província (fora de SC)",
+    "detecting": "Detectando localização…",
+    "detect": "Detectar minha localização",
+    "denied": "Não conseguimos obter sua localização. Selecione sua área manualmente.",
+    "provinceShipping": "Envio para a província (até o terminal): Bs {amount}."
+  },
+  "map": {
+    "title": "Local de entrega",
+    "hint": "Marque no mapa onde entregar (caso você não esteja em casa)."
+  },
+  "shipping": {
+    "title": "Dados de entrega",
+    "savedTab": "Endereços salvos",
+    "newTab": "Usar um novo",
+    "phoneLine": "Tel.: {phone}",
+    "ciLine": "CI: {ci}",
+    "ci": "Carteira de identidade (CI)",
+    "ciRequired": "Obrigatório para envios fora de Santa Cruz",
+    "ciHelp": "Necessário para retirar a encomenda no terminal ou na transportadora.",
+    "zone": "Área",
+    "department": "Departamento",
+    "saveForLater": "Salvar estes dados para as próximas compras"
+  },
+  "contact": {
+    "title": "Dados de contato",
+    "fullName": "Nome completo",
+    "phone": "Telefone",
+    "required": "Obrigatório",
+    "pickupInfo": "Você retira seu pedido na loja; avisaremos quando estiver pronto. Esta é a nossa localização:"
+  },
+  "payment": {
+    "title": "Forma de pagamento",
+    "cash": "Dinheiro",
+    "qr": "Pagamento via QR",
+    "onlyQr": "Para envios fora de Santa Cruz, só aceitamos <strong>pagamento via QR</strong> (o pedido é enviado por transportadora e precisa estar pago).",
+    "exactAmount": "Valor exato a pagar",
+    "qrAmountHint": "O QR não inclui o valor: digite-o manualmente no app do seu banco.",
+    "cashAmountHint": "Separe o valor exato em dinheiro para pagar na entrega ou na retirada.",
+    "copied": "Copiado!",
+    "copyAmount": "Copiar valor",
+    "cashTitle": "Pagamento em dinheiro",
+    "cashPickup": "Pague em dinheiro ao retirar seu pedido na loja.",
+    "cashDelivery": "Pague em dinheiro ao receber seu pedido (na entrega).",
+    "cashExact": "Tenha o valor exato em mãos: Bs {amount}.",
+    "zoomQr": "Ampliar o QR para escanear",
+    "qrAlt": "QR de pagamento",
+    "qrHelp": "Toque no QR para ampliá-lo. Escaneie com o app do seu banco e depois envie o comprovante.",
+    "qrMissing": "O QR ainda não foi configurado. Entre em contato com a loja.",
+    "proofTitle": "Comprovante de pagamento",
+    "uploadProof": "Enviar foto do comprovante",
+    "proofAlt": "Comprovante",
+    "removeProof": "Remover comprovante",
+    "reference": "Nº do comprovante / transação (opcional)",
+    "referencePlaceholder": "Ex.: 000123456789",
+    "referenceHelp": "Copie do app do seu banco para agilizar a verificação.",
+    "qrZoomedLabel": "QR de pagamento ampliado",
+    "close": "Fechar",
+    "qrZoomedHint": "Valor exato: Bs {amount} · Toque fora do QR para fechar"
+  },
+  "summary": {
+    "title": "Seu pedido",
+    "subtotal": "Subtotal",
+    "provinceShipping": "Envio para a província",
+    "total": "Total",
+    "continue": "Continuar",
+    "continueToPayment": "Continuar para o pagamento",
+    "submitting": "Enviando…",
+    "submit": "Confirmar pedido",
+    "verifyNote": "Vamos verificar seu comprovante e confirmar o pedido assim que estiver pronto."
+  },
+  "errors": {
+    "selectSavedAddress": "Selecione um endereço salvo.",
+    "markLocation": "Marque seu local de entrega no mapa.",
+    "createOrder": "Não foi possível criar o pedido.",
+    "generic": "Algo deu errado."
+  },
+  "locationPicker": {
+    "locating": "Obtendo sua localização…",
+    "error": "Não conseguimos obter sua localização. Marque o ponto manualmente.",
+    "hintWithPin": "Toque no mapa ou arraste o pino até o local de entrega",
+    "hintNoPin": "Toque no mapa para marcar o local de entrega",
+    "useMyLocation": "Usar minha localização atual",
+    "expand": "Ampliar mapa",
+    "expandedLabel": "Mapa do local de entrega ampliado",
+    "expandedTitle": "Local de entrega",
+    "close": "Fechar mapa"
+  },
+  "storeMap": {
+    "whatsappShare": "Localização da Iris Natural{address}: {url}",
+    "expand": "Ampliar mapa",
+    "viewOnMap": "Ver localização no mapa",
+    "shareWhatsapp": "Compartilhar localização pelo WhatsApp",
+    "expandedLabel": "Mapa da loja ampliado",
+    "expandedTitle": "Localização da loja",
+    "share": "Compartilhar",
+    "close": "Fechar mapa"
+  },
+  "sessionExpired": "Sua sessão expirou. Entre novamente."
+}

@@ -13,7 +13,7 @@ export default async function AdminLayout({
 }: {
   children: React.ReactNode;
 }) {
-  // Gate server-side de todo el panel: sin sesión → /sign-in; no staff → home.
+  // Server-side gate for the whole panel: no session → /sign-in; not staff → home.
   await requireStaff();
   const user = await getCurrentUser();
   return <DashboardShell user={user}>{children}</DashboardShell>;

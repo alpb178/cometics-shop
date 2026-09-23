@@ -1,8 +1,9 @@
 import { SingleProduct } from "@/container/products/product/single-product";
 import fetchContentType from "@/lib/strapi/fetchContentType";
-import { redirect } from "next/navigation";
+import { getTranslations } from "next-intl/server";
+import { redirect } from "@/i18n/navigation";
 import type { Metadata } from "next";
-import { siteMetadata } from "@/lib/next-metadata";
+import { localizedAlternates, OG_LOCALE, toAppLocale } from "@/lib/seo-pages";
 import { ProductJsonLd } from "@/components/seo/product-json-ld";
 
 function stripHtml(html: string, maxLength = 160): string {
@@ -15,17 +16,20 @@ export async function generateMetadata({
 }: {
   params: Promise<{ slug: string; locale: string }>;
 }): Promise<Metadata> {
-  const { slug } = await params;
+  const { slug, locale: rawLocale } = await params;
+  const locale = toAppLocale(rawLocale);
+  const t = await getTranslations({ locale, namespace: "seo" });
   const product = await fetchContentType(
     "products",
     { filters: { slug } },
     true
   );
-  if (!product) return { title: "Producto" };
-  const name = product.name || "Producto";
+  if (!product) return { title: t("product.fallbackTitle") };
+  const name = product.name || t("product.fallbackTitle");
   const description =
-    stripHtml(product.description || "", 160) || siteMetadata.description;
-  const url = `${siteMetadata.url}/products/${slug}`;
+    stripHtml(product.description || "", 160) || t("site.description");
+  const alternates = localizedAlternates(`/products/${slug}`, locale);
+  const url = alternates.canonical as string;
   const image =
     product.images?.[0]?.url &&
     (product.images[0].url.startsWith("http")
@@ -39,6 +43,7 @@ export async function generateMetadata({
       description,
       url,
       type: "website",
+      locale: OG_LOCALE[locale],
       images: image ? [{ url: image, alt: name }] : undefined
     },
     twitter: {
@@ -46,7 +51,7 @@ export async function generateMetadata({
       title: name,
       description
     },
-    alternates: { canonical: url }
+    alternates
   };
 }
 
@@ -55,7 +60,8 @@ export default async function SingleProductPage({
 }: {
   params: Promise<{ slug: string; locale: string }>;
 }) {
-  const { slug, locale } = await params;
+  const { slug, locale: rawLocale } = await params;
+  const locale = toAppLocale(rawLocale);
 
   const product = await fetchContentType(
     "products",
@@ -66,7 +72,7 @@ export default async function SingleProductPage({
   );
 
   if (!product) {
-    redirect("/");
+    redirect({ href: "/", locale });
   }
 
   return (

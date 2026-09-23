@@ -12,6 +12,7 @@ import utc from "dayjs/plugin/utc";
 import { AbstractIntlMessages, NextIntlClientProvider } from "next-intl";
 import { ViewTransitions } from "next-view-transitions";
 import { SlugProvider } from "./context/SlugContext";
+import type { AppLocale } from "@/i18n/routing";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Analytics } from "@vercel/analytics/next";
 
@@ -29,7 +30,7 @@ export function Providers({
   messages
 }: Readonly<{
   children: React.ReactNode;
-  locale: string;
+  locale: AppLocale;
   messages: AbstractIntlMessages;
 }>) {
   dayjs.locale(locale);
@@ -46,7 +47,7 @@ export function Providers({
             <CartProvider>
               <ThemeProvider>
                 {children}
-                {/* Dentro del ThemeProvider: el toaster sigue el tema activo */}
+                {/* Inside ThemeProvider: the toaster follows the active theme */}
                 <ErrorToaster />
               </ThemeProvider>
               <SpeedInsights />

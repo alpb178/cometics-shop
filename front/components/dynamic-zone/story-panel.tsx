@@ -3,6 +3,7 @@
 import { strapiImage } from "@/lib/strapi/strapiImage";
 import { motion } from "framer-motion";
 import Image from "next/image";
+import { useTranslations } from "next-intl";
 
 type StoryItem = {
   tittle: string;
@@ -11,6 +12,7 @@ type StoryItem = {
 };
 
 export function StoryPanel({ storys: data }: { storys: StoryItem[] }) {
+  const t = useTranslations("pages.story");
   if (!data?.length) return null;
 
   return (
@@ -36,7 +38,7 @@ export function StoryPanel({ storys: data }: { storys: StoryItem[] }) {
                 className="max-w-3xl mx-auto text-center"
               >
                 <span className="inline-block text-xs font-semibold text-pink-600 uppercase tracking-widest mb-4">
-                  {String(index + 1).padStart(2, "0")} · Nuestra historia
+                  {t("eyebrow", { number: String(index + 1).padStart(2, "0") })}
                 </span>
                 <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-6 leading-tight">
                   {item.tittle}
@@ -79,7 +81,7 @@ export function StoryPanel({ storys: data }: { storys: StoryItem[] }) {
                 }`}
               >
                 <span className="inline-block text-xs font-semibold text-pink-600 uppercase tracking-widest mb-4">
-                  {String(index + 1).padStart(2, "0")} · Nuestra historia
+                  {t("eyebrow", { number: String(index + 1).padStart(2, "0") })}
                 </span>
                 <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-6 leading-tight">
                   {item.tittle}

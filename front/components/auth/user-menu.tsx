@@ -8,11 +8,16 @@ import {
   User as UserIcon,
   UserCircle2
 } from "lucide-react";
-import { Link } from "next-view-transitions";
-import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
+import Link from "next/link";
+import { TransitionLink } from "@/components/i18n/transition-link";
+import { useRouter } from "@/i18n/navigation";
 import { useAuth } from "@/context/auth-context";
 
-export function UserMenu({ locale }: { locale: string }) {
+// `locale` is kept for the navbar's call site; links get their prefix from the
+// locale-aware helpers.
+export function UserMenu(_props: { locale?: string }) {
+  const t = useTranslations("auth.userMenu");
   const { user, logout } = useAuth();
   const [open, setOpen] = useState(false);
   const router = useRouter();
@@ -38,13 +43,13 @@ export function UserMenu({ locale }: { locale: string }) {
 
   if (!user) {
     return (
-      <Link
-        href={`/${locale}/sign-in`}
-        aria-label="Iniciar sesión"
+      <TransitionLink
+        href="/sign-in"
+        aria-label={t("signIn")}
         className="flex h-10 w-10 items-center justify-center transition-colors hover:bg-secondary"
       >
         <UserIcon className="h-5 w-5" strokeWidth={1.5} />
-      </Link>
+      </TransitionLink>
     );
   }
 
@@ -59,7 +64,7 @@ export function UserMenu({ locale }: { locale: string }) {
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
-        aria-label="Mi cuenta"
+        aria-label={t("myAccount")}
         aria-expanded={open}
         aria-haspopup="menu"
         className="flex h-9 w-9 items-center justify-center rounded-full bg-foreground text-xs font-semibold uppercase tracking-wider text-background transition-transform hover:scale-105"
@@ -90,25 +95,26 @@ export function UserMenu({ locale }: { locale: string }) {
           </div>
 
           <div className="py-2">
-            <Link
-              href={`/${locale}/account`}
+            <TransitionLink
+              href="/account"
               className="flex items-center gap-3 px-5 py-2.5 text-sm transition-colors hover:bg-secondary"
               onClick={() => setOpen(false)}
               role="menuitem"
             >
               <UserCircle2 className="h-4 w-4 text-muted-foreground" strokeWidth={1.5} />
-              Mi cuenta
-            </Link>
-            <Link
-              href={`/${locale}/account/orders`}
+              {t("myAccount")}
+            </TransitionLink>
+            <TransitionLink
+              href="/account/orders"
               className="flex items-center gap-3 px-5 py-2.5 text-sm transition-colors hover:bg-secondary"
               onClick={() => setOpen(false)}
               role="menuitem"
             >
               <Package className="h-4 w-4 text-muted-foreground" strokeWidth={1.5} />
-              Mis pedidos
-            </Link>
+              {t("myOrders")}
+            </TransitionLink>
             {user.isStaff && (
+              // Plain link: the panel is unprefixed and Spanish-only.
               <Link
                 href="/admin"
                 className="flex items-center gap-3 px-5 py-2.5 text-sm transition-colors hover:bg-secondary"
@@ -119,7 +125,7 @@ export function UserMenu({ locale }: { locale: string }) {
                   className="h-4 w-4 text-muted-foreground"
                   strokeWidth={1.5}
                 />
-                Panel de administración
+                {t("adminPanel")}
               </Link>
             )}
           </div>
@@ -129,14 +135,14 @@ export function UserMenu({ locale }: { locale: string }) {
             onClick={async () => {
               await logout();
               setOpen(false);
-              router.push(`/${locale}`);
+              router.push("/");
               router.refresh();
             }}
             className="flex w-full items-center gap-3 border-t border-border px-5 py-3 text-left text-sm transition-colors hover:bg-secondary"
             role="menuitem"
           >
             <LogOut className="h-4 w-4 text-muted-foreground" strokeWidth={1.5} />
-            Cerrar sesión
+            {t("logout")}
           </button>
         </div>
       )}

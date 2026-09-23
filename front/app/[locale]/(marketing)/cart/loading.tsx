@@ -1,7 +1,7 @@
-// Skeleton del carrito: refleja el layout real de `components/cart/cart-page.tsx`
-// (sección ancha `max-w-screen-2xl`, grid `[1fr_400px]` con aside de resumen,
-// imágenes en retrato `aspect-[3/4]` y filas divididas sin borde) para que no
-// haya salto de layout al cargar el contenido real.
+// Cart skeleton: mirrors the real layout of `components/cart/cart-page.tsx`
+// (wide `max-w-screen-2xl` section, `[1fr_400px]` grid with a summary aside,
+// `aspect-[3/4]` portrait images and borderless divided rows) so there is no
+// layout shift when the real content loads.
 export default function CartLoading() {
   return (
     <section className="mx-auto w-full max-w-screen-2xl animate-pulse px-4 py-8 sm:px-6 lg:px-10">

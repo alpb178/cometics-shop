@@ -10,6 +10,7 @@
     "lint": "next lint",
     "tsc": "tsc --noEmit",
     "type-check": "tsc --noEmit",
+    "i18n:check": "node scripts/check-messages.mjs",
     "clean": "rm -rf .next && rm -rf node_modules && npm i",
     "format": "prettier --write .",
     "format:check": "prettier --check ."

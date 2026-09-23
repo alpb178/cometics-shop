@@ -81,7 +81,7 @@ export class UsersService {
     });
   }
 
-  /** Actualización parcial estilo users-permissions (password se rehashea, role se reenlaza). */
+  /** users-permissions-style partial update (password is rehashed, role is relinked). */
   async updateUser(
     id: number,
     input: {
@@ -155,7 +155,7 @@ export class UsersService {
   }
 
   private async getDefaultRoleId(): Promise<number | null> {
-    // Como el seed de Strapi: el rol por defecto del registro es `client`
+    // Like Strapi's seed: the default role on sign-up is `client`
     const role =
       (await this.prisma.up_roles.findFirst({ where: { type: "client" } })) ??
       (await this.prisma.up_roles.findFirst({
@@ -164,7 +164,7 @@ export class UsersService {
     return role?.id ?? null;
   }
 
-  /** User plano estilo users-permissions, con role incluido. */
+  /** Flat users-permissions-style user, with role included. */
   serializeUser(user: UserWithRole) {
     const role = user.up_users_role_lnk[0]?.up_roles ?? null;
     return {

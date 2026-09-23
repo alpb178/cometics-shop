@@ -21,7 +21,7 @@ export class ProductsController {
   constructor(private readonly productsService: ProductsService) {}
 
   @Get()
-  @ApiOperation({ summary: "Listar productos (público: publicados; status=draft: borradores)" })
+  @ApiOperation({ summary: "List products (public: published; status=draft: drafts)" })
   find(@Query() query: Record<string, unknown>) {
     return this.productsService.findMany({
       status: query.status === "draft" ? "draft" : "published",
@@ -31,7 +31,7 @@ export class ProductsController {
   }
 
   @Get(":documentId")
-  @ApiOperation({ summary: "Detalle de producto por documentId" })
+  @ApiOperation({ summary: "Product detail by documentId" })
   async findOne(@Param("documentId") documentId: string) {
     return { data: await this.productsService.findByDocumentId(documentId) };
   }
@@ -39,7 +39,7 @@ export class ProductsController {
   @Post()
   @UseGuards(JwtAuthGuard, StaffGuard)
   @ApiBearerAuth()
-  @ApiOperation({ summary: "Crear producto (solo staff)" })
+  @ApiOperation({ summary: "Create product (staff only)" })
   async create(@Body("data") data: ProductInput) {
     return { data: await this.productsService.create(data ?? {}) };
   }
@@ -47,7 +47,7 @@ export class ProductsController {
   @Put(":documentId")
   @UseGuards(JwtAuthGuard, StaffGuard)
   @ApiBearerAuth()
-  @ApiOperation({ summary: "Actualizar producto (solo staff)" })
+  @ApiOperation({ summary: "Update product (staff only)" })
   async update(
     @Param("documentId") documentId: string,
     @Body("data") data: ProductInput,
@@ -58,7 +58,7 @@ export class ProductsController {
   @Put(":documentId/visibility")
   @UseGuards(JwtAuthGuard, StaffGuard)
   @ApiBearerAuth()
-  @ApiOperation({ summary: "Mostrar/ocultar producto en la tienda (solo staff)" })
+  @ApiOperation({ summary: "Show/hide product in the store (staff only)" })
   async setVisibility(
     @Param("documentId") documentId: string,
     @Body("data") data: { visible?: boolean },
@@ -74,7 +74,7 @@ export class ProductsController {
   @Delete(":documentId")
   @UseGuards(JwtAuthGuard, StaffGuard)
   @ApiBearerAuth()
-  @ApiOperation({ summary: "Eliminar producto y sus versiones (solo staff)" })
+  @ApiOperation({ summary: "Delete product and its versions (staff only)" })
   async delete(@Param("documentId") documentId: string) {
     return { data: await this.productsService.delete(documentId) };
   }

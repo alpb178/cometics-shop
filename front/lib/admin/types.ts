@@ -1,5 +1,5 @@
-// Tipos compartidos para las entidades de Strapi que gestiona el backoffice.
-// Strapi v5 devuelve los atributos aplanados (no anidados en `attributes`).
+// Shared types for the Strapi entities managed by the back office.
+// Strapi v5 returns attributes flattened (not nested under `attributes`).
 
 export interface StrapiMediaFormat {
   url: string;
@@ -55,7 +55,7 @@ export interface OrderItem {
   name: string;
   slug?: string;
   price: number;
-  /** Precio original sin markup. Solo lo devuelve la API a staff. */
+  /** Original price without markup. The API only returns it to staff. */
   originalPrice?: number | null;
   quantity: number;
   imageUrl?: string;
@@ -105,7 +105,7 @@ export interface Order {
   cancellationReason: string | null;
   destLat: number | null;
   destLng: number | null;
-  /** Markup de la plataforma en %. Solo lo devuelve la API a staff. */
+  /** Platform markup in %. The API only returns it to staff. */
   markupPercent?: number | null;
   user: OrderUser | null;
   createdAt: string;
@@ -147,7 +147,7 @@ export interface TopProduct {
   count: number;
 }
 
-/** Clics en una tarjeta de "Sitios de interés" (label = nombre del sitio). */
+/** Clicks on a "Sites of interest" card (label = site name). */
 export interface GroupClick {
   label: string | null;
   count: number;
@@ -157,13 +157,13 @@ export interface OrderStats {
   total: number;
   pending: number;
   revenue: number;
-  /** Ganancia de las ventas a precio original (subtotal sin markup). */
+  /** Profit from sales at original price (subtotal without markup). */
   productProfit: number;
-  /** Ganancia de la plataforma (el markup añadido sobre el precio original). */
+  /** Platform profit (the markup added on top of the original price). */
   platformProfit: number;
-  /** Markup aplicado por la plataforma, en %. */
+  /** Markup applied by the platform, in %. */
   markupPercent: number;
-  /** Totales del día de hoy (desde las 00:00 hora de Bolivia). */
+  /** Today's totals (since 00:00 Bolivia time). */
   today: {
     orders: number;
     revenue: number;
@@ -191,7 +191,7 @@ export type StoreEventType =
   | "product_view"
   | "add_to_cart"
   | "cart_view"
-  // Clic en una tarjeta de "Sitios de interés" (ver ALLOWED_EVENT_TYPES en la API)
+  // Click on a "Sites of interest" card (see ALLOWED_EVENT_TYPES in the API)
   | "group_click";
 
 export interface StoreEvent {
@@ -240,14 +240,14 @@ export interface AuthUser {
   email: string;
 }
 
-/** Rol de users-permissions (public/authenticated/admin/client). */
+/** users-permissions role (public/authenticated/admin/client). */
 export interface AppRole {
   id: number;
   name: string;
   type: string;
 }
 
-/** Usuario tal como lo devuelve `GET /api/users?populate=role` (array plano). */
+/** User as returned by `GET /api/users?populate=role` (plain array). */
 export interface UserRow {
   id: number;
   username: string;

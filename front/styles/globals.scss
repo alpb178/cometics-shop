@@ -171,8 +171,8 @@ body {
   }
 }
 
-/* Clases de componente del panel de administración (`/admin`). Portadas del
-   antiguo backoffice; solo aplican donde el panel las usa. */
+/* Component classes for the admin panel (`/admin`). Ported from the old
+   back office; they only apply where the panel uses them. */
 @layer components {
   .btn {
     @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition disabled:cursor-not-allowed disabled:opacity-50;
@@ -198,4 +198,22 @@ body {
   .badge {
     @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium;
   }
+}
+
+// Shared language menu (components/language-switcher): Iris's palette. The
+// current language and the focus ring use a darkened brand green so they keep
+// AA contrast on the white menu (plain --primary is ~2.4:1).
+.lang-switcher-iris {
+  --lang-fg: rgb(var(--foreground));
+  --lang-bg: rgb(var(--background));
+  --lang-border: rgb(var(--border));
+  --lang-menu-bg: rgb(var(--popover));
+  --lang-menu-fg: rgb(var(--popover-foreground));
+  --lang-menu-border: rgb(var(--border));
+  --lang-accent: color-mix(in srgb, rgb(var(--primary)) 55%, black);
+  --lang-hover: rgb(var(--accent) / 0.25);
+}
+
+.dark .lang-switcher-iris {
+  --lang-accent: rgb(var(--accent));
 }

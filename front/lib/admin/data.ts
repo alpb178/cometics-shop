@@ -38,12 +38,12 @@ interface SingleResponse<T> {
 const PRODUCT_POPULATE =
   "populate[image]=true&populate[images]=true&populate[categories]=true";
 
-// Vista admin: `status=draft` le pide a la API que NO filtre por visibilidad,
-// es decir, que devuelva TODOS los productos (visibles y ocultos). Ya no hay
-// versiones borrador/publicada: cada producto es una sola fila.
+// Admin view: `status=draft` asks the API NOT to filter by visibility, i.e. to
+// return ALL products (visible and hidden). There are no draft/published
+// versions anymore: each product is a single row.
 const ALL = "status=draft";
 
-/* ----------------------------- Productos ----------------------------- */
+/* ------------------------------ Products ------------------------------ */
 
 export async function listProducts(): Promise<Product[]> {
   const res = await strapiGet<ListResponse<Product>>(
@@ -105,7 +105,7 @@ export async function setProductVisible(
   });
 }
 
-/* ----------------------------- Categorías ----------------------------- */
+/* ----------------------------- Categories ----------------------------- */
 
 export async function listCategories(): Promise<Category[]> {
   const res = await strapiGet<ListResponse<Category>>(
@@ -139,7 +139,7 @@ export async function deleteCategory(documentId: string): Promise<void> {
   await strapiDelete(`/api/categories/${documentId}`);
 }
 
-/* ------------------------------- Pedidos ------------------------------ */
+/* ------------------------------- Orders ------------------------------- */
 
 const ORDER_POPULATE =
   "populate[items]=true&populate[shippingAddress]=true&populate[paymentProof]=true&populate[user]=true";
@@ -174,7 +174,7 @@ export async function deleteOrder(documentId: string): Promise<void> {
   await strapiDelete(`/api/orders/${documentId}`);
 }
 
-/* ------------------------------ Contenido ----------------------------- */
+/* ------------------------------- Content ------------------------------ */
 
 export async function getPaymentInfo(): Promise<PaymentInfo | null> {
   const res = await strapiGet<SingleResponse<PaymentInfo>>(
@@ -196,11 +196,11 @@ export interface PaymentInfoInput {
 export async function updatePaymentInfo(
   input: PaymentInfoInput
 ): Promise<void> {
-  // Single type: PUT sin documentId.
+  // Single type: PUT without documentId.
   await strapiSend("PUT", "/api/payment-info", input);
 }
 
-/* --------------------- Precios / envío (config) ----------------------- */
+/* --------------------- Pricing / shipping (config) --------------------- */
 
 const PRICING_DEFAULTS: PricingSetting = {
   markupPercent: 10,
@@ -220,7 +220,7 @@ export async function getPricingSetting(): Promise<PricingSetting> {
 export async function updatePricingSetting(
   input: PricingSetting
 ): Promise<void> {
-  // Single type: PUT sin documentId.
+  // Single type: PUT without documentId.
   await strapiSend("PUT", "/api/pricing-setting", input);
 }
 
@@ -266,7 +266,7 @@ export async function listSocials(): Promise<SocialNetwork[]> {
   return res.data ?? [];
 }
 
-/* ------------------------------- Visitas ------------------------------ */
+/* ------------------------------- Visits ------------------------------- */
 
 export async function getVisitStats(): Promise<VisitStats> {
   const res = await strapiGet<SingleResponse<VisitStats>>(
@@ -306,8 +306,8 @@ export async function getHourlyVisits(): Promise<HourPoint[]> {
   return res.data ?? [];
 }
 
-// `period: "today"` acota al día en curso en Bolivia (desde las 00:00) e ignora
-// `days`, para que cuadre con el resto de KPIs de "hoy" del dashboard.
+// `period: "today"` limits results to the current day in Bolivia (since 00:00)
+// and ignores `days`, so it matches the dashboard's other "today" KPIs.
 export async function getTopProducts(
   days = 30,
   limit = 10,
@@ -321,7 +321,7 @@ export async function getTopProducts(
   return res.data ?? [];
 }
 
-// Clics en las tarjetas de "Sitios de interés" (Grupo CorpSC), por sitio.
+// Clicks on the "Sites of interest" cards (CorpSC Group), per site.
 export async function getGroupClicks(
   days = 30,
   limit = 20
@@ -336,8 +336,8 @@ export async function getOrderStats(days = 30): Promise<OrderStats> {
   const res = await strapiGet<SingleResponse<Partial<OrderStats>>>(
     `/api/orders/stats?days=${days}`
   );
-  // Fusionamos con defaults: una API sin los campos de ganancias (aún no
-  // desplegada) no debe dejar valores `undefined` que rompan el dashboard.
+  // Merge with defaults: an API without the profit fields (not deployed yet)
+  // must not leave `undefined` values that break the dashboard.
   return {
     total: 0,
     pending: 0,
@@ -352,7 +352,7 @@ export async function getOrderStats(days = 30): Promise<OrderStats> {
   };
 }
 
-/* --------------------------- Interacciones ---------------------------- */
+/* ---------------------------- Interactions ---------------------------- */
 
 export async function listStoreEvents(limit = 100): Promise<StoreEvent[]> {
   const res = await strapiGet<ListResponse<StoreEvent>>(
@@ -361,21 +361,21 @@ export async function listStoreEvents(limit = 100): Promise<StoreEvent[]> {
   return res.data ?? [];
 }
 
-/* ------------------------------- Usuarios ----------------------------- */
+/* -------------------------------- Users ------------------------------- */
 
-// `GET /api/users` (users-permissions) devuelve un array plano, no `{ data }`.
-// Acceso restringido a staff en la extensión del plugin (back/).
+// `GET /api/users` (users-permissions) returns a plain array, not `{ data }`.
+// Access is restricted to staff in the plugin extension (back/).
 export async function listUsers(): Promise<UserRow[]> {
   const users = await strapiGet<UserRow[]>(`/api/users?populate=role`);
-  // Ordenar por fecha de alta (desc) en el servidor Next para no depender de
-  // los query params de paginación/orden de users-permissions.
+  // Sort by sign-up date (desc) on the Next server so we don't depend on the
+  // users-permissions pagination/sort query params.
   return (users ?? [])
     .slice()
     .sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1));
 }
 
-// Roles de users-permissions. La ruta NO fija prefix vacío, así que usa el
-// prefijo del plugin: `/api/users-permissions/roles`. Devuelve `{ roles: [] }`.
+// users-permissions roles. The route does NOT set an empty prefix, so it uses
+// the plugin prefix: `/api/users-permissions/roles`. Returns `{ roles: [] }`.
 export async function listRoles(): Promise<AppRole[]> {
   const res = await strapiGet<{ roles: AppRole[] }>(
     `/api/users-permissions/roles`
@@ -391,15 +391,15 @@ export interface CreateUserInput {
 }
 
 export async function createUser(input: CreateUserInput): Promise<UserRow> {
-  // El body va sin envoltorio `{ data }`; `confirmed` lo fuerza además la
-  // extensión del backend por si acaso.
+  // The body goes without the `{ data }` envelope; the backend extension also
+  // forces `confirmed`, just in case.
   return await strapiPostRaw<UserRow>("/api/users", {
     ...input,
     confirmed: true
   });
 }
 
-/** Setea la contraseña de un usuario (users-permissions la hashea). */
+/** Sets a user's password (users-permissions hashes it). */
 export async function setUserPassword(
   id: number,
   password: string
@@ -407,12 +407,12 @@ export async function setUserPassword(
   await strapiPutRaw(`/api/users/${id}`, { password });
 }
 
-/** Cambia el rol de un usuario. */
+/** Changes a user's role. */
 export async function setUserRole(id: number, role: number): Promise<void> {
   await strapiPutRaw(`/api/users/${id}`, { role });
 }
 
-/** Actualiza usuario, email y/o rol (users-permissions, body plano). */
+/** Updates username, email and/or role (users-permissions, plain body). */
 export async function updateUser(
   id: number,
   input: { username?: string; email?: string; role?: number }
@@ -424,7 +424,7 @@ export async function deleteUser(id: number): Promise<void> {
   await strapiDelete(`/api/users/${id}`);
 }
 
-/** Nº de clientes registrados (rol "client"), excluye staff/admin. */
+/** Number of registered customers ("client" role), excluding staff/admin. */
 export async function countClients(): Promise<number> {
   const users = await listUsers();
   return users.filter((u) => u.role?.type === "client").length;

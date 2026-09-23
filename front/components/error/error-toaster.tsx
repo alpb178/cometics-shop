@@ -1,25 +1,29 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useEffect } from "react";
 import { Toaster, toast } from "sonner";
 import { useTheme } from "@/context/theme-context";
 
 /**
- * Captura los errores de JS que nadie maneja —excepciones sueltas y promesas
- * rechazadas— y los muestra como toast, además de renderizar el <Toaster> que
- * usa el resto de la app. Se monta una sola vez desde app/providers.tsx.
+ * Catches the JS errors nobody handles —stray exceptions and rejected promises—
+ * and shows them as a toast, besides rendering the <Toaster> used by the rest
+ * of the app. Mounted only once from app/providers.tsx.
  */
 
-/** Un mismo error repetido (p.ej. dentro de un bucle) muestra un solo toast. */
+/** The same error repeated (e.g. inside a loop) shows a single toast. */
 const DEDUPE_MS = 5000;
 
-/** El detalle se recorta: el mensaje de un stack largo desbordaría el toast. */
+/**
+ * The detail is truncated: the message of a long stack would overflow the
+ * toast.
+ */
 const MAX_DETAIL = 200;
 
 /**
- * Ruido del navegador sin información aprovechable: los scripts de otro origen
- * (extensiones, terceros) llegan como "Script error." sin stack ni línea, y el
- * bucle de ResizeObserver salta con layouts perfectamente válidos.
+ * Browser noise with no usable information: cross-origin scripts (extensions,
+ * third parties) arrive as "Script error." with no stack or line, and the
+ * ResizeObserver loop fires with perfectly valid layouts.
  */
 const IGNORED = [/^script error\.?$/i, /^resizeobserver loop/i];
 
@@ -29,13 +33,14 @@ function describe(reason: unknown): string {
   try {
     return JSON.stringify(reason) ?? String(reason);
   } catch {
-    // Referencias circulares o getters que lanzan
+    // Circular references or throwing getters
     return String(reason);
   }
 }
 
 export function ErrorToaster() {
   const { theme } = useTheme();
+  const t = useTranslations("errors.toast");
 
   useEffect(() => {
     const lastShown = new Map<string, number>();
@@ -49,9 +54,9 @@ export function ErrorToaster() {
       if (previous && now - previous < DEDUPE_MS) return;
       lastShown.set(message, now);
 
-      toast.error("Algo salió mal", {
-        // El mensaje como id: sonner actualiza el toast existente en vez de
-        // apilar duplicados si el error se repite.
+      toast.error(t("title"), {
+        // The message as id: sonner updates the existing toast instead of
+        // stacking duplicates if the error repeats.
         id: message,
         description:
           message.length > MAX_DETAIL
@@ -61,8 +66,8 @@ export function ErrorToaster() {
     };
 
     const onError = (event: ErrorEvent) => {
-      // Los fallos de carga de recursos (una <img> rota, un <script> 404) también
-      // disparan "error", pero como Event sin mensaje: no son errores de código.
+      // Resource loading failures (a broken <img>, a 404 <script>) also fire
+      // "error", but as an Event with no message: they are not code errors.
       if (!(event instanceof ErrorEvent)) return;
       show(event.error ?? event.message);
     };
@@ -74,18 +79,18 @@ export function ErrorToaster() {
       window.removeEventListener("error", onError);
       window.removeEventListener("unhandledrejection", onRejection);
     };
-  }, []);
+  }, [t]);
 
   return (
     <Toaster
       theme={theme}
       position="bottom-right"
       closeButton
-      // richColors es lo que hace que sonner use las variables --error-*;
-      // sin él, los toasts de error caen al estilo neutro.
+      // richColors is what makes sonner use the --error-* variables; without
+      // it, error toasts fall back to the neutral style.
       richColors
-      // Colores del sistema del repo (rgb + variable), esquinas rectas como el
-      // resto de la UI. El borde rojo distingue el error del toast neutro.
+      // Repo system colors (rgb + variable), square corners like the rest of
+      // the UI. The red border tells the error apart from the neutral toast.
       style={
         {
           "--border-radius": "0px",
@@ -99,7 +104,7 @@ export function ErrorToaster() {
       }
       toastOptions={{
         className: "font-sans",
-        // sonner fuerza border-radius:50% en el botón de cerrar
+        // sonner forces border-radius:50% on the close button
         classNames: { closeButton: "!rounded-none" }
       }}
     />

@@ -1,13 +1,15 @@
 "use client";
 
-import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useTranslations } from "next-intl";
+import { useSearchParams } from "next/navigation";
+import { Link, useRouter } from "@/i18n/navigation";
 import { useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { PasswordInput } from "@/components/form/password-input/PasswordInput";
 import { TextInput } from "@/components/form/text-input/TextInput";
 import { GoogleButton } from "@/components/auth/google-button";
 import { useAuth } from "@/context/auth-context";
+import { errorMessage, isAdminPath, safeRedirectPath } from "@/lib/auth/client";
 
 type FormValues = {
   email: string;
@@ -15,6 +17,7 @@ type FormValues = {
 };
 
 export default function SignInPage() {
+  const t = useTranslations("auth");
   const router = useRouter();
   const searchParams = useSearchParams();
   const { login } = useAuth();
@@ -22,7 +25,7 @@ export default function SignInPage() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(
     searchParams.get("error") === "google"
-      ? "No se pudo iniciar sesión con Google. Inténtalo de nuevo."
+      ? t("signIn.googleError")
       : null
   );
 
@@ -31,11 +34,16 @@ export default function SignInPage() {
     setError(null);
     try {
       await login(values.email, values.password);
-      const redirect = searchParams.get("redirect") ?? "/";
+      const redirect = safeRedirectPath(searchParams.get("redirect"));
+      if (isAdminPath(redirect)) {
+        // The panel is unprefixed and Spanish-only: leave the locale tree.
+        window.location.assign(redirect);
+        return;
+      }
       router.push(redirect);
       router.refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Algo salió mal.");
+      setError(errorMessage(err, t("common.genericError")));
     } finally {
       setSubmitting(false);
     }
@@ -46,39 +54,39 @@ export default function SignInPage() {
       <form onSubmit={onSubmit} noValidate className="flex flex-col gap-8">
         <header className="space-y-2 text-center">
           <h1 className="font-display text-3xl font-semibold tracking-tight">
-            Iniciar sesión
+            {t("signIn.title")}
           </h1>
           <p className="text-sm text-muted-foreground">
-            Accede a tu cuenta para finalizar tu compra
+            {t("signIn.subtitle")}
           </p>
         </header>
 
         <div className="flex flex-col gap-4">
           <TextInput
             name="email"
-            label="Email"
+            label={t("common.email")}
             type="email"
-            placeholder="tu@correo.com"
+            placeholder={t("common.emailPlaceholder")}
             required
             validation={{
-              required: "El email es requerido",
+              required: t("common.emailRequired"),
               pattern: {
                 value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                message: "Email inválido"
+                message: t("common.emailInvalid")
               }
             }}
           />
           <PasswordInput
             name="password"
-            label="Contraseña"
+            label={t("common.password")}
             required
-            validation={{ required: "La contraseña es requerida" }}
+            validation={{ required: t("common.passwordRequired") }}
           />
           <Link
             href="/forgot-password"
             className="self-end text-xs text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
           >
-            ¿Olvidaste tu contraseña?
+            {t("signIn.forgotPassword")}
           </Link>
         </div>
 
@@ -93,13 +101,13 @@ export default function SignInPage() {
           disabled={submitting}
           className="w-full bg-foreground px-6 py-4 text-xs font-semibold uppercase tracking-[0.16em] text-background transition-colors hover:bg-foreground/90 disabled:cursor-not-allowed disabled:opacity-50"
         >
-          {submitting ? "Entrando…" : "Iniciar sesión"}
+          {submitting ? t("signIn.submitting") : t("signIn.submit")}
         </button>
 
         <div className="flex items-center gap-3">
           <span className="h-px flex-1 bg-border" />
           <span className="text-xs uppercase tracking-widest text-muted-foreground">
-            o
+            {t("common.or")}
           </span>
           <span className="h-px flex-1 bg-border" />
         </div>
@@ -107,7 +115,7 @@ export default function SignInPage() {
         <GoogleButton />
 
         <p className="text-center text-sm text-muted-foreground">
-          ¿No tienes cuenta?{" "}
+          {t("signIn.noAccount")}{" "}
           <Link
             href={`/sign-up${
               searchParams.get("redirect")
@@ -116,7 +124,7 @@ export default function SignInPage() {
             }`}
             className="font-semibold text-foreground underline-offset-4 hover:underline"
           >
-            Regístrate
+            {t("signIn.signUpLink")}
           </Link>
         </p>
       </form>

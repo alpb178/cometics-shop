@@ -1,7 +1,8 @@
 "use client";
 
-import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useTranslations } from "next-intl";
+import { useSearchParams } from "next/navigation";
+import { Link, useRouter } from "@/i18n/navigation";
 import { useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { PasswordInput } from "@/components/form/password-input/PasswordInput";
@@ -9,6 +10,7 @@ import { PhoneInput } from "@/components/form/phone-input/PhoneInput";
 import { TextInput } from "@/components/form/text-input/TextInput";
 import { GoogleButton } from "@/components/auth/google-button";
 import { useAuth } from "@/context/auth-context";
+import { errorMessage, isAdminPath, safeRedirectPath } from "@/lib/auth/client";
 
 type FormValues = {
   firstName: string;
@@ -20,6 +22,7 @@ type FormValues = {
 };
 
 export default function SignUpPage() {
+  const t = useTranslations("auth");
   const router = useRouter();
   const searchParams = useSearchParams();
   const { register } = useAuth();
@@ -40,11 +43,16 @@ export default function SignUpPage() {
         lastName: values.lastName,
         phone: values.phone
       });
-      const redirect = searchParams.get("redirect") ?? "/";
+      const redirect = safeRedirectPath(searchParams.get("redirect"));
+      if (isAdminPath(redirect)) {
+        // The panel is unprefixed and Spanish-only: leave the locale tree.
+        window.location.assign(redirect);
+        return;
+      }
       router.push(redirect);
       router.refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Algo salió mal.");
+      setError(errorMessage(err, t("common.genericError")));
     } finally {
       setSubmitting(false);
     }
@@ -55,40 +63,40 @@ export default function SignUpPage() {
       <form onSubmit={onSubmit} noValidate className="flex flex-col gap-8">
         <header className="space-y-2 text-center">
           <h1 className="font-display text-3xl font-semibold tracking-tight">
-            Crear cuenta
+            {t("signUp.title")}
           </h1>
           <p className="text-sm text-muted-foreground">
-            Te tomará menos de un minuto
+            {t("signUp.subtitle")}
           </p>
         </header>
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <TextInput
             name="firstName"
-            label="Nombre"
+            label={t("signUp.firstName")}
             required
-            validation={{ required: "Tu nombre es requerido" }}
+            validation={{ required: t("signUp.firstNameRequired") }}
           />
           <TextInput
             name="lastName"
-            label="Apellido"
+            label={t("signUp.lastName")}
             required
-            validation={{ required: "Tu apellido es requerido" }}
+            validation={{ required: t("signUp.lastNameRequired") }}
           />
         </div>
 
-        <PhoneInput name="phone" label="Teléfono" required />
+        <PhoneInput name="phone" label={t("signUp.phone")} required />
 
         <TextInput
           name="email"
-          label="Email"
+          label={t("common.email")}
           type="email"
           required
           validation={{
-            required: "El email es requerido",
+            required: t("common.emailRequired"),
             pattern: {
               value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-              message: "Email inválido"
+              message: t("common.emailInvalid")
             }
           }}
         />
@@ -96,21 +104,21 @@ export default function SignUpPage() {
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <PasswordInput
             name="password"
-            label="Contraseña"
+            label={t("common.password")}
             required
             validation={{
-              required: "La contraseña es requerida",
-              minLength: { value: 8, message: "Mínimo 8 caracteres" }
+              required: t("common.passwordRequired"),
+              minLength: { value: 8, message: t("common.passwordMinLength") }
             }}
           />
           <PasswordInput
             name="passwordConfirm"
-            label="Repite la contraseña"
+            label={t("common.passwordRepeat")}
             required
             validation={{
-              required: "Confirma tu contraseña",
+              required: t("common.passwordConfirmRequired"),
               validate: (v: string) =>
-                v === password || "Las contraseñas no coinciden"
+                v === password || t("common.passwordMismatch")
             }}
           />
         </div>
@@ -126,21 +134,21 @@ export default function SignUpPage() {
           disabled={submitting}
           className="w-full bg-foreground px-6 py-4 text-xs font-semibold uppercase tracking-[0.16em] text-background transition-colors hover:bg-foreground/90 disabled:cursor-not-allowed disabled:opacity-50"
         >
-          {submitting ? "Creando cuenta…" : "Crear cuenta"}
+          {submitting ? t("signUp.submitting") : t("signUp.submit")}
         </button>
 
         <div className="flex items-center gap-3">
           <span className="h-px flex-1 bg-border" />
           <span className="text-xs uppercase tracking-widest text-muted-foreground">
-            o
+            {t("common.or")}
           </span>
           <span className="h-px flex-1 bg-border" />
         </div>
 
-        <GoogleButton label="Registrarse con Google" />
+        <GoogleButton label={t("signUp.google")} />
 
         <p className="text-center text-sm text-muted-foreground">
-          ¿Ya tienes cuenta?{" "}
+          {t("signUp.haveAccount")}{" "}
           <Link
             href={`/sign-in${
               searchParams.get("redirect")
@@ -149,7 +157,7 @@ export default function SignUpPage() {
             }`}
             className="font-semibold text-foreground underline-offset-4 hover:underline"
           >
-            Inicia sesión
+            {t("signUp.signInLink")}
           </Link>
         </p>
       </form>

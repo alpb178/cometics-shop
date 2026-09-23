@@ -15,24 +15,24 @@ export interface ProductInput {
   images?: number[];
   categories?: number | number[] | null;
   visible?: boolean;
-  /** Porcentaje de descuento (oferta). null/0 = sin oferta. */
+  /** Discount percentage (sale). null/0 = no sale. */
   discount?: number | null;
 }
 
 type Tx = Parameters<Parameters<PrismaService["$transaction"]>[0]>[0];
 
 /**
- * Products tiene UNA sola fila por documento (se eliminó el draft & publish
- * heredado de Strapi): se edita en sitio y la web la ve al instante. La fila
- * se mantiene siempre con `published_at` no nulo para que el front la lea; la
- * visibilidad en tienda la controla el flag `visible`. El parámetro `status`
- * ya no selecciona versión: 'published' = vista pública (solo visibles),
- * 'draft' = vista admin (todas). El dedupe por `document_id` es defensivo por
- * si quedaran filas duplicadas heredadas.
+ * Products has ONE row per document (the draft & publish inherited from
+ * Strapi was removed): it's edited in place and the website sees it right
+ * away. The row always keeps a non-null `published_at` so the front reads it;
+ * store visibility is controlled by the `visible` flag. The `status` param no
+ * longer selects a version: 'published' = public view (visible only),
+ * 'draft' = admin view (all). The dedupe by `document_id` is defensive in case
+ * legacy duplicate rows remain.
  */
 /**
- * Margen de filas sobre el `pageSize` pedido: mientras queden duplicados de
- * draft & publish hay hasta 2 filas por documento.
+ * Row headroom over the requested `pageSize`: while draft & publish
+ * duplicates remain there are up to 2 rows per document.
  */
 const ROW_BUDGET_FACTOR = 2;
 
@@ -45,21 +45,21 @@ export class ProductsService {
 
   async findMany(opts: { status: "draft" | "published"; slug?: string; pageSize: number }) {
     const where = {
-      // La tienda (status published) solo ve los productos marcados como
-      // visibles; el backoffice (status draft) los ve todos. `not: false`
-      // también deja pasar los `visible = null` heredados.
+      // The store (status published) only sees products marked as visible;
+      // the backoffice (status draft) sees them all. `not: false` also lets
+      // legacy `visible = null` rows through.
       ...(opts.status === "published" ? { visible: { not: false } } : {}),
       ...(opts.slug ? { slug: opts.slug } : {}),
     };
-    // Se pide por updated_at desc para que, ante duplicados heredados, la
-    // primera fila de cada document_id sea la última editada (superviviente).
+    // Ordered by updated_at desc so that, with legacy duplicates, the first
+    // row of each document_id is the last edited one (the survivor).
     //
-    // El `take` se aplica a FILAS y la deduplicación viene después, así que con
-    // los duplicados de draft & publish (2 filas por documento) el presupuesto
-    // se gastaba a la mitad: pedir 100 devolvía ~50 productos y el resto
-    // desaparecía del catálogo sin ningún error. Se pide el doble y se recorta
-    // tras deduplicar. Cuando se corra `collapse-product-versions.sql` el
-    // margen sobra y no molesta.
+    // `take` applies to ROWS and deduplication comes afterwards, so with the
+    // draft & publish duplicates (2 rows per document) half the budget was
+    // wasted: asking for 100 returned ~50 products and the rest silently
+    // vanished from the catalog. We ask for twice as many and trim after
+    // deduplicating. Once `collapse-product-versions.sql` has run the
+    // headroom is unnecessary but harmless.
     const rows = await this.prisma.products.findMany({
       where,
       orderBy: { updated_at: "desc" },
@@ -67,21 +67,21 @@ export class ProductsService {
     });
     const seen = new Set<string>();
     const unique = rows.filter((r) => {
-      if (!r.document_id) return true; // sin documento: se mantiene individual
+      if (!r.document_id) return true; // no document: kept as an individual row
       if (seen.has(r.document_id)) return false;
       seen.add(r.document_id);
       return true;
     });
-    // Orden de presentación: por fecha de creación descendente.
+    // Display order: by creation date, descending.
     unique.sort(
       (a, b) =>
         (b.created_at?.getTime() ?? 0) - (a.created_at?.getTime() ?? 0),
     );
     const page = unique.slice(0, opts.pageSize);
     const data = await Promise.all(page.map((r) => this.serialize(r)));
-    // El endpoint devuelve una sola página acotada por `pageSize` (el catálogo
-    // pagina en cliente) y no acepta offset, así que anunciar `pageCount` a
-    // partir de una división era engañoso: siempre hay una página.
+    // The endpoint returns a single page capped by `pageSize` (the catalog
+    // paginates client-side) and takes no offset, so reporting a `pageCount`
+    // derived from a division was misleading: there is always one page.
     return {
       data,
       meta: {
@@ -116,7 +116,7 @@ export class ProductsService {
           discount: input.discount ?? null,
           created_at: now,
           updated_at: now,
-          published_at: now, // fila única siempre publicada (sin draft/publish)
+          published_at: now, // single row, always published (no draft/publish)
         },
       });
       await this.applyRelations(tx, created.id, input);
@@ -139,14 +139,14 @@ export class ProductsService {
           slug: input.slug,
           discount: input.discount,
           updated_at: new Date(),
-          // Mantiene la fila publicada (por si viniera de datos heredados sin
-          // publicar); la visibilidad en tienda la controla `visible`.
+          // Keeps the row published (in case it comes from unpublished legacy
+          // data); store visibility is controlled by `visible`.
           published_at: target.published_at ?? new Date(),
         },
       });
       await this.applyRelations(tx, target.id, input, { onlyProvided: true });
-      // `visible` se propaga a todas las filas del documento (por robustez
-      // ante duplicados heredados; con fila única es un no-op inofensivo).
+      // `visible` is propagated to every row of the document (for robustness
+      // against legacy duplicates; with a single row it's a harmless no-op).
       if (input.visible !== undefined) {
         await tx.products.updateMany({
           where: { document_id: documentId },
@@ -169,12 +169,12 @@ export class ProductsService {
       await tx.files_related_mph.deleteMany({
         where: { related_type: RELATED_TYPE, related_id: { in: ids } },
       });
-      await tx.products.deleteMany({ where: { id: { in: ids } } }); // cascada lnk
+      await tx.products.deleteMany({ where: { id: { in: ids } } }); // cascades to lnk
     });
     return serialized;
   }
 
-  /** Fila única del documento: ante duplicados heredados, la última editada. */
+  /** The document's single row: with legacy duplicates, the last edited one. */
   private async getRow(documentId: string) {
     return this.prisma.products.findFirst({
       where: { document_id: documentId },
@@ -250,7 +250,7 @@ export class ProductsService {
       .replace(/^-+|-+$/g, "");
   }
 
-  /** Marca el producto como visible/oculto en la tienda (todas sus filas). */
+  /** Marks the product as visible/hidden in the store (all its rows). */
   async setVisible(documentId: string, visible: boolean) {
     const rows = await this.prisma.products.findMany({
       where: { document_id: documentId },
@@ -290,7 +290,7 @@ export class ProductsService {
         include: { categories: true },
       }),
     ]);
-    // "Nuevo" = creado en los últimos 15 días (por fecha de creación).
+    // "New" = created in the last 15 days (by creation date).
     const NEW_WINDOW_MS = 15 * 24 * 60 * 60 * 1000;
     const isNew = row.created_at
       ? Date.now() - row.created_at.getTime() <= NEW_WINDOW_MS

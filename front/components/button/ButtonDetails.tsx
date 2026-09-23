@@ -1,5 +1,6 @@
 import React from "react";
 import { motion } from "framer-motion";
+import { useTranslations } from "next-intl";
 
 export const ButtonDetails = ({
   onClick,
@@ -8,6 +9,7 @@ export const ButtonDetails = ({
   onClick: () => void;
   label?: string;
 }) => {
+  const t = useTranslations("products.buttons");
   return (
     <motion.button
       onClick={onClick}
@@ -15,7 +17,7 @@ export const ButtonDetails = ({
       whileTap={{ scale: 0.98 }}
       className="flex w-full text-underline text-xs justify-center items-center p-3 font-medium transition-all duration-200"
     >
-      {label ?? "Ver opciones"}
+      {label ?? t("viewOptions")}
     </motion.button>
   );
 };

@@ -137,7 +137,7 @@ export default async function DashboardHome() {
         />
       </div>
 
-      {/* Gráficos */}
+      {/* Charts */}
       <div className="mt-6 grid gap-4 lg:grid-cols-2">
         <ChartCard title="Visitas por día" subtitle="Últimos 30 días" href="/admin/visits">
           <DailyLine data={dailyVisits} />
@@ -159,7 +159,7 @@ export default async function DashboardHome() {
           />
         </ChartCard>
 
-        {/* Últimos eventos registrados */}
+        {/* Latest recorded events */}
         <div className="card p-5">
           <div className="mb-4 flex items-baseline justify-between">
             <h3 className="text-sm font-semibold text-neutral-700">
@@ -211,7 +211,7 @@ export default async function DashboardHome() {
           />
         </ChartCard>
 
-        {/* Últimos pedidos */}
+        {/* Latest orders */}
         <div className="card p-5">
           <div className="mb-4 flex items-baseline justify-between">
             <h3 className="text-sm font-semibold text-neutral-700">

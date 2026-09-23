@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Minus, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useTranslations } from "next-intl";
 
 interface QuantitySelectorProps {
   min?: number;
@@ -19,6 +20,7 @@ export const QuantitySelector = ({
   onQuantityChange,
   className
 }: QuantitySelectorProps) => {
+  const t = useTranslations("products.quantity");
   const [quantity, setQuantity] = useState(initialValue);
 
   const handleDecrease = () => {
@@ -48,11 +50,11 @@ export const QuantitySelector = ({
   return (
     <div className={cn("flex items-center gap-2", className)}>
       <label htmlFor="quantity" className="text-sm font-medium text-foreground">
-        Cantidad:
+        {t("label")}
       </label>
 
       <div className="flex items-center border border-border p-4 rounded-lg overflow-hidden">
-        <div onClick={handleDecrease} className="border-none">
+        <div onClick={handleDecrease} className="border-none" aria-label={t("decrease")}>
           <Minus className="w-4 h-4" />
         </div>
 
@@ -66,7 +68,7 @@ export const QuantitySelector = ({
           className="w-16 text-center border-0 focus:outline-none focus:ring-0 bg-transparent text-foreground font-medium"
         />
 
-        <div onClick={handleIncrease} className="border-none">
+        <div onClick={handleIncrease} className="border-none" aria-label={t("increase")}>
           <Plus className="w-4 h-4" />
         </div>
       </div>

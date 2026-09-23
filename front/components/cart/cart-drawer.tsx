@@ -8,7 +8,8 @@ import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { DeliveryOptions } from "../../container/products/product/components/delivery-options";
 import { useDeliveryOption } from "@/hooks/useDeliveryOption";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
+import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 
 interface CartDrawerProps {
@@ -17,6 +18,7 @@ interface CartDrawerProps {
 }
 
 export const CartDrawer = ({ isOpen, onClose }: CartDrawerProps) => {
+  const t = useTranslations("cart");
   const { items, updateQuantity, removeFromCart, getCartTotal, clearCart } =
     useCart();
   const { deliveryOption, handleDeliveryChange } =
@@ -129,18 +131,18 @@ export const CartDrawer = ({ isOpen, onClose }: CartDrawerProps) => {
               <div className="flex items-center gap-2">
                 <ShoppingBag className="w-5 h-5 text-foreground" />
                 <h2 className="text-lg font-semibold text-foreground">
-                  Carrito de Compras
+                  {t("drawer.title")}
                 </h2>
                 {items.length > 0 && (
                   <span className="text-sm text-muted-foreground">
-                    ({items.length} {items.length === 1 ? "item" : "items"})
+                    {t("drawer.itemCount", { count: items.length })}
                   </span>
                 )}
                 {items.length > 0 && (
                   <div className="flex items-center gap-1 ml-2 px-2 py-0.5 bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-900 rounded-full">
                     <Lock className="w-3 h-3 text-green-600" />
                     <span className="text-xs font-medium text-green-700 dark:text-green-300">
-                      Seguro
+                      {t("drawer.secure")}
                     </span>
                   </div>
                 )}
@@ -150,8 +152,8 @@ export const CartDrawer = ({ isOpen, onClose }: CartDrawerProps) => {
                   <button
                     onClick={() => setConfirmDelete({ show: true, isClearAll: true })}
                     className="p-2 rounded-lg hover:bg-destructive/10 text-destructive transition-colors"
-                    aria-label="Clear cart"
-                    title="Clear cart"
+                    aria-label={t("drawer.clear")}
+                    title={t("drawer.clear")}
                   >
                     <Trash2 className="w-5 h-5" />
                   </button>
@@ -159,7 +161,7 @@ export const CartDrawer = ({ isOpen, onClose }: CartDrawerProps) => {
                 <button
                   onClick={onClose}
                   className="p-2 rounded-lg hover:bg-primary/10 transition-colors"
-                  aria-label="Close cart"
+                  aria-label={t("drawer.close")}
                 >
                   <X className="w-5 h-5 text-foreground" />
                 </button>
@@ -176,10 +178,10 @@ export const CartDrawer = ({ isOpen, onClose }: CartDrawerProps) => {
                 <div className="flex flex-col items-center justify-center h-full text-center">
                   <ShoppingBag className="w-16 h-16 text-muted-foreground mb-4 opacity-50" />
                   <p className="text-lg font-medium text-foreground mb-2">
-                    Tu carrito está vacío
+                    {t("drawer.emptyTitle")}
                   </p>
                   <p className="text-sm text-muted-foreground">
-                    Agrega productos para comenzar
+                    {t("drawer.emptyHint")}
                   </p>
                 </div>
               ) : (
@@ -228,7 +230,7 @@ export const CartDrawer = ({ isOpen, onClose }: CartDrawerProps) => {
                                 )
                               }
                               className="p-1 hover:bg-primary/10 transition-colors"
-                              aria-label="Decrease quantity"
+                              aria-label={t("drawer.decrease")}
                             >
                               <Minus className="w-4 h-4 text-foreground" />
                             </button>
@@ -244,7 +246,7 @@ export const CartDrawer = ({ isOpen, onClose }: CartDrawerProps) => {
                                 )
                               }
                               className="p-1 hover:bg-primary/10 transition-colors"
-                              aria-label="Increase quantity"
+                              aria-label={t("drawer.increase")}
                             >
                               <Plus className="w-4 h-4 text-foreground" />
                             </button>
@@ -253,7 +255,7 @@ export const CartDrawer = ({ isOpen, onClose }: CartDrawerProps) => {
                           <button
                             onClick={() => setConfirmDelete({ show: true, productId: item.product.id })}
                             className="p-1.5 rounded-lg hover:bg-destructive/10 text-destructive transition-colors ml-auto"
-                            aria-label="Remove product"
+                            aria-label={t("drawer.remove")}
                           >
                             <Trash2 className="w-4 h-4" />
                           </button>
@@ -261,7 +263,7 @@ export const CartDrawer = ({ isOpen, onClose }: CartDrawerProps) => {
 
                         {/* Subtotal */}
                         <p className="text-xs text-muted-foreground mt-2">
-                          Subtotal:{" "}
+                          {t("drawer.subtotal")}{" "}
                           <span className="font-semibold text-foreground">
                             {formatPrice({
                               price: item.product.price * item.quantity,
@@ -296,7 +298,7 @@ export const CartDrawer = ({ isOpen, onClose }: CartDrawerProps) => {
                 {/* Summary */}
                 <div className="space-y-2">
                   <div className="flex items-center justify-between text-sm">
-                    <span className="text-muted-foreground">Subtotal:</span>
+                    <span className="text-muted-foreground">{t("drawer.subtotal")}</span>
                     <span className="font-medium text-foreground">
                       {formatPrice({
                         price: getCartTotal(),
@@ -307,16 +309,16 @@ export const CartDrawer = ({ isOpen, onClose }: CartDrawerProps) => {
 
                   {deliveryOption === "delivery" && (
                     <div className="flex items-center justify-between text-sm">
-                      <span className="text-muted-foreground">Envío:</span>
+                      <span className="text-muted-foreground">{t("drawer.shipping")}</span>
                       <span className="font-medium text-foreground">
-                        A cotizar
+                        {t("drawer.shippingToQuote")}
                       </span>
                     </div>
                   )}
 
                   <div className="flex items-center justify-between pt-2 border-t border-border">
                     <span className="text-lg font-semibold text-foreground">
-                      Total:
+                      {t("drawer.total")}
                     </span>
                     <span className="text-xl font-bold text-foreground">
                       {formatPrice({
@@ -325,7 +327,7 @@ export const CartDrawer = ({ isOpen, onClose }: CartDrawerProps) => {
                       }).toString()}
                       {deliveryOption === "delivery" && (
                         <span className="text-sm text-muted-foreground font-normal ml-1">
-                          + envío
+                          {t("drawer.plusShipping")}
                         </span>
                       )}
                     </span>
@@ -337,15 +339,15 @@ export const CartDrawer = ({ isOpen, onClose }: CartDrawerProps) => {
                   <div className="flex flex-col gap-2">
                     <div className="flex items-center gap-2 text-sm text-muted-foreground">
                       <Shield className="w-4 h-4 text-green-600" />
-                      <span className="text-xs">Compra segura y protegida</span>
+                      <span className="text-xs">{t("drawer.trustSecure")}</span>
                     </div>
                     <div className="flex items-center gap-2 text-sm text-muted-foreground">
                       <CheckCircle2 className="w-4 h-4 text-green-600" />
-                      <span className="text-xs">Garantía de satisfacción</span>
+                      <span className="text-xs">{t("drawer.trustGuarantee")}</span>
                     </div>
                     <div className="flex items-center gap-2 text-sm text-muted-foreground">
                       <Lock className="w-4 h-4 text-green-600" />
-                      <span className="text-xs">Datos protegidos</span>
+                      <span className="text-xs">{t("drawer.trustData")}</span>
                     </div>
                   </div>
                   
@@ -355,10 +357,10 @@ export const CartDrawer = ({ isOpen, onClose }: CartDrawerProps) => {
                       <BadgeCheck className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
                       <div className="flex-1">
                         <p className="text-xs font-semibold text-green-900 dark:text-green-100 mb-1">
-                          Garantía de satisfacción
+                          {t("drawer.guaranteeTitle")}
                         </p>
                         <p className="text-xs text-green-700 dark:text-green-300">
-                          Si no estás satisfecho con tu compra, te ayudamos a resolverlo.
+                          {t("drawer.guaranteeText")}
                         </p>
                       </div>
                     </div>
@@ -371,7 +373,7 @@ export const CartDrawer = ({ isOpen, onClose }: CartDrawerProps) => {
                     href="/checkout"
                     className="block w-full bg-foreground px-6 py-4 text-center text-xs font-semibold uppercase tracking-[0.16em] text-background transition-colors hover:bg-foreground/90"
                   >
-                    Ir a checkout
+                    {t("checkout")}
                   </Link>
                 </div>
               </div>
@@ -406,13 +408,13 @@ export const CartDrawer = ({ isOpen, onClose }: CartDrawerProps) => {
                   <div className="flex-1">
                     <h3 className="text-lg font-semibold text-foreground mb-2">
                       {confirmDelete.isClearAll
-                        ? "¿Eliminar todos los productos?"
-                        : "¿Eliminar este producto?"}
+                        ? t("drawer.confirmClearTitle")
+                        : t("drawer.confirmRemoveTitle")}
                     </h3>
                     <p className="text-sm text-muted-foreground">
                       {confirmDelete.isClearAll
-                        ? "Esta acción eliminará todos los productos de tu carrito. ¿Estás seguro?"
-                        : "Esta acción eliminará el producto de tu carrito. ¿Estás seguro?"}
+                        ? t("drawer.confirmClearText")
+                        : t("drawer.confirmRemoveText")}
                     </p>
                   </div>
                 </div>
@@ -421,13 +423,13 @@ export const CartDrawer = ({ isOpen, onClose }: CartDrawerProps) => {
                     onClick={handleCancelDelete}
                     className="px-4 py-2 rounded-lg border border-border hover:bg-muted transition-colors text-foreground"
                   >
-                    Cancelar
+                    {t("cancel")}
                   </button>
                   <button
                     onClick={handleConfirmDelete}
                     className="px-4 py-2 rounded-lg bg-destructive text-destructive-foreground hover:bg-destructive/90 transition-colors"
                   >
-                    Confirmar
+                    {t("confirm")}
                   </button>
                 </div>
               </div>

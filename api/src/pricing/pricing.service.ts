@@ -12,7 +12,7 @@ export interface PricingSettings {
   scRadiusKm: number;
 }
 
-/** Mismos defaults que back/src/api/pricing-setting/services/pricing-setting.ts */
+/** Same defaults as back/src/api/pricing-setting/services/pricing-setting.ts */
 const DEFAULTS = {
   markupPercent: 10,
   provinceShippingCost: 17,
@@ -42,20 +42,20 @@ export class PricingService {
   }
 
   /**
-   * Precio de venta: base + markup, redondeado SIEMPRE hacia arriba al boliviano
-   * (41,12 → 42). Es el precio que se muestra y el que se cobra: mismo cálculo
-   * aquí y en `front/lib/pricing.ts`.
+   * Sale price: base + markup, ALWAYS rounded up to the whole boliviano
+   * (41.12 → 42). It's the price shown and the price charged: same calculation
+   * here and in `front/lib/pricing.ts`.
    *
-   * El `round2` previo no es decorativo: en coma flotante 25 × 1.12 da
-   * 28.000000000000004, y un `ceil` directo cobraría 29.
+   * The preceding `round2` isn't decorative: in floating point 25 × 1.12 gives
+   * 28.000000000000004, and a direct `ceil` would charge 29.
    */
   applyMarkup(basePrice: number, settings: PricingSettings): number {
     return Math.ceil(round2(basePrice * (1 + settings.markupPercent / 100)));
   }
 
   /**
-   * Tri-estado como en Strapi: true/false si hay coordenadas válidas,
-   * null si no las hay (el llamador cae al flag del cliente).
+   * Tri-state as in Strapi: true/false when there are valid coordinates,
+   * null when there aren't (the caller falls back to the client's flag).
    */
   isProvince(
     settings: PricingSettings,
@@ -74,7 +74,7 @@ export class PricingService {
     return distance > settings.scRadiusKm;
   }
 
-  /** Haversine, R = 6371 km — idéntico al servicio original. */
+  /** Haversine, R = 6371 km — identical to the original service. */
   private distanceKm(
     lat1: number,
     lng1: number,

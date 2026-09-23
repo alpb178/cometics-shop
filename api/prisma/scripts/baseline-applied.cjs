@@ -1,17 +1,17 @@
-// Marca como YA APLICADAS todas las migraciones presentes en prisma/migrations,
-// sin ejecutar su SQL.
+// Marks every migration in prisma/migrations as ALREADY APPLIED,
+// without running its SQL.
 //
-// Para qué: mientras el deploy use el puente `db:align`, el DDL de cada
-// migración llega a la BD por `align-prod-schema.sql`, no por Prisma. La tabla
-// `_prisma_migrations` de esas BD no lo sabe, así que el día que se cambie
-// `build:render` a `prisma migrate deploy` intentaría re-ejecutarlas: los
-// `ADD COLUMN` fallarían con "column already exists" y tumbarían el deploy.
+// Why: while the deploy uses the `db:align` bridge, each migration's DDL
+// reaches the DB through `align-prod-schema.sql`, not through Prisma. Those DBs'
+// `_prisma_migrations` table doesn't know that, so the day `build:render` is
+// switched to `prisma migrate deploy` it would try to re-run them: the
+// `ADD COLUMN`s would fail with "column already exists" and break the deploy.
 //
-// Este script cierra ese hueco de una vez por base de datos:
-//   DATABASE_URL=<la BD> node prisma/scripts/baseline-applied.cjs
-//   (o: npm run db:baseline)
+// This script closes that gap once per database:
+//   DATABASE_URL=<the DB> node prisma/scripts/baseline-applied.cjs
+//   (or: npm run db:baseline)
 //
-// Es seguro repetirlo: las migraciones ya registradas se omiten.
+// Safe to re-run: already registered migrations are skipped.
 
 const fs = require("fs");
 const path = require("path");
@@ -27,7 +27,7 @@ async function appliedNames(prisma) {
     );
     return new Set(rows.map((r) => r.migration_name));
   } catch {
-    // La tabla no existe todavía: ninguna migración está registrada.
+    // The table doesn't exist yet: no migration is registered.
     return new Set();
   }
 }
@@ -37,10 +37,10 @@ async function appliedNames(prisma) {
     .readdirSync(MIGRATIONS_DIR, { withFileTypes: true })
     .filter((e) => e.isDirectory())
     .map((e) => e.name)
-    .sort(); // el prefijo temporal ordena cronológicamente
+    .sort(); // the timestamp prefix sorts chronologically
 
   if (local.length === 0) {
-    console.log("[db:baseline] no hay migraciones en prisma/migrations.");
+    console.log("[db:baseline] no migrations in prisma/migrations.");
     return;
   }
 
@@ -55,21 +55,21 @@ async function appliedNames(prisma) {
   const pending = local.filter((name) => !applied.has(name));
   if (pending.length === 0) {
     console.log(
-      `[db:baseline] nada que hacer: las ${local.length} migración(es) ya están registradas.`,
+      `[db:baseline] nothing to do: all ${local.length} migration(s) are already registered.`,
     );
     return;
   }
 
   for (const name of pending) {
-    console.log(`[db:baseline] marcando como aplicada: ${name}`);
+    console.log(`[db:baseline] marking as applied: ${name}`);
     execFileSync("npx", ["prisma", "migrate", "resolve", "--applied", name], {
       stdio: "inherit",
       cwd: path.join(__dirname, "..", ".."),
     });
   }
   console.log(
-    `[db:baseline] OK — ${pending.length} migración(es) marcadas. ` +
-      "Ya se puede usar `npm run db:migrate` en esta BD.",
+    `[db:baseline] OK — ${pending.length} migration(s) marked. ` +
+      "`npm run db:migrate` can now be used on this DB.",
   );
 })().catch((e) => {
   console.error("[db:baseline] ERROR:", e.message);

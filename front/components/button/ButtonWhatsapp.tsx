@@ -2,6 +2,7 @@ import React from "react";
 import { IconBrandWhatsapp } from "@tabler/icons-react";
 import { motion } from "framer-motion";
 import { logsStrapi } from "@/lib/strapi/logs";
+import { useTranslations } from "next-intl";
 
 export const ButtonWhatsapp = ({
   onClick,
@@ -14,6 +15,7 @@ export const ButtonWhatsapp = ({
   description?: string;
   productName?: string;
 }) => {
+  const t = useTranslations("products.whatsapp");
   const handleWhatsAppClick = async () => {
     onClick();
     try {
@@ -33,7 +35,7 @@ export const ButtonWhatsapp = ({
       className="flex w-full text-lg justify-center items-center mb-6 gap-2 bg-primary text-black rounded-full py-3 px-4 font-medium transition-all duration-200 hover:bg-primary/80"
     >
       <IconBrandWhatsapp className="w-5 h-5 text-lg" />
-      {label ?? "Compra por WhatsApp"}
+      {label ?? t("button")}
     </motion.button>
   );
 };

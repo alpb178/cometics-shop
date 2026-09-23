@@ -3,8 +3,8 @@
 import { useState } from "react";
 import { Check, Copy, MessageCircle } from "lucide-react";
 
-// Normaliza el teléfono al formato que espera wa.me (solo dígitos, con código
-// de país). Los móviles bolivianos locales tienen 8 dígitos → se antepone 591.
+// Normalizes the phone to the format wa.me expects (digits only, with country
+// code). Local Bolivian mobiles have 8 digits → 591 is prepended.
 function toWhatsApp(phone: string): string {
   const digits = phone.replace(/\D/g, "");
   return digits.length === 8 ? `591${digits}` : digits;
@@ -19,7 +19,7 @@ export function PhoneActions({ phone }: { phone: string }) {
       setCopied(true);
       setTimeout(() => setCopied(false), 1500);
     } catch {
-      // Portapapeles no disponible (contexto no seguro): no hacemos nada.
+      // Clipboard not available (insecure context): do nothing.
     }
   }
 

@@ -12,10 +12,10 @@ export const ALLOWED_EVENT_TYPES = [
   "product_view",
   "add_to_cart",
   "cart_view",
-  "group_click", // clic en una tarjeta de "Sitios de interés" (Grupo CorpSC)
+  "group_click", // click on a "Sitios de interés" card (Grupo CorpSC)
 ] as const;
 
-/** Mismas reglas de clasificación de fuentes que el servicio original. */
+/** Same source classification rules as the original service. */
 const SOURCE_RULES: { label: string; match: RegExp }[] = [
   { label: "Google", match: /(^|\.)google\./ },
   { label: "Instagram", match: /(^|\.)instagram\.com$/ },
@@ -147,7 +147,7 @@ export class TrackingService {
       .sort((a, b) => b.count - a.count);
   }
 
-  /** Visitas por día (hora de La Paz), serie completa con ceros. */
+  /** Visits per day (La Paz time), full series with zeros. */
   async getDailyVisits(days: number) {
     const since = new Date(Date.now() - days * 86400000);
     const rows = await this.prisma.$queryRaw<{ day: Date; count: number }[]>`
@@ -163,7 +163,7 @@ export class TrackingService {
     return fillDailySeries(counts, days);
   }
 
-  /** Visitas de hoy (La Paz) por hora, 0–23 con ceros. */
+  /** Today's visits (La Paz) per hour, 0–23 with zeros. */
   async getHourlyVisits() {
     const since = laPazStartOfToday();
     const rows = await this.prisma.$queryRaw<{ hour: number; count: number }[]>`
@@ -177,9 +177,9 @@ export class TrackingService {
   }
 
   /**
-   * Productos más vistos (eventos product_view) en la ventana indicada.
-   * Con `today` la ventana es el día en curso en Bolivia (desde las 00:00), no
-   * las últimas 24 h, para que cuadre con el resto de KPIs de "hoy".
+   * Most viewed products (product_view events) in the given window.
+   * With `today` the window is the current day in Bolivia (since 00:00), not
+   * the last 24 h, so it matches the other "today" KPIs.
    */
   async getTopProducts(opts: { days: number; limit: number; today?: boolean }) {
     const since = opts.today
@@ -198,8 +198,8 @@ export class TrackingService {
   }
 
   /**
-   * Personas (sesiones distintas) que han entrado al detalle de cada producto.
-   * Público: alimenta el contador social en las tarjetas de la tienda.
+   * People (distinct sessions) who have opened each product's detail page.
+   * Public: feeds the social counter on the store's cards.
    */
   async getProductViewCounts() {
     const rows = await this.prisma.$queryRaw<
@@ -212,7 +212,7 @@ export class TrackingService {
     return rows;
   }
 
-  /** Clics en las tarjetas de "Sitios de interés" (Grupo CorpSC), por sitio. */
+  /** Clicks on the "Sitios de interés" cards (Grupo CorpSC), per site. */
   async getGroupClicks(opts: { days: number; limit: number }) {
     const since = new Date(Date.now() - opts.days * 86400000);
     const rows = await this.prisma.$queryRaw<

@@ -18,7 +18,7 @@ import { JwtStrategy } from "./jwt.strategy";
       inject: [ConfigService],
       useFactory: (config: ConfigService) => ({
         secret: config.getOrThrow<string>("JWT_SECRET"),
-        // Misma caducidad que usa users-permissions de Strapi
+        // Same expiry Strapi's users-permissions uses
         signOptions: { expiresIn: "30d" },
       }),
     }),

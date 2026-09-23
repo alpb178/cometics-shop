@@ -1,7 +1,9 @@
 "use client";
 
-import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useTranslations } from "next-intl";
+import { useSearchParams } from "next/navigation";
+import { Link, useRouter } from "@/i18n/navigation";
+import { errorMessage } from "@/lib/auth/client";
 import { useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { PasswordInput } from "@/components/form/password-input/PasswordInput";
@@ -13,6 +15,7 @@ type FormValues = {
 };
 
 export default function ResetPasswordPage() {
+  const t = useTranslations("auth");
   const router = useRouter();
   const searchParams = useSearchParams();
   const code = searchParams.get("code");
@@ -24,7 +27,7 @@ export default function ResetPasswordPage() {
 
   const onSubmit = methods.handleSubmit(async (values) => {
     if (!code) {
-      setError("Enlace inválido o expirado.");
+      setError(t("resetPassword.invalidLinkError"));
       return;
     }
     setSubmitting(true);
@@ -40,12 +43,12 @@ export default function ResetPasswordPage() {
         })
       });
       const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data.error || "Algo salió mal.");
+      if (!res.ok) throw new Error(data.error || "");
       await refresh();
       router.push("/account");
       router.refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Algo salió mal.");
+      setError(errorMessage(err, t("common.genericError")));
     } finally {
       setSubmitting(false);
     }
@@ -55,17 +58,16 @@ export default function ResetPasswordPage() {
     return (
       <div className="space-y-4 text-center">
         <h1 className="font-display text-2xl font-semibold tracking-tight">
-          Enlace inválido
+          {t("resetPassword.invalidTitle")}
         </h1>
         <p className="text-sm text-muted-foreground">
-          Este enlace no es válido o ya fue usado. Pide uno nuevo desde
-          la página de recuperación.
+          {t("resetPassword.invalidBody")}
         </p>
         <Link
           href="/forgot-password"
           className="inline-block text-sm font-semibold underline-offset-4 hover:underline"
         >
-          Pedir un nuevo enlace
+          {t("resetPassword.requestNewLink")}
         </Link>
       </div>
     );
@@ -76,30 +78,30 @@ export default function ResetPasswordPage() {
       <form onSubmit={onSubmit} noValidate className="flex flex-col gap-8">
         <header className="space-y-2 text-center">
           <h1 className="font-display text-3xl font-semibold tracking-tight">
-            Nueva contraseña
+            {t("resetPassword.title")}
           </h1>
           <p className="text-sm text-muted-foreground">
-            Elige una nueva contraseña para tu cuenta.
+            {t("resetPassword.subtitle")}
           </p>
         </header>
 
         <PasswordInput
           name="password"
-          label="Nueva contraseña"
+          label={t("resetPassword.newPassword")}
           required
           validation={{
-            required: "La contraseña es requerida",
-            minLength: { value: 8, message: "Mínimo 8 caracteres" }
+            required: t("common.passwordRequired"),
+            minLength: { value: 8, message: t("common.passwordMinLength") }
           }}
         />
         <PasswordInput
           name="passwordConfirmation"
-          label="Repite la contraseña"
+          label={t("common.passwordRepeat")}
           required
           validation={{
-            required: "Confirma tu contraseña",
+            required: t("common.passwordConfirmRequired"),
             validate: (v: string) =>
-              v === password || "Las contraseñas no coinciden"
+              v === password || t("common.passwordMismatch")
           }}
         />
 
@@ -114,7 +116,7 @@ export default function ResetPasswordPage() {
           disabled={submitting}
           className="w-full bg-foreground px-6 py-4 text-xs font-semibold uppercase tracking-[0.16em] text-background transition-colors hover:bg-foreground/90 disabled:cursor-not-allowed disabled:opacity-50"
         >
-          {submitting ? "Guardando…" : "Restablecer contraseña"}
+          {submitting ? t("resetPassword.submitting") : t("resetPassword.submit")}
         </button>
       </form>
     </FormProvider>

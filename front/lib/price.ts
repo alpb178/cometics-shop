@@ -1,9 +1,8 @@
 /**
- * Importe en bolivianos sin separadores, para texto suelto y para copiar al
- * portapapeles. Los precios de venta ya son enteros (se redondean hacia arriba
- * en `applyMarkup`), así que se muestran sin decimales; los pedidos antiguos,
- * anteriores a ese cambio, conservan los suyos en vez de mentir sobre lo que se
- * cobró.
+ * Amount in bolivianos without separators, for inline text and for copying to
+ * the clipboard. Sale prices are already whole numbers (rounded up in
+ * `applyMarkup`), so they are shown without decimals; older orders, from before
+ * that change, keep theirs instead of misreporting what was charged.
  */
 export const formatAmount = (value: number | string | null | undefined) => {
   const n = Number(value) || 0;
@@ -14,7 +13,7 @@ interface FormatPriceOptions {
   price?: number | string | null;
   locale?: string;
   currency?: string;
-  /** Fijo si se indica; si no, se ajusta al valor (entero → sin decimales). */
+  /** Fixed if given; otherwise it adapts to the value (integer → no decimals). */
   decimals?: number;
   split?: boolean;
 }
@@ -27,8 +26,8 @@ export const formatPrice = ({
   split = false
 }: FormatPriceOptions) => {
   const value = Number(price) || 0;
-  // Sin `decimals` explícito se ajusta al valor: entero sin decimales, con
-  // decimales si los tiene. Evita el "42,00" tras redondear hacia arriba.
+  // Without explicit `decimals` it adapts to the value: integers without
+  // decimals, decimals when present. Avoids "42,00" after rounding up.
   const fractionDigits = decimals ?? (Number.isInteger(value) ? 0 : 2);
   const pr = new Intl.NumberFormat(locale, {
     style: "decimal",

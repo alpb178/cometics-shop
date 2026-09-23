@@ -30,15 +30,15 @@ interface VerifiedItem {
 }
 
 interface SerializeOpts {
-  /** Incluir el precio original (sin markup) por ítem. Solo para staff. */
+  /** Include the original (pre-markup) price per item. Staff only. */
   includeOriginalPrice?: boolean;
 }
 
 interface ScopeOpts {
   /**
-   * Fuerza el filtro por propiedad aunque el usuario sea staff. Lo pide la
-   * vista "Mis pedidos" del storefront (`?scope=mine`), que comparte endpoint
-   * con el panel: sin esto, un admin vería ahí los pedidos de todos.
+   * Forces the ownership filter even when the user is staff. Requested by the
+   * storefront's "My orders" view (`?scope=mine`), which shares the endpoint
+   * with the panel: without it, an admin would see everyone's orders there.
    */
   onlyOwn?: boolean;
 }
@@ -53,9 +53,9 @@ export class OrdersService {
   ) {}
 
   /**
-   * Réplica de buildVerifiedOrderData del servicio de Strapi: nunca se confía
-   * en los importes del cliente; precios desde BD (solo productos publicados)
-   * con markup, envío por Haversine con fallback al flag del cliente.
+   * Replica of the Strapi service's buildVerifiedOrderData: client amounts are
+   * never trusted; prices come from the DB (published products only) with
+   * markup, shipping via Haversine with a fallback to the client's flag.
    */
   async buildVerifiedOrderData(
     rawItems: OrderItemInputDto[],
@@ -78,11 +78,11 @@ export class OrdersService {
     ];
     const [products, settings] = await Promise.all([
       this.prisma.products.findMany({
-        // Misma regla que la vista pública de ProductsService.findMany: en el
-        // modelo de versión única la visibilidad la manda `visible`, no
-        // `published_at` (que quedó nulo en filas heredadas y en la fila
-        // superviviente del colapso de versiones). Filtrar por published_at
-        // rechazaba productos que la tienda sí ofrece: "Producto no disponible".
+        // Same rule as ProductsService.findMany's public view: in the
+        // single-version model visibility is driven by `visible`, not
+        // `published_at` (which ended up null on legacy rows and on the row
+        // that survived the version collapse). Filtering by published_at
+        // rejected products the store does offer: "Producto no disponible".
         where: { id: { in: ids }, visible: { not: false } },
         select: { id: true, name: true, slug: true, price: true },
       }),
@@ -137,8 +137,8 @@ export class OrdersService {
       clientIsProvince: dto.isProvince,
     });
 
-    // A diferencia de Strapi, verificamos que la dirección sea del usuario
-    // (evita enlazar y leer direcciones ajenas vía populate)
+    // Unlike Strapi, we check that the address belongs to the user
+    // (prevents linking and reading other people's addresses via populate)
     if (dto.shippingAddress) {
       await this.addressesService
         .findOwnedOrThrow(dto.shippingAddress, user.id)
@@ -214,7 +214,7 @@ export class OrdersService {
     return this.serializeById(order.id);
   }
 
-  /** KPIs de pedidos para el dashboard del backoffice (solo staff). */
+  /** Order KPIs for the backoffice dashboard (staff only). */
   async getStats(days: number) {
     const since = new Date(Date.now() - days * 86400000);
     const [total, pending, rows, todayRows, settings] = await Promise.all([
@@ -231,8 +231,8 @@ export class OrdersService {
         WHERE created_at >= ${since} AND status IS DISTINCT FROM 'cancelled'
         GROUP BY 1
         ORDER BY 1`,
-      // Totales del día de hoy (desde las 00:00 hora de Bolivia) para el
-      // dashboard: mismos filtros que la ventana, acotados al día local.
+      // Today's totals (since 00:00 Bolivia time) for the dashboard: same
+      // filters as the window, restricted to the local day.
       this.prisma.$queryRaw<
         { count: number; revenue: number | null; subtotal: number | null }[]
       >`
@@ -257,9 +257,9 @@ export class OrdersService {
     }));
     const revenue = round2(byDay.reduce((acc, d) => acc + d.revenue, 0));
 
-    // El `subtotal` guardado ya incluye el markup de la plataforma (los items
-    // se guardan con `applyMarkup`), así que lo descomponemos en:
-    //   ganancia de productos (precio original) + ganancia de plataforma (markup).
+    // The stored `subtotal` already includes the platform markup (items are
+    // stored with `applyMarkup`), so we split it into:
+    //   product profit (original price) + platform profit (markup).
     const { markupPercent } = settings;
     const windowSubtotal = rows.reduce((acc, r) => acc + (r.subtotal ?? 0), 0);
     const { productProfit, platformProfit } = this.splitProfit(
@@ -290,9 +290,9 @@ export class OrdersService {
   }
 
   /**
-   * Separa un subtotal (que ya incluye el markup) en la ganancia a precio
-   * original y la ganancia de la plataforma. Se revierte con el markup actual:
-   * subtotal = original × (1 + markup/100).
+   * Splits a subtotal (which already includes the markup) into the profit at
+   * original price and the platform profit. It's reversed with the current
+   * markup: subtotal = original × (1 + markup/100).
    */
   private splitProfit(subtotal: number, markupPercent: number) {
     const productProfit = round2(subtotal / (1 + markupPercent / 100));
@@ -311,8 +311,8 @@ export class OrdersService {
       isStaffUser(user) && !opts?.onlyOwn
         ? {}
         : { orders_user_lnk: { some: { user_id: user.id } } };
-    // `page` se respeta de verdad: antes se anunciaba `page: 1` y se ignoraba
-    // el parámetro, así que pedir la página 2 devolvía otra vez la primera.
+    // `page` is actually honored: previously `page: 1` was reported and the
+    // parameter ignored, so asking for page 2 returned the first one again.
     const page = Math.max(1, opts?.page ?? 1);
     const [rows, total] = await Promise.all([
       this.prisma.orders.findMany({
@@ -337,7 +337,7 @@ export class OrdersService {
     };
   }
 
-  /** Acepta id numérico (front) o documentId (backoffice), como el controller original. */
+  /** Accepts a numeric id (front) or documentId (backoffice), like the original controller. */
   async findOneOrThrow(
     idOrDocumentId: string,
     user: AuthenticatedUser,
@@ -352,7 +352,7 @@ export class OrdersService {
       const owned = await this.prisma.orders_user_lnk.findFirst({
         where: { order_id: row.id, user_id: user.id },
       });
-      // 404 y no 403, para no revelar existencia de pedidos ajenos
+      // 404 rather than 403, so we don't reveal that other people's orders exist
       if (!owned) throw new NotFoundException();
     }
     return row;
@@ -376,7 +376,7 @@ export class OrdersService {
     const row = await this.findOneOrThrow(idOrDocumentId, user);
     const serialized = await this.serialize(row);
     await this.prisma.$transaction(async (tx) => {
-      // Los componentes no tienen FK en cascada: borrarlos explícitamente
+      // Components have no cascading FK: delete them explicitly
       const cmps = await tx.orders_cmps.findMany({
         where: { entity_id: row.id, field: "items" },
         select: { cmp_id: true },
@@ -390,7 +390,7 @@ export class OrdersService {
       await tx.files_related_mph.deleteMany({
         where: { related_type: ORDER_RELATED_TYPE, related_id: row.id },
       });
-      await tx.orders.delete({ where: { id: row.id } }); // cascada: cmps + lnk
+      await tx.orders.delete({ where: { id: row.id } }); // cascade: cmps + lnk
     });
     return serialized;
   }
@@ -443,8 +443,8 @@ export class OrdersService {
           where: { id: { in: cmpIds } },
         })
       : [];
-    // El precio original (sin markup) solo se revela a staff: revelarlo al
-    // cliente expondría el margen de la plataforma.
+    // The original (pre-markup) price is only revealed to staff: showing it
+    // to the customer would expose the platform's margin.
     const markupPercent = opts?.includeOriginalPrice
       ? (await this.pricingService.getSettings()).markupPercent
       : null;

@@ -1,15 +1,18 @@
 import { Image } from "@/definitions/Image";
-import { DEFAULT_LOCALE } from "@/i18n/routing";
-import { Link } from "next-view-transitions";
+import { useTranslations } from "next-intl";
+import { TransitionLink as Link } from "@/components/i18n/transition-link";
 
 import { getImageSrc } from "@/lib/strapi/strapiImage";
 import { BlurImage } from "../blur-image/blur-image";
 
-export const Logo = ({ image, locale }: { image?: Image; locale?: string }) => {
+// `locale` is accepted for backwards compatibility; the link adds the prefix.
+export const Logo = ({ image }: { image?: Image; locale?: string }) => {
+  const t = useTranslations("nav");
   if (image) {
     return (
       <Link
-        href={`/${locale || DEFAULT_LOCALE}`}
+        href="/"
+        aria-label={t("goHome")}
         className="z-20 relative flex items-center space-x-2 mr-4 min-w-max font-normal text-foreground text-sm"
       >
         <BlurImage

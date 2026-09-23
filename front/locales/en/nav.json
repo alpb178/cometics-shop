@@ -1,0 +1,29 @@
+{
+  "mainNavigation": "Main navigation bar",
+  "accountAndCart": "Account and cart",
+  "sections": "Sections",
+  "openMenu": "Open menu",
+  "closeMenu": "Close menu",
+  "myAccount": "My account",
+  "myOrders": "My orders",
+  "signOut": "Sign out",
+  "signInOrSignUp": "Sign in / Sign up",
+  "goHome": "Go to home page",
+  "loading": "Loading…",
+  "items": {
+    "products": "Products",
+    "howItWorks": "How it works",
+    "faq": "FAQ",
+    "about": "About us",
+    "contact": "Contact"
+  },
+  "help": {
+    "buttonLabel": "Help",
+    "title": "Need help?",
+    "contactWhatsapp": "Chat on WhatsApp",
+    "hoursLabel": "Opening hours:",
+    "hours": "Monday - Friday: 10:00 - 18:00",
+    "whatsappMessage": "Hi! Could you help me with a question about your products or services?",
+    "productWhatsappMessage": "Hi! Could you help me with a question about the product {productName}?"
+  }
+}

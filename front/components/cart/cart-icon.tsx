@@ -1,7 +1,8 @@
 "use client";
 
 import { ShoppingCart } from "lucide-react";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
+import { useTranslations } from "next-intl";
 import { useCart } from "@/context/cart-context";
 import { cn } from "@/lib/utils";
 
@@ -30,7 +31,11 @@ function CartBadge() {
   );
 }
 
+/** Accepts `/cart` or a legacy `/es/cart`; the locale-aware Link adds the prefix. */
+const stripLocale = (href: string) => href.replace(/^\/(es|en)(?=\/|$)/, "") || "/";
+
 export const CartIcon = ({ href, onClick, className }: CartIconProps) => {
+  const t = useTranslations("cart");
   const baseClass = cn(
     "relative flex items-center justify-center p-2 rounded-lg transition-colors hover:bg-primary/10",
     className
@@ -39,9 +44,9 @@ export const CartIcon = ({ href, onClick, className }: CartIconProps) => {
   if (href) {
     return (
       <Link
-        href={href}
+        href={stripLocale(href)}
         className={baseClass}
-        aria-label="Open shopping cart"
+        aria-label={t("openCart")}
       >
         {iconContent}
       </Link>
@@ -52,7 +57,7 @@ export const CartIcon = ({ href, onClick, className }: CartIconProps) => {
     <button
       onClick={onClick}
       className={baseClass}
-      aria-label="Open shopping cart"
+      aria-label={t("openCart")}
     >
       {iconContent}
     </button>

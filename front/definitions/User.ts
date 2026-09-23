@@ -10,7 +10,7 @@ export interface User {
   createdAt?: string;
   updatedAt?: string;
   role?: { id?: number; name?: string; type?: string } | null;
-  // Calculado en el servidor (`getCurrentUser`): true si el usuario tiene
-  // acceso al panel /admin (rol admin/staff o email en STAFF_EMAILS).
+  // Computed on the server (`getCurrentUser`): true if the user can access
+  // the /admin panel (admin/staff role or email in STAFF_EMAILS).
   isStaff?: boolean;
 }

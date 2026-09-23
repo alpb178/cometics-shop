@@ -1,22 +1,23 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { GROUP_COMPANIES } from "@/lib/companies";
 import { groupSiteUrl, siteDomain } from "@/lib/group-ticker";
 import { trackEvent } from "@/lib/track-event";
 
-// Cintillo del Grupo CorpSC: franja fina sobre la navbar con los sitios
-// hermanos desplazándose en bucle. Usa la paleta de la matriz (azul marino de
-// CorpSC) y no la de la tienda a propósito: es la misma franja en los cuatro
-// sitios del grupo, así se lee como "barra del grupo" y no como parte del
-// header de Iris Natural.
+// CorpSC Group ticker: a thin strip above the navbar with the sister sites
+// scrolling in a loop. It uses the parent company palette (CorpSC navy blue)
+// rather than the store's on purpose: it is the same strip on all four group
+// sites, so it reads as the "group bar" and not as part of the Iris Natural
+// header.
 //
-// La pista lleva la lista duplicada y se desplaza -50%: al terminar la primera
-// copia, la segunda está exactamente donde empezó la primera, así el bucle no
-// tiene salto. La copia duplicada va oculta para lectores de pantalla y fuera
-// del orden de tabulación.
+// The track holds the list twice and moves -50%: when the first copy ends, the
+// second is exactly where the first started, so the loop has no jump. The
+// duplicate copy is hidden from screen readers and out of the tab order.
 export function GroupTicker() {
+  const t = useTranslations("home");
   return (
-    <aside className="gt" aria-label="Sitios de interés">
+    <aside className="gt" aria-label={t("groupTicker.label")}>
       <div className="gt-viewport">
         <div className="gt-track">
           <TickerRow />
@@ -30,6 +31,7 @@ export function GroupTicker() {
 }
 
 function TickerRow({ duplicate = false }: { duplicate?: boolean }) {
+  const t = useTranslations("home");
   return (
     <ul className="gt-row" aria-hidden={duplicate || undefined}>
       {GROUP_COMPANIES.map((company) => (
@@ -49,7 +51,7 @@ function TickerRow({ duplicate = false }: { duplicate?: boolean }) {
             />
             <span className="gt-name">{company.name}</span>
             <span className="gt-url">{siteDomain(company.url)}</span>
-            <span className="gt-desc">{company.tagline}</span>
+            <span className="gt-desc">{t(`companies.${company.slug}.tagline`)}</span>
           </a>
         </li>
       ))}
@@ -57,9 +59,9 @@ function TickerRow({ duplicate = false }: { duplicate?: boolean }) {
   );
 }
 
-// Estilos propios en vez de utilidades de Tailwind: la animación y la máscara
-// del cintillo son idénticas en los cuatro sitios del grupo, y así el bloque se
-// copia entre repos sin depender de la config de Tailwind de cada uno.
+// Own styles instead of Tailwind utilities: the ticker animation and mask are
+// identical on all four group sites, and this way the block can be copied
+// between repos without depending on each one's Tailwind config.
 const CSS = `
 .gt {
   position: relative;
@@ -69,8 +71,8 @@ const CSS = `
   height: 38px;
   overflow: hidden;
   background: #06132e;
-  /* El header de CorpSC es del mismo azul marino: sin esta línea la franja se
-     fundiría con él. */
+  /* The CorpSC header is the same navy blue: without this line the strip
+     would blend into it. */
   border-bottom: 1px solid rgba(127, 176, 255, 0.22);
   color: #ffffff;
   font-size: 0.8125rem;
@@ -81,9 +83,9 @@ const CSS = `
   flex: 1;
   overflow: hidden;
 }
-/* Difuminado de los bordes con degradados del propio fondo y no con
-   mask-image: en Safari de iOS la máscara puede congelar la animación
-   que corre por debajo. */
+/* Edges faded with gradients of the background itself rather than
+   mask-image: on iOS Safari the mask can freeze the animation running
+   underneath. */
 .gt-viewport::before,
 .gt-viewport::after {
   content: "";
@@ -108,9 +110,9 @@ const CSS = `
   will-change: transform;
   animation: gt-scroll 38s linear infinite;
 }
-/* La pausa al pasar el mouse solo donde hay puntero: en táctil el :hover
-   se queda pegado tras el primer toque y dejaría la franja detenida. El
-   foco de teclado sí la pausa siempre. */
+/* Pause on hover only where there is a pointer: on touch screens :hover
+   sticks after the first tap and would leave the strip stopped. Keyboard
+   focus always pauses it. */
 .gt-track:focus-within {
   animation-play-state: paused;
 }
@@ -148,7 +150,7 @@ const CSS = `
 .gt-name { font-weight: 600; }
 .gt-url { color: #ffffff; }
 .gt-desc { color: #ffffff; }
-/* Separador entre el enlace y su descripción; decorativo, por eso va en CSS. */
+/* Separator between the link and its description; decorative, hence CSS. */
 .gt-desc::before {
   content: "·";
   margin-right: 0.5rem;
@@ -158,7 +160,7 @@ const CSS = `
   from { transform: translateX(0); }
   to { transform: translateX(-50%); }
 }
-/* Sin movimiento: la franja queda quieta y se puede arrastrar en horizontal. */
+/* Reduced motion: the strip stays still and can be scrolled horizontally. */
 @media (prefers-reduced-motion: reduce) {
   .gt-track { animation: none; }
   .gt-viewport { overflow-x: auto; }

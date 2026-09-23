@@ -5,8 +5,8 @@ import { Response } from "express";
 import { AuthService } from "./auth.service";
 
 /**
- * Endpoints con los mismos paths y cuerpos (planos, sin { data }) que
- * users-permissions de Strapi, que es lo que llaman front y backoffice.
+ * Endpoints with the same paths and bodies (flat, without { data }) as
+ * Strapi's users-permissions, which is what front and backoffice call.
  */
 @ApiTags("auth")
 @Controller()
@@ -17,13 +17,13 @@ export class AuthController {
   ) {}
 
   @Post("auth/local")
-  @ApiOperation({ summary: "Login con email/username + contraseña" })
+  @ApiOperation({ summary: "Log in with email/username + password" })
   login(@Body() body: { identifier?: string; password?: string }) {
     return this.authService.login(body.identifier ?? "", body.password ?? "");
   }
 
   @Post("auth/local/register")
-  @ApiOperation({ summary: "Registro de usuario (rol client)" })
+  @ApiOperation({ summary: "Register a user (client role)" })
   register(
     @Body() body: { username?: string; email?: string; password?: string },
   ) {
@@ -35,13 +35,13 @@ export class AuthController {
   }
 
   @Post("auth/forgot-password")
-  @ApiOperation({ summary: "Solicitar email de restablecimiento" })
+  @ApiOperation({ summary: "Request a password reset email" })
   forgotPassword(@Body() body: { email?: string }) {
     return this.authService.forgotPassword(body.email ?? "");
   }
 
   @Post("auth/reset-password")
-  @ApiOperation({ summary: "Restablecer contraseña con el código del email" })
+  @ApiOperation({ summary: "Reset the password with the code from the email" })
   resetPassword(
     @Body()
     body: {
@@ -58,19 +58,19 @@ export class AuthController {
   }
 
   @Get("auth/google/callback")
-  @ApiOperation({ summary: "Canjea el access_token de Google por { jwt, user }" })
+  @ApiOperation({ summary: "Exchange the Google access_token for { jwt, user }" })
   googleCallback(@Query("access_token") accessToken?: string) {
     return this.authService.googleCallback(accessToken ?? "");
   }
 
   @Get("connect/google")
-  @ApiOperation({ summary: "Inicio del flujo OAuth con Google (redirección)" })
+  @ApiOperation({ summary: "Start the Google OAuth flow (redirect)" })
   connectGoogle(@Res() res: Response) {
     return res.redirect(this.authService.googleAuthorizeUrl());
   }
 
   @Get("connect/google/callback")
-  @ApiOperation({ summary: "Callback OAuth: redirige al front con el access_token" })
+  @ApiOperation({ summary: "OAuth callback: redirects to the front with the access_token" })
   async connectGoogleCallback(
     @Query("code") code: string,
     @Res() res: Response,

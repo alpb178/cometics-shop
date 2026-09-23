@@ -1,8 +1,8 @@
-// Skeleton del detalle de pedido: es la pantalla a la que redirige el checkout
-// tras confirmar el pago (`router.push("/account/orders/{id}")`). Antes no
-// existía y la transición quedaba en blanco mientras el server component cargaba.
-// Refleja el layout de `page.tsx` (sección `max-w-3xl`, cabecera con estado,
-// lista de productos, bloques de entrega/pago y totales).
+// Order detail skeleton: this is the screen checkout redirects to after the
+// payment is confirmed (`router.push("/account/orders/{id}")`). It didn't exist
+// before, and the transition stayed blank while the server component loaded.
+// Mirrors the layout of `page.tsx` (`max-w-3xl` section, header with status,
+// product list, delivery/payment blocks and totals).
 export default function OrderDetailLoading() {
   return (
     <section className="mx-auto w-full max-w-3xl animate-pulse px-6 py-16 lg:py-24">

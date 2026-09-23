@@ -7,26 +7,26 @@ describe("TrackingService.getTopProducts", () => {
     get: () => undefined,
   } as never);
 
-  /** El `since` es el único valor interpolado en la consulta. */
+  /** `since` is the only value interpolated into the query. */
   const sinceOfLastCall = (): Date => prismaMock.$queryRaw.mock.calls[0][1];
 
   beforeEach(() => {
     prismaMock.$queryRaw.mockReset().mockResolvedValue([]);
   });
 
-  it("con period=today arranca en las 00:00 de Bolivia, no hace 24 h", async () => {
+  it("with period=today it starts at 00:00 Bolivia time, not 24 h ago", async () => {
     await service.getTopProducts({ days: 1, limit: 5, today: true });
     expect(sinceOfLastCall().getTime()).toBe(laPazStartOfToday().getTime());
   });
 
-  it("sin today usa la ventana móvil de `days` días", async () => {
+  it("without today it uses the rolling `days`-day window", async () => {
     await service.getTopProducts({ days: 30, limit: 5 });
     const expected = Date.now() - 30 * 86400000;
-    // Margen amplio: entre el cálculo del servicio y el del test pasa poco tiempo
+    // Generous margin: little time passes between the service's and the test's calculation
     expect(Math.abs(sinceOfLastCall().getTime() - expected)).toBeLessThan(5000);
   });
 
-  it("today ignora `days` (1 día y 30 dan la misma ventana)", async () => {
+  it("today ignores `days` (1 day and 30 give the same window)", async () => {
     await service.getTopProducts({ days: 1, limit: 5, today: true });
     const withOneDay = sinceOfLastCall().getTime();
     prismaMock.$queryRaw.mockReset().mockResolvedValue([]);

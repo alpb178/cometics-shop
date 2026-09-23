@@ -12,7 +12,7 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-/** Devuelve una URL absoluta para un media de Strapi (local o Cloudinary). */
+/** Returns an absolute URL for a Strapi media item (local or Cloudinary). */
 export function mediaUrl(
   media: StrapiMedia | null | undefined,
   size: "thumbnail" | "small" | "medium" | "full" = "full"
@@ -41,10 +41,10 @@ export function formatPrice(
 }
 
 /**
- * Fecha dd/mm/aaaa hh:mm en hora de Bolivia (UTC-4 fijo), construida a mano.
- * No usar toLocaleString aquí: Node y el navegador formatean distinto
- * (espacios invisibles de ICU) y rompe la hidratación de React en las
- * tablas cliente.
+ * Date as dd/mm/yyyy hh:mm in Bolivia time (fixed UTC-4), built by hand.
+ * Don't use toLocaleString here: Node and the browser format differently
+ * (invisible ICU spaces), which breaks React hydration in the client
+ * tables.
  */
 export function formatDate(value: string | null | undefined): string {
   if (!value) return "—";
@@ -70,8 +70,8 @@ export const ORDER_STATUS_META: Record<
 };
 
 /**
- * Etiquetas de los eventos de tienda. Las comparten la tabla de interacciones
- * de /admin/visits y el panel de últimos eventos del dashboard.
+ * Store event labels. Shared by the interactions table in /admin/visits and
+ * the dashboard's latest-events panel.
  */
 export const EVENT_META: Record<
   StoreEventType,

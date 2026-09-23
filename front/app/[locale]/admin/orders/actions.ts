@@ -16,7 +16,7 @@ export async function updateOrderStatusAction(
   revalidatePath(`/admin/orders/${documentId}`);
 }
 
-/** Confirma el pago tras verificar el comprobante manualmente. */
+/** Confirms the payment after manually checking the receipt. */
 export async function confirmOrderPaymentAction(documentId: string) {
   await requireStaff();
   await updateOrderStatus(documentId, "confirmed");
@@ -24,14 +24,14 @@ export async function confirmOrderPaymentAction(documentId: string) {
   revalidatePath(`/admin/orders/${documentId}`);
 }
 
-/** Elimina el pedido definitivamente. */
+/** Permanently deletes the order. */
 export async function deleteOrderAction(documentId: string) {
   await requireStaff();
   await deleteOrder(documentId);
   revalidatePath("/admin/orders");
 }
 
-/** Elimina varios pedidos seleccionados. */
+/** Deletes several selected orders. */
 export async function bulkDeleteOrdersAction(documentIds: string[]) {
   await requireStaff();
   for (const documentId of documentIds) {
@@ -40,7 +40,7 @@ export async function bulkDeleteOrdersAction(documentIds: string[]) {
   revalidatePath("/admin/orders");
 }
 
-/** Elimina el pedido desde su detalle y vuelve al listado. */
+/** Deletes the order from its detail page and returns to the list. */
 export async function deleteOrderFromDetailAction(documentId: string) {
   await requireStaff();
   await deleteOrder(documentId);
@@ -48,7 +48,7 @@ export async function deleteOrderFromDetailAction(documentId: string) {
   redirect("/admin/orders");
 }
 
-/** Rechaza el pedido (comprobante inválido) con un motivo. */
+/** Rejects the order (invalid receipt) with a reason. */
 export async function rejectOrderAction(documentId: string, reason: string) {
   await requireStaff();
   const trimmed = reason.trim();

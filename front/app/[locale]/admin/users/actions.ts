@@ -68,7 +68,7 @@ export async function deleteUserAction(id: number) {
   revalidatePath("/admin/users");
 }
 
-/** Elimina varios usuarios seleccionados (nunca la cuenta propia). */
+/** Deletes several selected users (never the current account). */
 export async function bulkDeleteUsersAction(ids: number[]) {
   const me = await requireStaff();
   for (const id of ids) {

@@ -36,12 +36,12 @@ export class AuthService {
     private readonly usersService: UsersService,
   ) {}
 
-  /** Mismo payload que los JWT de users-permissions: { id }. */
+  /** Same payload as users-permissions JWTs: { id }. */
   issueJwt(userId: number): string {
     return this.jwtService.sign({ id: userId });
   }
 
-  /** Forma de user que devuelve Strapi en { jwt, user } (sanitizado, plano). */
+  /** User shape Strapi returns in { jwt, user } (sanitized, flat). */
   sanitizeUser(user: UpUserRow) {
     return {
       id: user.id,
@@ -114,7 +114,7 @@ export class AuthService {
     return { jwt: this.issueJwt(user.id), user: this.sanitizeUser(user) };
   }
 
-  // ---- Google OAuth (mismo flujo que el provider de users-permissions) ----
+  // ---- Google OAuth (same flow as the users-permissions provider) ----
 
   googleAuthorizeUrl(): string {
     const clientId = this.config.getOrThrow<string>("GOOGLE_CLIENT_ID");
@@ -128,7 +128,7 @@ export class AuthService {
     return `https://accounts.google.com/o/oauth2/v2/auth?${params}`;
   }
 
-  /** Intercambia el code por un access_token de Google. */
+  /** Exchanges the code for a Google access_token. */
   async exchangeGoogleCode(code: string): Promise<string> {
     const res = await fetch("https://oauth2.googleapis.com/token", {
       method: "POST",
@@ -148,7 +148,7 @@ export class AuthService {
     return data.access_token;
   }
 
-  /** Valida el access_token con Google y devuelve { jwt, user }, creando el usuario si no existe. */
+  /** Validates the access_token with Google and returns { jwt, user }, creating the user if missing. */
   async googleCallback(accessToken: string) {
     const res = await fetch("https://www.googleapis.com/oauth2/v3/userinfo", {
       headers: { Authorization: `Bearer ${accessToken}` },
@@ -181,7 +181,7 @@ export class AuthService {
     return { jwt: this.issueJwt(user.id), user: this.sanitizeUser(user) };
   }
 
-  // ---- Reset de contraseña ----
+  // ---- Password reset ----
 
   async forgotPassword(email: string) {
     const user = await this.prisma.up_users.findFirst({
@@ -190,7 +190,7 @@ export class AuthService {
         provider: "local",
       },
     });
-    // Siempre { ok: true } para no revelar si el email existe, como Strapi
+    // Always { ok: true } so we don't reveal whether the email exists, like Strapi
     if (!user?.email) return { ok: true };
     const token = randomBytes(32).toString("hex");
     await this.prisma.up_users.update({
@@ -204,7 +204,7 @@ export class AuthService {
         "Restablecer contraseña — Iris Natural",
         `<p>Para restablecer tu contraseña haz clic en el siguiente enlace:</p><p><a href="${url}">${url}</a></p><p>Si no lo has solicitado, ignora este mensaje.</p>`,
       )
-      .catch((err) => this.logger.error(`Error enviando email: ${err}`));
+      .catch((err) => this.logger.error(`Error sending email: ${err}`));
     return { ok: true };
   }
 

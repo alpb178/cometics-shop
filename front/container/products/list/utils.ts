@@ -5,7 +5,7 @@ export const groupProductsByCategory = (products: Product[]) => {
   const withoutCategory: Product[] = [];
 
   products?.forEach((product) => {
-    // Un producto puede tener varias categorías; aparece bajo cada una.
+    // A product can have several categories; it appears under each one.
     const names = (product?.categories ?? [])
       .map((c) => c?.name?.trim())
       .filter((n): n is string => !!n);
@@ -28,7 +28,3 @@ export const groupProductsByCategory = (products: Product[]) => {
 
   return grouped;
 };
-
-export const PRODUCTS_TITLE = "En manos expertas la calidad esta garantizada";
-export const PRODUCTS_DESCRIPTION =
-  "Cada producto nace con un propósito claro, inspirado en una investigación dedicada sobre los beneficios que la naturaleza nos ofrece.";

@@ -1,22 +1,34 @@
 import { getRequestConfig } from "next-intl/server";
-import { routing } from "./routing";
+import { isAppLocale, routing } from "./routing";
+
+// One JSON file per namespace under locales/<locale>/. Add the file for every
+// locale (es, en, pt) and list its name here.
+export const NAMESPACES = [
+  "common",
+  "nav",
+  "footer",
+  "home",
+  "pages",
+  "errors",
+  "products",
+  "cart",
+  "checkout",
+  "account",
+  "auth",
+  "seo"
+] as const;
 
 export default getRequestConfig(async ({ requestLocale }) => {
   // This typically corresponds to the `[locale]` segment
-  let locale = await requestLocale;
+  const requested = await requestLocale;
+  const locale = isAppLocale(requested) ? requested : routing.defaultLocale;
 
-  // Ensure that the incoming locale is valid
-  if (!locale || !routing.locales.includes(locale as any)) {
-    locale = routing.defaultLocale;
-  }
+  const entries = await Promise.all(
+    NAMESPACES.map(async (ns) => {
+      const mod = await import(`../locales/${locale}/${ns}.json`);
+      return [ns, mod.default] as const;
+    })
+  );
 
-  return {
-    locale,
-    messages: (
-      await (locale === "en"
-        ? // When using Turbopack, this will enable HMR for `en`
-          import("../locales/en/common.json")
-        : import(`../locales/${locale}/common.json`))
-    ).default
-  };
+  return { locale, messages: Object.fromEntries(entries) };
 });

@@ -9,7 +9,6 @@ import { trackEvent } from "@/lib/track-event";
 import { FormattedText } from "../../../components/text/formatted-text";
 import { QuantitySelector } from "./components/quantity-selector";
 import { SparklesCore } from "@/components/ui/sparkles";
-import { SHIPPING_POLICY_TEXT } from "@/lib/shipping";
 import Image from "next/image";
 import { useCart } from "@/context/cart-context";
 import { cn } from "@/lib/utils";
@@ -22,10 +21,12 @@ import {
   Store
 } from "lucide-react";
 import { applyDiscount } from "@/lib/pricing";
+import { useTranslations } from "next-intl";
 
 const DESCRIPTION_PREVIEW_CHARS = 700;
 
 export const SingleProduct = ({ product }: { product: Product }) => {
+  const t = useTranslations("products.detail");
   const [activeIndex, setActiveIndex] = useState(0);
   const [quantity, setQuantity] = useState(1);
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
@@ -33,7 +34,7 @@ export const SingleProduct = ({ product }: { product: Product }) => {
 
   const { addToCart } = useCart();
 
-  // Registra la vista del detalle de producto (una vez por producto montado).
+  // Record the product detail view (once per mounted product).
   useEffect(() => {
     trackEvent("product_view", {
       label: product.name,
@@ -69,7 +70,7 @@ export const SingleProduct = ({ product }: { product: Product }) => {
       productSlug: product.slug,
       quantity
     });
-    setFeedback(`Añadido al carrito: ${product.name} × ${quantity}`);
+    setFeedback(t("added", { name: product.name, quantity }));
     setTimeout(() => setFeedback(null), 3500);
     try {
       await logsStrapi(
@@ -83,17 +84,17 @@ export const SingleProduct = ({ product }: { product: Product }) => {
 
   return (
     <section className="mx-auto w-full max-w-screen-2xl px-4 py-6 sm:px-6 lg:px-10 lg:py-10">
-      {/* Reparto tipo Amazon: fotos a la izquierda, nombre y descripción en el
-          centro y la caja de compra a la derecha. En móvil el orden del DOM
-          manda: fotos, cabecera, carrito/envío y la descripción al final. */}
-      {/* `grid-rows-[auto_1fr]`: la fila de la cabecera se queda en su alto y
-          es la de la descripción la que absorbe el sobrante de las columnas
-          que ocupan las dos filas. Sin esto la cabecera crecía y dejaba un
-          hueco entre el precio y la descripción. */}
+      {/* Amazon-style layout: photos on the left, name and description in
+          the middle and the buy box on the right. On mobile the DOM order
+          rules: photos, header, cart/shipping and the description last. */}
+      {/* `grid-rows-[auto_1fr]`: the header row keeps its height and the
+          description row absorbs the leftover space of the columns that span
+          both rows. Without this the header grew and left a gap between the
+          price and the description. */}
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,520px)_minmax(0,1fr)_340px] lg:grid-rows-[auto_1fr] lg:gap-10">
-        {/* El bloque de imágenes se limita en ancho: estirado a toda la
-            columna la foto principal se escalaba por encima de la resolución
-            de origen y se veía pixelada. */}
+        {/* The image block is width-limited: stretched to the full column
+            the main photo was scaled beyond its source resolution and looked
+            pixelated. */}
         <div className="grid w-full max-w-[520px] grid-cols-[64px_1fr] gap-3 sm:grid-cols-[88px_1fr] sm:gap-5 lg:sticky lg:top-24 lg:col-start-1 lg:row-span-2 lg:row-start-1 lg:self-start">
           <div className="flex flex-col gap-2">
             {images.map((image: any, index: number) => (
@@ -101,7 +102,7 @@ export const SingleProduct = ({ product }: { product: Product }) => {
                 key={image.url ?? index}
                 type="button"
                 onClick={() => setActiveIndex(index)}
-                aria-label={`Ver imagen ${index + 1} de ${images.length}`}
+                aria-label={t("viewImage", { index: index + 1, total: images.length })}
                 aria-pressed={index === activeIndex}
                 className={cn(
                   "relative aspect-square w-full overflow-hidden border transition-colors",
@@ -117,8 +118,9 @@ export const SingleProduct = ({ product }: { product: Product }) => {
                   sizes="88px"
                   className="object-cover"
                 />
-                {/* Grano de partículas sobre la miniatura activa. El canvas no
-                    captura clics para no anular el botón que lo contiene. */}
+                {/* Particle grain over the active thumbnail. The canvas does
+                    not capture clicks so it does not cancel the button that
+                    contains it. */}
                 {index === activeIndex && (
                   <SparklesCore
                     id={`thumb-sparkles-${index}`}
@@ -155,7 +157,7 @@ export const SingleProduct = ({ product }: { product: Product }) => {
           </motion.div>
         </div>
 
-        {/* Cabecera: categoría, nombre y precio */}
+        {/* Header: category, name and price */}
         <div className="flex flex-col lg:col-start-2 lg:row-start-1">
           {product.categories?.[0]?.name && (
             <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
@@ -191,8 +193,8 @@ export const SingleProduct = ({ product }: { product: Product }) => {
           )}
         </div>
 
-        {/* Caja de compra: cantidad, carrito y condiciones de envío. En móvil
-            cae justo debajo de las fotos, antes de la descripción. */}
+        {/* Buy box: quantity, cart and shipping terms. On mobile it falls
+            right below the photos, before the description. */}
         <div className="border border-border p-5 lg:col-start-3 lg:row-span-2 lg:row-start-1 lg:self-start">
           <div>
             <QuantitySelector
@@ -207,16 +209,16 @@ export const SingleProduct = ({ product }: { product: Product }) => {
               type="button"
               onClick={handleAddToCart}
               className="flex w-full items-center justify-center gap-2 bg-foreground py-4 text-xs font-semibold uppercase tracking-[0.16em] text-background transition-colors hover:bg-foreground/90"
-              aria-label={`Añadir al carrito: ${product.name}`}
+              aria-label={t("addToCartAria", { name: product.name })}
             >
               <ShoppingBag className="h-4 w-4" strokeWidth={1.75} />
-              Añadir al carrito
+              {t("addToCart")}
             </button>
 
             {quantity > 1 && product.price && (
               <p className="mt-3 flex items-baseline justify-between text-sm text-muted-foreground">
                 <span>
-                  Total ({quantity} {quantity === 1 ? "unidad" : "unidades"})
+                  {t("totalUnits", { quantity })}
                 </span>
                 <span className="font-semibold text-foreground">
                   {formatPrice({
@@ -245,12 +247,12 @@ export const SingleProduct = ({ product }: { product: Product }) => {
               />
               <div>
                 <p className="font-semibold uppercase tracking-[0.12em] text-foreground">
-                  Envío
+                  {t("shipping")}
                 </p>
-                <p className="text-muted-foreground">Entrega 24–72 h</p>
-                {/* Misma política que el aviso flotante de bienvenida. */}
+                <p className="text-muted-foreground">{t("shippingTime")}</p>
+                {/* Same policy as the floating welcome notice. */}
                 <p className="mt-1 leading-relaxed text-muted-foreground">
-                  {SHIPPING_POLICY_TEXT}
+                  {t("shippingPolicy")}
                 </p>
               </div>
             </div>
@@ -261,20 +263,20 @@ export const SingleProduct = ({ product }: { product: Product }) => {
               />
               <div>
                 <p className="font-semibold uppercase tracking-[0.12em] text-foreground">
-                  Recogida
+                  {t("pickup")}
                 </p>
-                <p className="text-muted-foreground">Lista en 24–48 h</p>
+                <p className="text-muted-foreground">{t("pickupTime")}</p>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Descripción: en escritorio bajo la cabecera, en móvil al final. Es
-            lo único que scrollea en escritorio, para que la foto no se mueva
-            al leerla. */}
+        {/* Description: under the header on desktop, last on mobile. It is
+            the only thing that scrolls on desktop, so the photo does not
+            move while reading it. */}
         <div className="lg:col-start-2 lg:row-start-2 lg:max-h-[60vh] lg:self-start lg:overflow-y-auto lg:pr-3">
           <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.16em] text-foreground">
-            Descripción del producto
+            {t("description")}
           </p>
           <FormattedText
             content={displayedDescription}
@@ -288,11 +290,11 @@ export const SingleProduct = ({ product }: { product: Product }) => {
             >
               {isDescriptionExpanded ? (
                 <>
-                  Ver menos <ChevronUp className="h-4 w-4" />
+                  {t("showLess")} <ChevronUp className="h-4 w-4" />
                 </>
               ) : (
                 <>
-                  Ver más <ChevronDown className="h-4 w-4" />
+                  {t("showMore")} <ChevronDown className="h-4 w-4" />
                 </>
               )}
             </button>

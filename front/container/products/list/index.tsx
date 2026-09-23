@@ -8,6 +8,7 @@ import { Filter, FilterState } from "./components/Filter";
 import { Grid2X2, Grid3X3, SlidersHorizontal, X } from "lucide-react";
 import { ShippingNotice } from "@/components/shipping-notice";
 import { cn } from "@/lib/utils";
+import { useTranslations } from "next-intl";
 
 type SortOption = "popular" | "newest" | "price-asc" | "price-desc" | "name";
 
@@ -17,6 +18,7 @@ const byNewest = (a: Product, b: Product) =>
   new Date(b.createdAt ?? 0).getTime() - new Date(a.createdAt ?? 0).getTime();
 
 export const ProductList = ({ products }: { products: Product[] }) => {
+  const t = useTranslations("products");
   const { minPrice, maxPrice } = useMemo(() => {
     const prices = products
       .map((p) => p.price)
@@ -28,7 +30,7 @@ export const ProductList = ({ products }: { products: Product[] }) => {
     };
   }, [products]);
 
-  // "Destacados" = los 10 productos más visitados (con al menos 1 visita).
+  // "Destacados" = the 10 most visited products (with at least 1 visit).
   const featuredSlugs = useMemo(
     () =>
       new Set(
@@ -112,9 +114,9 @@ export const ProductList = ({ products }: { products: Product[] }) => {
         break;
       case "popular":
       default:
-        // De más visto a menos. Los que aún no tienen visitas quedan al final
-        // ordenados por novedad, para que el bloque de ceros no salga en un
-        // orden arbitrario.
+        // Most viewed first. Products with no visits yet go last, sorted by
+        // newest, so the block of zeros does not come out in an arbitrary
+        // order.
         sorted.sort(
           (a, b) => (b.views ?? 0) - (a.views ?? 0) || byNewest(a, b)
         );
@@ -131,9 +133,15 @@ export const ProductList = ({ products }: { products: Product[] }) => {
 
   const activeChips = [
     filter.category && { key: "category", label: filter.category },
-    filter.flags.has("isNew") && { key: "isNew", label: "Nuevos" },
-    filter.flags.has("featured") && { key: "featured", label: "Destacados" },
-    filter.flags.has("discount") && { key: "discount", label: "En oferta" },
+    filter.flags.has("isNew") && { key: "isNew", label: t("filter.isNew") },
+    filter.flags.has("featured") && {
+      key: "featured",
+      label: t("filter.featured")
+    },
+    filter.flags.has("discount") && {
+      key: "discount",
+      label: t("filter.discount")
+    },
     searchQuery.trim() && { key: "search", label: `"${searchQuery}"` }
   ].filter(Boolean) as { key: string; label: string }[];
 
@@ -161,10 +169,10 @@ export const ProductList = ({ products }: { products: Product[] }) => {
       <header className="mb-6 flex flex-col gap-4 border-b border-border pb-6">
         <div className="flex flex-col gap-1">
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-            Catálogo
+            {t("list.eyebrow")}
           </p>
           <h1 className="font-display text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
-            Nuestros productos
+            {t("list.title")}
           </h1>
         </div>
         <SearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
@@ -212,7 +220,7 @@ export const ProductList = ({ products }: { products: Product[] }) => {
                 onClick={clearAll}
                 className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
               >
-                Limpiar todo
+                {t("list.clearAll")}
               </button>
             </div>
           )}
@@ -231,17 +239,17 @@ export const ProductList = ({ products }: { products: Product[] }) => {
           ) : (
             <div className="flex flex-col items-center justify-center py-24 text-center">
               <p className="mb-2 text-base font-semibold text-foreground">
-                No encontramos productos
+                {t("list.emptyTitle")}
               </p>
               <p className="mb-6 max-w-md text-sm text-muted-foreground">
-                Prueba con otra búsqueda o ajusta los filtros.
+                {t("list.emptyHint")}
               </p>
               <button
                 type="button"
                 onClick={clearAll}
                 className="bg-foreground px-6 py-3 text-xs font-semibold uppercase tracking-[0.14em] text-background hover:bg-foreground/90"
               >
-                Limpiar filtros
+                {t("list.clearFilters")}
               </button>
             </div>
           )}
@@ -258,17 +266,17 @@ export const ProductList = ({ products }: { products: Product[] }) => {
             type="button"
             className="flex-1 bg-foreground/40 backdrop-blur-sm"
             onClick={() => setMobileFiltersOpen(false)}
-            aria-label="Cerrar filtros"
+            aria-label={t("list.closeFilters")}
           />
           <div className="flex h-full w-[88vw] max-w-sm flex-col bg-background shadow-xl">
             <div className="flex items-center justify-between border-b border-border px-5 py-4">
               <p className="text-xs font-semibold uppercase tracking-[0.16em] text-foreground">
-                Filtros
+                {t("list.filters")}
               </p>
               <button
                 type="button"
                 onClick={() => setMobileFiltersOpen(false)}
-                aria-label="Cerrar"
+                aria-label={t("list.close")}
                 className="p-1"
               >
                 <X className="h-5 w-5 text-foreground" />
@@ -289,7 +297,7 @@ export const ProductList = ({ products }: { products: Product[] }) => {
                 onClick={() => setMobileFiltersOpen(false)}
                 className="w-full bg-foreground py-3 text-xs font-semibold uppercase tracking-[0.14em] text-background"
               >
-                Ver {filtered.length} productos
+                {t("list.showResults", { count: filtered.length })}
               </button>
             </div>
           </div>
@@ -317,87 +325,90 @@ const Toolbar = ({
   density: "comfortable" | "compact";
   setDensity: (d: "comfortable" | "compact") => void;
   onOpenFilters: () => void;
-}) => (
-  <div className="mb-6 flex flex-wrap items-center justify-between gap-3 text-xs">
-    <div className="flex items-center gap-4">
-      <button
-        type="button"
-        onClick={onOpenFilters}
-        className="inline-flex items-center gap-2 border border-foreground/20 px-3 py-2 font-semibold uppercase tracking-[0.14em] text-foreground lg:hidden"
-        aria-label="Abrir filtros"
-      >
-        <SlidersHorizontal className="h-4 w-4" />
-        Filtros
-      </button>
-      <p className="text-foreground">
-        <span className="font-semibold">{count}</span>{" "}
-        <span className="text-muted-foreground">productos</span>
-      </p>
-      <label className="hidden items-center gap-2 text-muted-foreground sm:inline-flex">
-        Por página
-        <select
-          value={pageSize}
-          onChange={(e) => setPageSize(Number(e.target.value))}
-          className="border-0 bg-transparent font-semibold text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-foreground"
-        >
-          {PAGE_SIZE_OPTIONS.map((n) => (
-            <option key={n} value={n}>
-              {n}
-            </option>
-          ))}
-        </select>
-      </label>
-    </div>
-
-    <div className="flex items-center gap-4">
-      <label className="inline-flex items-center gap-2 text-muted-foreground">
-        Ordenar
-        <select
-          value={sort}
-          onChange={(e) => setSort(e.target.value as SortOption)}
-          className="border-0 bg-transparent font-semibold text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-foreground"
-        >
-          <option value="popular">Lo más visto</option>
-          <option value="newest">Lo más nuevo</option>
-          <option value="price-asc">Precio: menor a mayor</option>
-          <option value="price-desc">Precio: mayor a menor</option>
-          <option value="name">Nombre A–Z</option>
-        </select>
-      </label>
-
-      <div className="hidden items-center gap-1 sm:flex" role="group">
+}) => {
+  const t = useTranslations("products.list");
+  return (
+    <div className="mb-6 flex flex-wrap items-center justify-between gap-3 text-xs">
+      <div className="flex items-center gap-4">
         <button
           type="button"
-          aria-label="Vista cómoda"
-          aria-pressed={density === "comfortable"}
-          onClick={() => setDensity("comfortable")}
-          className={cn(
-            "p-1.5 transition-colors",
-            density === "comfortable"
-              ? "text-foreground"
-              : "text-muted-foreground hover:text-foreground"
-          )}
+          onClick={onOpenFilters}
+          className="inline-flex items-center gap-2 border border-foreground/20 px-3 py-2 font-semibold uppercase tracking-[0.14em] text-foreground lg:hidden"
+          aria-label={t("openFilters")}
         >
-          <Grid2X2 className="h-4 w-4" />
+          <SlidersHorizontal className="h-4 w-4" />
+          {t("filters")}
         </button>
-        <button
-          type="button"
-          aria-label="Vista compacta"
-          aria-pressed={density === "compact"}
-          onClick={() => setDensity("compact")}
-          className={cn(
-            "p-1.5 transition-colors",
-            density === "compact"
-              ? "text-foreground"
-              : "text-muted-foreground hover:text-foreground"
-          )}
-        >
-          <Grid3X3 className="h-4 w-4" />
-        </button>
+        <p className="text-foreground">
+          <span className="font-semibold">{count}</span>{" "}
+          <span className="text-muted-foreground">{t("count", { count })}</span>
+        </p>
+        <label className="hidden items-center gap-2 text-muted-foreground sm:inline-flex">
+          {t("perPage")}
+          <select
+            value={pageSize}
+            onChange={(e) => setPageSize(Number(e.target.value))}
+            className="border-0 bg-transparent font-semibold text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-foreground"
+          >
+            {PAGE_SIZE_OPTIONS.map((n) => (
+              <option key={n} value={n}>
+                {n}
+              </option>
+            ))}
+          </select>
+        </label>
+      </div>
+
+      <div className="flex items-center gap-4">
+        <label className="inline-flex items-center gap-2 text-muted-foreground">
+          {t("sort")}
+          <select
+            value={sort}
+            onChange={(e) => setSort(e.target.value as SortOption)}
+            className="border-0 bg-transparent font-semibold text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-foreground"
+          >
+            <option value="popular">{t("sortOptions.popular")}</option>
+            <option value="newest">{t("sortOptions.newest")}</option>
+            <option value="price-asc">{t("sortOptions.priceAsc")}</option>
+            <option value="price-desc">{t("sortOptions.priceDesc")}</option>
+            <option value="name">{t("sortOptions.name")}</option>
+          </select>
+        </label>
+
+        <div className="hidden items-center gap-1 sm:flex" role="group">
+          <button
+            type="button"
+            aria-label={t("viewComfortable")}
+            aria-pressed={density === "comfortable"}
+            onClick={() => setDensity("comfortable")}
+            className={cn(
+              "p-1.5 transition-colors",
+              density === "comfortable"
+                ? "text-foreground"
+                : "text-muted-foreground hover:text-foreground"
+            )}
+          >
+            <Grid2X2 className="h-4 w-4" />
+          </button>
+          <button
+            type="button"
+            aria-label={t("viewCompact")}
+            aria-pressed={density === "compact"}
+            onClick={() => setDensity("compact")}
+            className={cn(
+              "p-1.5 transition-colors",
+              density === "compact"
+                ? "text-foreground"
+                : "text-muted-foreground hover:text-foreground"
+            )}
+          >
+            <Grid3X3 className="h-4 w-4" />
+          </button>
+        </div>
       </div>
     </div>
-  </div>
-);
+  );
+};
 
 const Pagination = ({
   page,
@@ -408,6 +419,7 @@ const Pagination = ({
   totalPages: number;
   onChange: (n: number) => void;
 }) => {
+  const t = useTranslations("products.list");
   const pages = useMemo(() => {
     const arr: (number | "…")[] = [];
     const push = (n: number | "…") => arr.push(n);
@@ -430,13 +442,14 @@ const Pagination = ({
 
   return (
     <nav
-      aria-label="Paginación"
+      aria-label={t("pagination")}
       className="mt-12 flex items-center justify-center gap-1 text-sm"
     >
       <button
         type="button"
         onClick={() => onChange(Math.max(1, page - 1))}
         disabled={page === 1}
+        aria-label={t("previousPage")}
         className="px-3 py-2 font-semibold text-foreground disabled:cursor-not-allowed disabled:text-muted-foreground"
       >
         ‹
@@ -471,6 +484,7 @@ const Pagination = ({
         type="button"
         onClick={() => onChange(Math.min(totalPages, page + 1))}
         disabled={page === totalPages}
+        aria-label={t("nextPage")}
         className="px-3 py-2 font-semibold text-foreground disabled:cursor-not-allowed disabled:text-muted-foreground"
       >
         ›

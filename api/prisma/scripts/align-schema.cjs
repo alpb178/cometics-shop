@@ -1,9 +1,9 @@
-// Ejecuta el script idempotente de alineación de esquema (align-prod-schema.sql)
-// contra la BD apuntada por DATABASE_URL. Pensado para correr en el deploy
-// (Build o Pre-Deploy Command de Render), donde DATABASE_URL es la BD de prod.
+// Runs the idempotent schema alignment script (align-prod-schema.sql)
+// against the DB pointed to by DATABASE_URL. Meant to run on deploy
+// (Render's Build or Pre-Deploy Command), where DATABASE_URL is the prod DB.
 //
-// Idempotente: usa `ADD COLUMN IF NOT EXISTS`, así que es seguro en cada deploy.
-//   Uso: node prisma/scripts/align-schema.cjs   (o: yarn db:align)
+// Idempotent: it uses `ADD COLUMN IF NOT EXISTS`, so it is safe on every deploy.
+//   Usage: node prisma/scripts/align-schema.cjs   (or: yarn db:align)
 
 const fs = require("fs");
 const path = require("path");
@@ -14,7 +14,7 @@ const prisma = new PrismaClient();
 (async () => {
   const sqlPath = path.join(__dirname, "align-prod-schema.sql");
   const raw = fs.readFileSync(sqlPath, "utf8");
-  // Quita líneas de comentario y separa en sentencias por `;`.
+  // Strip comment lines and split into statements on `;`.
   const statements = raw
     .split("\n")
     .filter((line) => !line.trim().startsWith("--"))
@@ -24,10 +24,10 @@ const prisma = new PrismaClient();
     .filter(Boolean);
 
   for (const stmt of statements) {
-    console.log("[db:align] ejecutando:", stmt);
+    console.log("[db:align] executing:", stmt);
     await prisma.$executeRawUnsafe(stmt);
   }
-  console.log(`[db:align] OK — ${statements.length} sentencia(s) aplicada(s).`);
+  console.log(`[db:align] OK — ${statements.length} statement(s) applied.`);
   await prisma.$disconnect();
 })().catch(async (e) => {
   console.error("[db:align] ERROR:", e.message);

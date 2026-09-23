@@ -1,0 +1,70 @@
+{
+  "eyebrow": "Mi cuenta",
+  "home": {
+    "email": "Email",
+    "phone": "Teléfono",
+    "myOrders": "Mis pedidos",
+    "myAddresses": "Mis direcciones"
+  },
+  "addresses": {
+    "backToAccount": "← Mi cuenta",
+    "backToAddresses": "← Mis direcciones",
+    "title": "Mis direcciones",
+    "newAddress": "Nueva dirección",
+    "editAddress": "Editar dirección",
+    "empty": "Aún no tienes direcciones guardadas.",
+    "default": "Predeterminada",
+    "phoneLine": "Tel: {phone}",
+    "edit": "Editar",
+    "delete": "Eliminar",
+    "deleting": "Eliminando…",
+    "confirmDelete": "¿Eliminar esta dirección?"
+  },
+  "addressForm": {
+    "fullName": "Nombre completo",
+    "phone": "Teléfono",
+    "line1": "Dirección",
+    "line2": "Referencia / apartamento (opcional)",
+    "city": "Ciudad",
+    "department": "Departamento",
+    "notes": "Notas (opcional)",
+    "required": "Requerido",
+    "makeDefault": "Usar como dirección predeterminada",
+    "saving": "Guardando…",
+    "saveNew": "Guardar dirección",
+    "saveChanges": "Guardar cambios",
+    "cancel": "Cancelar",
+    "saveError": "No se pudo guardar la dirección.",
+    "genericError": "Algo salió mal."
+  },
+  "orders": {
+    "title": "Mis pedidos",
+    "empty": "Todavía no tienes pedidos.",
+    "startShopping": "Empieza a comprar",
+    "orderNumber": "Pedido #{id}",
+    "backToOrders": "← Volver a mis pedidos",
+    "products": "Productos",
+    "delivery": "Entrega",
+    "deliveryHome": "Envío a domicilio",
+    "deliveryPickup": "Recoger en tienda",
+    "phoneLine": "Tel: {phone}",
+    "ciLine": "CI: {ci}",
+    "payment": "Pago",
+    "paymentProofAlt": "Comprobante de pago",
+    "subtotal": "Subtotal",
+    "shipping": "Envío",
+    "total": "Total",
+    "status": {
+      "pending_verification": "Pendiente de verificación",
+      "confirmed": "Confirmado",
+      "shipped": "Enviado",
+      "delivered": "Entregado",
+      "cancelled": "Cancelado"
+    },
+    "paymentMethod": {
+      "cash": "Efectivo",
+      "qr": "Pago por QR",
+      "bank_transfer": "Transferencia bancaria"
+    }
+  }
+}

@@ -1,15 +1,17 @@
 "use client";
 
 import { ExternalLink } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useEffect, useRef, useState } from "react";
 import { Company, GROUP_COMPANIES } from "@/lib/companies";
 import { trackEvent } from "@/lib/track-event";
 import { Tilt3D } from "@/components/ui/tilt-3d";
 import { SlideBurst } from "@/components/carrousel/slide-burst";
 
-// Tarjeta de una empresa hermana: imagen destacada con el nombre en overlay,
-// descripción y CTA "Visitar sitio" (enlace externo seguro).
+// Sister company card: featured image with the name overlaid, description and a
+// "Visitar sitio" CTA (safe external link).
 function CompanyCard({ company }: { company: Company }) {
+  const t = useTranslations("home");
   const track = () => trackEvent("group_click", { label: company.name });
   return (
     <article className="flex h-full flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-sm transition-shadow hover:shadow-md">
@@ -39,7 +41,7 @@ function CompanyCard({ company }: { company: Company }) {
 
       <div className="flex flex-1 flex-col p-6">
         <p className="mb-6 flex-1 text-sm leading-relaxed text-muted-foreground">
-          {company.description}
+          {t(`companies.${company.slug}.description`)}
         </p>
         <a
           href={company.url}
@@ -47,9 +49,9 @@ function CompanyCard({ company }: { company: Company }) {
           rel="noopener noreferrer"
           onClick={track}
           className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground transition-colors hover:opacity-90 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
-          aria-label={`Visitar el sitio de ${company.name} (se abre en una pestaña nueva)`}
+          aria-label={t("groupCompanies.visitSiteLabel", { name: company.name })}
         >
-          Visitar sitio
+          {t("groupCompanies.visitSite")}
           <ExternalLink className="h-4 w-4" />
         </a>
       </div>
@@ -57,17 +59,18 @@ function CompanyCard({ company }: { company: Company }) {
   );
 }
 
-// Sección "Sitios de interés" — carrusel con las demás empresas del Grupo CorpSC.
+// "Sitios de interés" section — carousel with the other CorpSC Group companies.
 export function GroupCompanies() {
+  const t = useTranslations("home");
   const scroller = useRef<HTMLDivElement>(null);
-  // Se incrementa en cada movimiento del carrusel (flecha o auto-avance) para
-  // relanzar la ráfaga de destellos sobre las tarjetas.
+  // Incremented on every carousel move (arrow or auto-advance) to restart the
+  // sparkle burst over the cards.
   const [burst, setBurst] = useState(0);
-  // Punto activo del indicador de cantidad: se deriva de la posición de scroll.
+  // Active dot of the count indicator: derived from the scroll position.
   const [active, setActive] = useState(0);
   const count = GROUP_COMPANIES.length;
 
-  // Lleva la tarjeta `i` al inicio de la vista (usado por los puntos).
+  // Bring card `i` to the start of the view (used by the dots).
   const goTo = (i: number) => {
     const el = scroller.current;
     if (!el) return;
@@ -76,8 +79,8 @@ export function GroupCompanies() {
     setBurst((b) => b + 1);
   };
 
-  // Mantiene el punto activo sincronizado con el scroll (flechas, auto-avance
-  // o arrastre manual). Mapea el rango de scroll a los índices de tarjeta.
+  // Keeps the active dot in sync with the scroll (arrows, auto-advance or
+  // manual drag). Maps the scroll range to card indexes.
   useEffect(() => {
     const el = scroller.current;
     if (!el) return;
@@ -91,9 +94,9 @@ export function GroupCompanies() {
     return () => el.removeEventListener("scroll", onScroll);
   }, [count]);
 
-  // Auto-avance del carrusel: cada 5s pasa a la siguiente "página" y al llegar
-  // al final vuelve al inicio (mismo tiempo de cambio que el carrusel del hero).
-  // Se pausa al pasar el puntero por encima y respeta prefers-reduced-motion.
+  // Carousel auto-advance: every 5s it moves to the next "page" and at the end
+  // goes back to the start (same interval as the hero carousel). It pauses
+  // while the pointer is over it and respects prefers-reduced-motion.
   useEffect(() => {
     const el = scroller.current;
     if (!el) return;
@@ -126,11 +129,11 @@ export function GroupCompanies() {
 
   return (
     <section
-      aria-label="Sitios de interés del Grupo CorpSC"
+      aria-label={t("groupCompanies.sectionLabel")}
       className="mx-auto w-full max-w-screen-2xl px-4 py-12 sm:px-6 lg:px-10"
     >
-      {/* Alinea las tarjetas con la columna de productos: mismo grid que la
-          lista (barra lateral de 220px + productos) con un hueco a la izquierda en lg. */}
+      {/* Align the cards with the products column: same grid as the list
+          (220px sidebar + products) with a gap on the left at lg. */}
       <div className="lg:grid lg:grid-cols-[220px_1fr] lg:gap-x-10">
         <div aria-hidden="true" className="hidden lg:block" />
         <div className="min-w-0">
@@ -151,18 +154,18 @@ export function GroupCompanies() {
           ))}
         </div>
 
-        {/* Ráfaga de destellos al mover el carrusel (no captura clics) */}
+        {/* Sparkle burst when the carousel moves (does not capture clicks) */}
         <SlideBurst trigger={burst} />
       </div>
 
-      {/* Indicador de cantidad (puntos) — mismo estilo que el carrusel del hero */}
+      {/* Count indicator (dots) — same style as the hero carousel */}
       <div className="mt-6 flex justify-center gap-1.5">
         {GROUP_COMPANIES.map((company, i) => (
           <button
             key={company.slug}
             type="button"
             onClick={() => goTo(i)}
-            aria-label={`Ir a ${company.name}`}
+            aria-label={t("groupCompanies.goTo", { name: company.name })}
             aria-current={i === active}
             className={`h-1.5 rounded-full transition-all ${
               i === active

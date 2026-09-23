@@ -19,8 +19,8 @@ import { CreateOrderDto, UpdateOrderDto } from "./order.dto";
 import { OrdersService } from "./orders.service";
 
 /**
- * `?scope=mine` marca la petición como "vista de cliente": fuerza el filtro por
- * propiedad y oculta el precio original, aunque quien consulte sea staff.
+ * `?scope=mine` marks the request as a "customer view": it forces the ownership
+ * filter and hides the original price, even when the caller is staff.
  */
 const MINE_SCOPE = "mine";
 
@@ -33,10 +33,10 @@ export class OrdersController {
 
   @Get()
   @ApiOperation({
-    summary: "Pedidos (staff: todos, cliente: los suyos)",
+    summary: "Orders (staff: all, customer: their own)",
     description:
-      "Con `?scope=mine` devuelve solo los pedidos del usuario autenticado, " +
-      "incluso si es staff. Lo usa la vista 'Mis pedidos' del storefront.",
+      "With `?scope=mine` it returns only the authenticated user's orders, " +
+      "even for staff. Used by the storefront's 'My orders' view.",
   })
   find(
     @CurrentUser() user: AuthenticatedUser,
@@ -55,7 +55,7 @@ export class OrdersController {
 
   @Get("stats")
   @UseGuards(StaffGuard)
-  @ApiOperation({ summary: "KPIs de pedidos: total, pendientes, ingresos y serie diaria (staff)" })
+  @ApiOperation({ summary: "Order KPIs: total, pending, revenue and daily series (staff)" })
   async stats(@Query("days") days?: string) {
     return {
       data: await this.ordersService.getStats(
@@ -66,10 +66,10 @@ export class OrdersController {
 
   @Get(":id")
   @ApiOperation({
-    summary: "Detalle de pedido (id numérico o documentId)",
+    summary: "Order detail (numeric id or documentId)",
     description:
-      "Con `?scope=mine` exige que el pedido sea del usuario autenticado " +
-      "(404 si no lo es) y omite el precio original, aunque sea staff.",
+      "With `?scope=mine` it requires the order to belong to the authenticated " +
+      "user (404 otherwise) and omits the original price, even for staff.",
   })
   async findOne(
     @CurrentUser() user: AuthenticatedUser,
@@ -86,7 +86,7 @@ export class OrdersController {
   }
 
   @Post()
-  @ApiOperation({ summary: "Crear pedido (totales recalculados server-side)" })
+  @ApiOperation({ summary: "Create an order (totals recomputed server-side)" })
   async create(
     @CurrentUser() user: AuthenticatedUser,
     @Body("data") data: CreateOrderDto,
@@ -96,7 +96,7 @@ export class OrdersController {
 
   @Put(":id")
   @UseGuards(StaffGuard)
-  @ApiOperation({ summary: "Actualizar estado/notas (solo staff)" })
+  @ApiOperation({ summary: "Update status/notes (staff only)" })
   async update(
     @CurrentUser() user: AuthenticatedUser,
     @Param("id") id: string,
@@ -107,7 +107,7 @@ export class OrdersController {
 
   @Delete(":id")
   @UseGuards(StaffGuard)
-  @ApiOperation({ summary: "Eliminar pedido (solo staff)" })
+  @ApiOperation({ summary: "Delete order (staff only)" })
   async delete(@CurrentUser() user: AuthenticatedUser, @Param("id") id: string) {
     return { data: await this.ordersService.delete(id, user) };
   }

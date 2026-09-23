@@ -14,8 +14,8 @@ export interface MediaFile {
 }
 
 /**
- * Lectura/escritura de la tabla polimórfica files_related_mph con la que
- * Strapi asocia media a entidades (related_type + related_id + field).
+ * Reads/writes the polymorphic files_related_mph table Strapi uses to attach
+ * media to entities (related_type + related_id + field).
  */
 @Injectable()
 export class MediaService {

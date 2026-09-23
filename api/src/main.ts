@@ -8,13 +8,13 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const config = app.get(ConfigService);
 
-  // Mismo prefijo que Strapi: los clientes llaman /api/...
+  // Same prefix as Strapi: clients call /api/...
   app.setGlobalPrefix("api");
 
   app.useGlobalPipes(
     new ValidationPipe({
-      // whitelist sin forbid: los campos no declarados se descartan en
-      // silencio, como hacían las whitelists de los controllers de Strapi
+      // whitelist without forbid: undeclared fields are silently dropped,
+      // like the Strapi controllers' whitelists did
       whitelist: true,
       transform: true,
     }),
@@ -29,7 +29,7 @@ async function bootstrap() {
 
   const swaggerConfig = new DocumentBuilder()
     .setTitle("Iris Natural API")
-    .setDescription("API de la tienda Iris Natural")
+    .setDescription("Iris Natural store API")
     .setVersion("0.1.0")
     .build();
   const document = SwaggerModule.createDocument(app, swaggerConfig);
@@ -37,7 +37,7 @@ async function bootstrap() {
 
   const port = config.get<number>("API_PORT", 4000);
   await app.listen(port);
-  console.log(`API escuchando en http://localhost:${port} (docs en /docs)`);
+  console.log(`API listening on http://localhost:${port} (docs at /docs)`);
 }
 
 bootstrap();

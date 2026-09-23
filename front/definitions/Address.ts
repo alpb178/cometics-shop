@@ -9,7 +9,7 @@ export interface Address {
   ci?: string | null;
   notes?: string | null;
   isDefault?: boolean;
-  /** Último punto que el cliente marcó en el mapa para esta dirección. */
+  /** Last point the customer picked on the map for this address. */
   lat?: number | null;
   lng?: number | null;
 }

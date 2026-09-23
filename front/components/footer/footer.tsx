@@ -1,7 +1,8 @@
 "use client";
 
-import { Link } from "next-view-transitions";
-import seoData from "@/lib/next-metadata";
+import { useTranslations } from "next-intl";
+import { TransitionLink as Link } from "@/components/i18n/transition-link";
+import { siteMetadata } from "@/lib/next-metadata";
 import { ArrowRight } from "lucide-react";
 import {
   IconBrandFacebook,
@@ -10,33 +11,35 @@ import {
 } from "@tabler/icons-react";
 import { SOCIAL_LINKS } from "@/lib/static-content";
 
-type FooterLink = { text: string; URL: string };
+type FooterLink = { labelKey: "privacyPolicy"; URL: string };
 
 const POLICY_LINKS: FooterLink[] = [
-  { text: "Política de privacidad", URL: "/policy-privacy" }
+  { labelKey: "privacyPolicy", URL: "/policy-privacy" }
 ];
 
-// Iconos en color de marca (currentColor = text-primary del enlace).
+// Icons in the brand color (currentColor = the link's text-primary).
 const SOCIAL_ICON: Record<string, React.ReactNode> = {
   facebook: <IconBrandFacebook className="size-5" />,
   instagram: <IconBrandInstagram className="size-5" />,
   tiktok: <IconBrandTiktok className="size-5" />
 };
 
-export const Footer = ({ locale }: { locale: string }) => {
+// `locale` is accepted for backwards compatibility; links add the prefix.
+export const Footer = (_props: { locale: string }) => {
+  const t = useTranslations("footer");
   return (
     <footer className="mt-24 bg-foreground text-background">
       <div className="mx-auto max-w-screen-2xl px-6 py-14 sm:px-10">
         <div className="grid grid-cols-2 gap-10 md:grid-cols-4">
-          <FooterColumn title="Atención">
-            <FooterLink href={`/${locale}/contact`}>Contacto</FooterLink>
-            <FooterLink href={`/${locale}/faq`}>Preguntas frecuentes</FooterLink>
-            <FooterLink href={`/${locale}/how-it-works`}>Cómo comprar</FooterLink>
+          <FooterColumn title={t("support.title")}>
+            <FooterLink href="/contact">{t("support.contact")}</FooterLink>
+            <FooterLink href="/faq">{t("support.faq")}</FooterLink>
+            <FooterLink href="/how-it-works">{t("support.howToBuy")}</FooterLink>
           </FooterColumn>
 
-          <FooterColumn title="La marca">
-            <FooterLink href={`/${locale}/about`}>Nuestra historia</FooterLink>
-            <FooterLink href={`/${locale}`}>Productos</FooterLink>
+          <FooterColumn title={t("brand.title")}>
+            <FooterLink href="/about">{t("brand.ourStory")}</FooterLink>
+            <FooterLink href="/">{t("brand.products")}</FooterLink>
             {process.env.NEXT_PUBLIC_ADDRESS && (
               <li className="text-sm text-background/70">
                 {process.env.NEXT_PUBLIC_ADDRESS}
@@ -44,40 +47,36 @@ export const Footer = ({ locale }: { locale: string }) => {
             )}
           </FooterColumn>
 
-          <FooterColumn title="Legal">
+          <FooterColumn title={t("legal.title")}>
             {POLICY_LINKS.map((link) => (
               <FooterLink
-                key={link.text}
-                href={
-                  link.URL.startsWith("http")
-                    ? link.URL
-                    : `/${locale}${link.URL}`
-                }
+                key={link.labelKey}
+                href={link.URL}
               >
-                {link.text}
+                {t(`legal.${link.labelKey}`)}
               </FooterLink>
             ))}
           </FooterColumn>
 
           <div className="col-span-2 flex flex-col gap-5 md:col-span-1">
             <p className="text-[11px] font-semibold uppercase tracking-[0.18em]">
-              Síguenos
+              {t("followUs")}
             </p>
 
             <form
               className="flex w-full items-center gap-2 border-b border-background/30 pb-2"
               onSubmit={(e) => e.preventDefault()}
-              aria-label="Newsletter"
+              aria-label={t("newsletter.label")}
             >
               <input
                 type="email"
-                placeholder="Tu email para novedades"
+                placeholder={t("newsletter.placeholder")}
                 className="flex-1 bg-transparent text-sm text-background placeholder:text-background/60 focus:outline-none"
-                aria-label="Tu email"
+                aria-label={t("newsletter.emailLabel")}
               />
               <button
                 type="submit"
-                aria-label="Suscribirse"
+                aria-label={t("newsletter.subscribe")}
                 className="flex h-9 w-9 items-center justify-center text-background hover:text-background/70"
               >
                 <ArrowRight className="h-4 w-4" />
@@ -103,11 +102,13 @@ export const Footer = ({ locale }: { locale: string }) => {
 
         <div className="mt-14 flex flex-col gap-4 border-t border-background/20 pt-6 md:flex-row md:items-center md:justify-between">
           <div className="flex items-center gap-3">
-            <span className="text-xs text-background/70">{seoData.title}</span>
+            <span className="text-xs text-background/70">{siteMetadata.name}</span>
           </div>
           <p className="text-xs text-background/60">
-            © {new Date().getFullYear()} {seoData.title}. Todos los derechos
-            reservados.
+            {t("copyright", {
+              year: new Date().getFullYear(),
+              name: siteMetadata.name
+            })}
           </p>
         </div>
       </div>

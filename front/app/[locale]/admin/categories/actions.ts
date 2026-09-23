@@ -30,7 +30,7 @@ export async function deleteCategoryAction(documentId: string) {
   revalidatePath("/admin/categories");
 }
 
-/** Elimina varias categorías seleccionadas. */
+/** Deletes several selected categories. */
 export async function bulkDeleteCategoriesAction(documentIds: string[]) {
   await requireStaff();
   for (const documentId of documentIds) {

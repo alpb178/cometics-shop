@@ -23,9 +23,9 @@ const config: Config = {
         libre: ["var(--font-libre-franklin)", "sans-serif"]
       },
       colors: {
-        // Tokens del panel de administración (`/admin`). No colisionan con los
-        // del storefront salvo `primary`/`secondary`, que son de la tienda; en
-        // el panel esos usos se mapearon a `brand`.
+        // Admin panel tokens (`/admin`). They don't collide with the storefront
+        // ones except `primary`/`secondary`, which belong to the store; in the
+        // panel those uses were mapped to `brand`.
         brand: {
           DEFAULT: "#3f6f52",
           dark: "#2f5440",
