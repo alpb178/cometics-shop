@@ -16,7 +16,7 @@ export function IconButton(props: Readonly<IconButtonProps>) {
     <button
       type={props.type ?? 'button'}
       className={classNames}
-      aria-label="Button"
+      aria-label={props['aria-label']}
       disabled={props.disabled ?? props.isLoading}
       onClick={props.onClick}
     >

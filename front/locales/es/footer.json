@@ -1,0 +1,25 @@
+{
+  "support": {
+    "title": "Atención",
+    "contact": "Contacto",
+    "faq": "Preguntas frecuentes",
+    "howToBuy": "Cómo comprar"
+  },
+  "brand": {
+    "title": "La marca",
+    "ourStory": "Nuestra historia",
+    "products": "Productos"
+  },
+  "legal": {
+    "title": "Legal",
+    "privacyPolicy": "Política de privacidad"
+  },
+  "followUs": "Síguenos",
+  "newsletter": {
+    "label": "Novedades",
+    "placeholder": "Tu email para novedades",
+    "emailLabel": "Tu email",
+    "subscribe": "Suscribirse"
+  },
+  "copyright": "© {year} {name}. Todos los derechos reservados."
+}

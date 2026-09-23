@@ -1,0 +1,106 @@
+{
+  "list": {
+    "eyebrow": "Catálogo",
+    "title": "Nuestros productos",
+    "clearAll": "Limpiar todo",
+    "emptyTitle": "No encontramos productos",
+    "emptyHint": "Prueba con otra búsqueda o ajusta los filtros.",
+    "clearFilters": "Limpiar filtros",
+    "closeFilters": "Cerrar filtros",
+    "close": "Cerrar",
+    "filters": "Filtros",
+    "openFilters": "Abrir filtros",
+    "showResults": "Ver {count, plural, one {# producto} other {# productos}}",
+    "count": "{count, plural, one {producto} other {productos}}",
+    "perPage": "Por página",
+    "sort": "Ordenar",
+    "sortOptions": {
+      "popular": "Lo más visto",
+      "newest": "Lo más nuevo",
+      "priceAsc": "Precio: menor a mayor",
+      "priceDesc": "Precio: mayor a menor",
+      "name": "Nombre A–Z"
+    },
+    "viewComfortable": "Vista cómoda",
+    "viewCompact": "Vista compacta",
+    "pagination": "Paginación",
+    "previousPage": "Página anterior",
+    "nextPage": "Página siguiente"
+  },
+  "search": {
+    "label": "Buscar productos",
+    "placeholder": "Buscar productos"
+  },
+  "filter": {
+    "ariaLabel": "Filtros",
+    "style": "Estilo",
+    "all": "Todas",
+    "highlight": "Destacar",
+    "isNew": "Nuevos",
+    "featured": "Destacados",
+    "discount": "En oferta",
+    "price": "Precio",
+    "minPrice": "Precio mínimo",
+    "maxPrice": "Precio máximo"
+  },
+  "item": {
+    "viewDetails": "Ver detalles de {name}",
+    "badgeNew": "New",
+    "badgeFeatured": "Destacado",
+    "views": "{count, plural, one {# persona ha visto este producto} other {# personas han visto este producto}}",
+    "addAria": "Añadir {name} al carrito",
+    "add": "Añadir"
+  },
+  "detail": {
+    "viewImage": "Ver imagen {index} de {total}",
+    "added": "Añadido al carrito: {name} × {quantity}",
+    "addToCartAria": "Añadir al carrito: {name}",
+    "addToCart": "Añadir al carrito",
+    "totalUnits": "Total ({quantity, plural, one {# unidad} other {# unidades}})",
+    "shipping": "Envío",
+    "shippingTime": "Entrega 24–72 h",
+    "shippingPolicy": "El envío de todos los productos es gratis hasta el 10.º anillo. Para envíos a otras zonas y departamentos de Bolivia se cobra una tarifa adicional de Bs. 17.",
+    "pickup": "Recogida",
+    "pickupTime": "Lista en 24–48 h",
+    "description": "Descripción del producto",
+    "showLess": "Ver menos",
+    "showMore": "Ver más"
+  },
+  "quantity": {
+    "label": "Cantidad:",
+    "decrease": "Reducir cantidad",
+    "increase": "Aumentar cantidad"
+  },
+  "delivery": {
+    "optionLabel": "Opción de entrega:",
+    "viewOnMap": "Ver ubicación en el mapa",
+    "delivery": {
+      "title": "Envío a domicilio",
+      "description": "Te llevamos el producto hasta tu casa",
+      "time": "Entrega en 24-72 horas",
+      "cost": "Costo de envío a cotizar"
+    },
+    "pickup": {
+      "title": "Recoger en tienda",
+      "description": "Ven a recoger tu pedido cuando esté listo",
+      "time": "Listo de 24 a 48 horas",
+      "cost": "Sin costo adicional"
+    },
+    "preference": {
+      "delivery": "envío a domicilio, a cotizar el costo del envío",
+      "pickup": "recoger en tienda, a definir el horario"
+    },
+    "buy": {
+      "delivery": "Comprar con envío",
+      "pickup": "Comprar para recoger"
+    }
+  },
+  "whatsapp": {
+    "message": "Hola, quiero comprar {quantity, plural, one {# unidad} other {# unidades}} del producto {name}{hasPrice, select, yes { a {price} {currency} cada uno} other {}}{hasTotal, select, yes { (Total: {total} {currency})} other {}}. Prefiero {delivery}.",
+    "button": "Compra por WhatsApp"
+  },
+  "buttons": {
+    "viewOptions": "Ver opciones",
+    "addToCart": "Agregar al carrito"
+  }
+}

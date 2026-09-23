@@ -1,20 +1,15 @@
-import Link from "next/link";
+import { getLocale, getTranslations } from "next-intl/server";
+import { Link } from "@/i18n/navigation";
 import { ChevronRight } from "lucide-react";
 import { requireUser } from "@/lib/auth/server";
 import { authFetch } from "@/lib/strapi/auth-fetch";
 import type { Order } from "@/definitions/Order";
 import { formatAmount } from "@/lib/price";
 
-const STATUS_LABELS: Record<Order["status"], string> = {
-  pending_verification: "Pendiente de verificación",
-  confirmed: "Confirmado",
-  shipped: "Enviado",
-  delivered: "Entregado",
-  cancelled: "Cancelado"
-};
-
 export default async function OrdersPage() {
   await requireUser("/account/orders");
+  const t = await getTranslations("account");
+  const dateLocale = (await getLocale()) === "en" ? "en-US" : "es-BO";
 
   // scope=mine: this view shares its endpoint with the admin panel; without the
   // parameter a staff account would see every customer's orders here.
@@ -29,18 +24,18 @@ export default async function OrdersPage() {
     <section className="mx-auto w-full max-w-3xl px-6 py-16 lg:py-24">
       <header className="mb-10 border-b border-border pb-6">
         <p className="text-xs font-semibold uppercase tracking-[0.22em] text-primary">
-          Mi cuenta
+          {t("eyebrow")}
         </p>
         <h1 className="font-display text-3xl font-semibold tracking-tight">
-          Mis pedidos
+          {t("orders.title")}
         </h1>
       </header>
 
       {data.data.length === 0 ? (
         <p className="py-12 text-center text-sm text-muted-foreground">
-          Todavía no tienes pedidos.{" "}
+          {t("orders.empty")}{" "}
           <Link href="/" className="underline-offset-4 hover:underline">
-            Empieza a comprar
+            {t("orders.startShopping")}
           </Link>
           .
         </p>
@@ -54,15 +49,15 @@ export default async function OrdersPage() {
               >
                 <div>
                   <p className="text-sm font-semibold">
-                    Pedido #{order.id}
+                    {t("orders.orderNumber", { id: order.id })}
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    {new Date(order.createdAt).toLocaleDateString("es-BO", {
+                    {new Date(order.createdAt).toLocaleDateString(dateLocale, {
                       year: "numeric",
                       month: "long",
                       day: "numeric"
                     })}{" "}
-                    · {STATUS_LABELS[order.status]}
+                    · {t(`orders.status.${order.status}`)}
                   </p>
                 </div>
                 <div className="flex items-center gap-4">

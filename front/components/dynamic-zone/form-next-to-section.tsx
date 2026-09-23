@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import { MapPin, MessageCircle, Send, Sparkles } from "lucide-react";
-import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { FormProvider, useForm } from "react-hook-form";
 import { TextInput } from "../form/text-input/TextInput";
 import ViewMap from "../map/ViewMap";
@@ -20,6 +20,7 @@ export function FormNextToSection({
   section: any;
   social_networks: any;
 }) {
+  const t = useTranslations("pages.contact");
   const lat = process.env.NEXT_PUBLIC_LAT;
   const lng = process.env.NEXT_PUBLIC_LNG;
   const address = process.env.NEXT_PUBLIC_ADDRESS;
@@ -29,19 +30,19 @@ export function FormNextToSection({
     if (input.required) {
       rules.required = {
         value: true,
-        message: `${input.label || input.name} es requerido`
+        message: t("validation.required", { field: input.label || input.name })
       };
     }
     if (input.type === "email") {
       rules.pattern = {
         value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-        message: "Correo electrónico inválido"
+        message: t("validation.invalidEmail")
       };
     }
     if (input.type === "tel") {
       rules.pattern = {
         value: /^[\+]?[1-9][\d]{0,15}$/,
-        message: "Número de teléfono inválido"
+        message: t("validation.invalidPhone")
       };
     }
     return rules;
@@ -54,9 +55,13 @@ export function FormNextToSection({
     email: string;
     comments: string;
   }) => {
-    const message = `Hola, mi nombre es ${data.name}.${
-      data.email ? ` Pueden escribirme a ${data.email}.` : ""
-    }${data.comments ? ` Quisiera añadir: "${data.comments}".` : ""}`;
+    const message = [
+      t("whatsapp.greeting", { name: data.name }),
+      data.email ? t("whatsapp.email", { email: data.email }) : "",
+      data.comments ? t("whatsapp.comments", { comments: data.comments }) : ""
+    ]
+      .filter(Boolean)
+      .join(" ");
 
     window.open(
       `https://wa.me/${
@@ -84,7 +89,7 @@ export function FormNextToSection({
           <div className="inline-flex items-center gap-2 px-4 py-1.5 mb-4 bg-pink-100 rounded-full">
             <Sparkles className="w-4 h-4 text-pink-600" />
             <span className="text-xs md:text-sm font-semibold text-pink-700 uppercase tracking-wider">
-              Estamos para ayudarte
+              {t("badge")}
             </span>
           </div>
           <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-4">
@@ -111,7 +116,7 @@ export function FormNextToSection({
                 <Send className="w-5 h-5" />
               </div>
               <h3 className="text-xl md:text-2xl font-bold text-gray-900">
-                Envíanos un mensaje
+                {t("formTitle")}
               </h3>
             </div>
 
@@ -129,7 +134,7 @@ export function FormNextToSection({
                         className="mt-2 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-green-500 px-4 py-3.5 text-base font-semibold text-white shadow-lg shadow-green-500/30 transition-all duration-300 hover:-translate-y-0.5 hover:bg-green-600 hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-offset-2"
                       >
                         <MessageCircle className="h-5 w-5" />
-                        Enviar por WhatsApp
+                        {t("sendWhatsapp")}
                       </button>
                     );
                   }
@@ -166,11 +171,11 @@ export function FormNextToSection({
             {social_networks?.length > 0 && (
               <div className="mt-8 pt-6 border-t border-gray-100">
                 <p className="text-sm text-gray-500 mb-4">
-                  También puedes encontrarnos en:
+                  {t("alsoFindUs")}
                 </p>
                 <div className="flex items-center gap-4">
                   {social_networks.map((social: any) => (
-                    <Link
+                    <a
                       href={social.link.URL}
                       target="_blank"
                       key={social.alias}
@@ -178,7 +183,7 @@ export function FormNextToSection({
                       aria-label={social.name}
                     >
                       {socials[social.name as keyof typeof socials]?.icon}
-                    </Link>
+                    </a>
                   ))}
                 </div>
               </div>
@@ -193,7 +198,7 @@ export function FormNextToSection({
             transition={{ duration: 0.5, delay: 0.2 }}
             className="lg:col-span-2 space-y-4"
           >
-            <Link
+            <a
               href={`https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER}`}
               target="_blank"
               className="flex items-start gap-4 p-5 md:p-6 rounded-2xl bg-gradient-to-br from-green-500 to-green-600 text-white shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300"
@@ -203,13 +208,13 @@ export function FormNextToSection({
               </div>
               <div>
                 <h4 className="font-bold text-base md:text-lg mb-1">
-                  WhatsApp directo
+                  {t("whatsappCard.title")}
                 </h4>
                 <p className="text-sm text-white/90">
-                  Respondemos en minutos
+                  {t("whatsappCard.subtitle")}
                 </p>
               </div>
-            </Link>
+            </a>
 
             {address && (
               <div className="flex items-start gap-4 p-5 md:p-6 rounded-2xl bg-white border border-gray-100 shadow-sm">
@@ -218,7 +223,7 @@ export function FormNextToSection({
                 </div>
                 <div>
                   <h4 className="font-bold text-base md:text-lg text-gray-900 mb-1">
-                    Visítanos
+                    {t("visitUs")}
                   </h4>
                   <p className="text-sm text-gray-600 leading-relaxed">
                     {address}

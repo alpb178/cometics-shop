@@ -6,14 +6,14 @@ import Image from "next/image";
 import { formatPrice } from "@/lib/price";
 import { useCart } from "@/context/cart-context";
 import { Eye, ShoppingBag } from "lucide-react";
-import Link from "next/link";
-import { useLocale } from "next-intl";
+import { Link } from "@/i18n/navigation";
+import { useTranslations } from "next-intl";
 import { trackEvent } from "@/lib/track-event";
 import { applyDiscount } from "@/lib/pricing";
 
 export const ProductItem = ({ product }: { product: Product }) => {
   const { addToCart } = useCart();
-  const locale = useLocale();
+  const t = useTranslations("products.item");
 
   const hasDiscount = !!product.discount && product.discount > 0;
   const finalPrice = hasDiscount
@@ -22,9 +22,9 @@ export const ProductItem = ({ product }: { product: Product }) => {
 
   return (
     <Link
-      href={`/${locale}/products/${product.slug}`}
+      href={`/products/${product.slug}`}
       className="group block h-full w-full focus:outline-none focus-visible:ring-2 focus-visible:ring-foreground focus-visible:ring-offset-2"
-      aria-label={`Ver detalles de ${product.name}`}
+      aria-label={t("viewDetails", { name: product.name })}
     >
       <article className="flex h-full flex-col">
         <div className="relative aspect-[3/4] w-full overflow-hidden bg-secondary">
@@ -46,12 +46,12 @@ export const ProductItem = ({ product }: { product: Product }) => {
           <div className="pointer-events-none absolute left-3 top-3 flex flex-col gap-1.5">
             {product.isNew && (
               <span className="bg-foreground px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-background">
-                New
+                {t("badgeNew")}
               </span>
             )}
             {product.featured && (
               <span className="bg-background px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-foreground ring-1 ring-foreground/10">
-                Destacado
+                {t("badgeFeatured")}
               </span>
             )}
             {hasDiscount && (
@@ -64,7 +64,7 @@ export const ProductItem = ({ product }: { product: Product }) => {
           {typeof product.views === "number" && product.views > 0 && (
             <div
               className="pointer-events-none absolute right-3 top-3 flex items-center gap-1 rounded-full bg-foreground px-2 py-1 text-[10px] font-medium text-background shadow-sm"
-              title={`${product.views} personas han visto este producto`}
+              title={t("views", { count: product.views })}
             >
               <Eye className="h-3 w-3" strokeWidth={1.75} />
               {product.views}
@@ -84,10 +84,10 @@ export const ProductItem = ({ product }: { product: Product }) => {
               });
             }}
             className="pointer-events-auto absolute inset-x-0 bottom-0 flex h-11 items-center justify-center gap-2 bg-foreground text-xs font-semibold uppercase tracking-[0.14em] text-background opacity-0 transition-opacity duration-200 group-hover:opacity-100 group-focus-within:opacity-100"
-            aria-label={`Añadir ${product.name} al carrito`}
+            aria-label={t("addAria", { name: product.name })}
           >
             <ShoppingBag className="h-4 w-4" strokeWidth={1.75} />
-            Añadir
+            {t("add")}
           </button>
         </div>
 

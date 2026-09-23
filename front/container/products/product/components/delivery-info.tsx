@@ -2,7 +2,7 @@
 
 import { DeliveryOption } from "./delivery-options";
 import { cn } from "@/lib/utils";
-import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { IconMapPin } from "@tabler/icons-react";
 import ViewMap from "../../../../components/map/ViewMap";
 
@@ -12,20 +12,21 @@ interface DeliveryInfoProps {
 }
 
 export const DeliveryInfo = ({ option, className }: DeliveryInfoProps) => {
+  const t = useTranslations("products.delivery");
   const deliveryInfo = {
     delivery: {
-      title: "Envío a domicilio",
-      description: "Te llevamos el producto hasta tu casa",
-      details: ["Entrega en 24-72 horas", "Costo de envío a cotizar"],
+      title: t("delivery.title"),
+      description: t("delivery.description"),
+      details: [t("delivery.time"), t("delivery.cost")],
       icon: "🚚",
       locationLink: undefined
     },
     pickup: {
-      title: "Recoger en tienda",
-      description: "Ven a recoger tu pedido cuando esté listo",
+      title: t("pickup.title"),
+      description: t("pickup.description"),
       details: [
-        "Listo de 24 a 48 horas",
-        "Sin costo adicional",
+        t("pickup.time"),
+        t("pickup.cost"),
         process.env.NEXT_PUBLIC_TIME,
         process.env.NEXT_PUBLIC_ADDRESS
       ],
@@ -71,15 +72,15 @@ export const DeliveryInfo = ({ option, className }: DeliveryInfoProps) => {
             lng={Number(lng)}
             address={address || ""}
           />
-          <Link
+          <a
             href={info.locationLink}
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-2 text-xs text-primary hover:text-primary/80 transition-colors"
           >
             <IconMapPin className="w-3 h-3" />
-            Ver ubicación en el mapa
-          </Link>
+            {t("viewOnMap")}
+          </a>
         </div>
       )}
     </div>

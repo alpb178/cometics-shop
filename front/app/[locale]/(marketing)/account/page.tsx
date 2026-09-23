@@ -1,10 +1,12 @@
-import Link from "next/link";
+import { getTranslations } from "next-intl/server";
+import { Link } from "@/i18n/navigation";
 import { ChevronRight } from "lucide-react";
 import { requireUser } from "@/lib/auth/server";
 import { LogoutButton } from "@/components/auth/logout-button";
 
 export default async function AccountPage() {
   const user = await requireUser("/account");
+  const t = await getTranslations("account");
 
   const fullName = [user.firstName, user.lastName].filter(Boolean).join(" ");
 
@@ -13,7 +15,7 @@ export default async function AccountPage() {
       <header className="mb-10 flex flex-wrap items-end justify-between gap-4 border-b border-border pb-6">
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.22em] text-primary">
-            Mi cuenta
+            {t("eyebrow")}
           </p>
           <h1 className="font-display text-3xl font-semibold tracking-tight">
             {fullName || user.email}
@@ -25,14 +27,14 @@ export default async function AccountPage() {
       <dl className="grid grid-cols-1 gap-6 sm:grid-cols-2">
         <div>
           <dt className="text-xs uppercase tracking-[0.16em] text-muted-foreground">
-            Email
+            {t("home.email")}
           </dt>
           <dd className="mt-1 text-sm">{user.email}</dd>
         </div>
         {user.phone && (
           <div>
             <dt className="text-xs uppercase tracking-[0.16em] text-muted-foreground">
-              Teléfono
+              {t("home.phone")}
             </dt>
             <dd className="mt-1 text-sm">{user.phone}</dd>
           </div>
@@ -44,14 +46,14 @@ export default async function AccountPage() {
           href="/account/orders"
           className="flex items-center justify-between py-5 text-sm font-medium transition-colors hover:text-primary"
         >
-          Mis pedidos
+          {t("home.myOrders")}
           <ChevronRight className="h-4 w-4" />
         </Link>
         <Link
           href="/account/addresses"
           className="flex items-center justify-between py-5 text-sm font-medium transition-colors hover:text-primary"
         >
-          Mis direcciones
+          {t("home.myAddresses")}
           <ChevronRight className="h-4 w-4" />
         </Link>
       </nav>

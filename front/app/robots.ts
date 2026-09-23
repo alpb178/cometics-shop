@@ -7,8 +7,9 @@ export default function robots(): MetadataRoute.Robots {
     rules: {
       userAgent: "*",
       allow: "/",
-      disallow: ["/api/"],
+      // Both locale trees (/es, /en) are crawlable; the staff panel is not.
+      disallow: ["/api/", "/admin"]
     },
-    sitemap: `${base}/sitemap.xml`,
+    sitemap: `${base}/sitemap.xml`
   };
 }

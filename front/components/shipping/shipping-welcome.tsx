@@ -3,7 +3,9 @@
 import { useCallback, useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Truck } from "lucide-react";
-import { WELCOME_NOTICE_PARAGRAPHS } from "@/lib/shipping";
+import { useTranslations } from "next-intl";
+
+const PARAGRAPHS = ["shipping", "payment"] as const;
 
 const COOKIE_NAME = "iris_shipping_notice";
 // One year: the notice is informational, no point repeating it every session.
@@ -15,6 +17,7 @@ const COOKIE_MAX_AGE = 60 * 60 * 24 * 365;
  */
 export const ShippingWelcome = () => {
   const [open, setOpen] = useState(false);
+  const t = useTranslations("home.shippingWelcome");
 
   // The cookie can only be read on the client, so the notice is never painted
   // in the server HTML: it appears after mounting and only if it is not
@@ -65,12 +68,12 @@ export const ShippingWelcome = () => {
               {/* The id wraps both paragraphs: aria-labelledby points here
                   and the dialog's accessible name must include both. */}
               <div id="shipping-welcome-text" className="space-y-2">
-                {WELCOME_NOTICE_PARAGRAPHS.map((paragraph) => (
+                {PARAGRAPHS.map((paragraph) => (
                   <p
                     key={paragraph}
                     className="text-sm leading-relaxed text-foreground"
                   >
-                    {paragraph}
+                    {t(paragraph)}
                   </p>
                 ))}
               </div>
@@ -81,7 +84,7 @@ export const ShippingWelcome = () => {
                 onClick={dismiss}
                 className="bg-foreground px-5 py-2.5 text-xs font-semibold uppercase tracking-[0.16em] text-background transition-colors hover:bg-foreground/90"
               >
-                Continuar
+                {t("continue")}
               </button>
             </div>
           </motion.div>

@@ -2,9 +2,11 @@
 
 import { Text } from "@/components/text/text-variant/text";
 import clsx from "clsx";
+import { useLocale, useTranslations } from "next-intl";
 import { Controller, useFormContext } from "react-hook-form";
 import { isValidPhoneNumber } from "react-phone-number-input";
 import RPNInput, { type Country } from "react-phone-number-input";
+import esCountryLabels from "react-phone-number-input/locale/es";
 import "react-phone-number-input/style.css";
 import styles from "./PhoneInput.module.scss";
 
@@ -23,6 +25,9 @@ export function PhoneInput({
   defaultCountry = "BO",
   helperText
 }: Readonly<PhoneInputProps>) {
+  const t = useTranslations("auth.form");
+  // Country names in the picker follow the page language (library default: English).
+  const countryLabels = useLocale() === "es" ? esCountryLabels : undefined;
   const {
     control,
     formState: { errors }
@@ -46,17 +51,18 @@ export function PhoneInput({
         name={name}
         control={control}
         rules={{
-          required: required ? "El teléfono es requerido" : false,
+          required: required ? t("phoneRequired") : false,
           validate: (value) =>
             !value ||
             isValidPhoneNumber(value) ||
-            "Número de teléfono inválido"
+            t("phoneInvalid")
         }}
         render={({ field }) => (
           <RPNInput
             {...field}
             id={name}
             defaultCountry={defaultCountry}
+            labels={countryLabels}
             international
             countryCallingCodeEditable={false}
             value={field.value || ""}

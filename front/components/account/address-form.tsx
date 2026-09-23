@@ -1,6 +1,8 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
+import { useRouter } from "@/i18n/navigation";
+import { errorMessage } from "@/lib/auth/client";
 import { useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { PhoneInput } from "@/components/form/phone-input/PhoneInput";
@@ -16,6 +18,7 @@ export function AddressForm({
   initial?: Address;
   mode: "create" | "edit";
 }) {
+  const t = useTranslations("account.addressForm");
   const router = useRouter();
   const methods = useForm<FormValues>({
     mode: "onTouched",
@@ -50,12 +53,12 @@ export function AddressForm({
       });
       const data = await res.json();
       if (!res.ok) {
-        throw new Error(data?.error || "No se pudo guardar la dirección.");
+        throw new Error(data?.error || t("saveError"));
       }
       router.push("/account/addresses");
       router.refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Algo salió mal.");
+      setError(errorMessage(err, t("genericError")));
     } finally {
       setSubmitting(false);
     }
@@ -67,41 +70,41 @@ export function AddressForm({
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <TextInput
             name="fullName"
-            label="Nombre completo"
+            label={t("fullName")}
             required
-            validation={{ required: "Requerido" }}
+            validation={{ required: t("required") }}
           />
-          <PhoneInput name="phone" label="Teléfono" required />
+          <PhoneInput name="phone" label={t("phone")} required />
         </div>
 
         <TextInput
           name="line1"
-          label="Dirección"
+          label={t("line1")}
           required
-          validation={{ required: "Requerido" }}
+          validation={{ required: t("required") }}
         />
 
         <TextInput
           name="line2"
-          label="Referencia / apartamento (opcional)"
+          label={t("line2")}
         />
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <TextInput
             name="city"
-            label="Ciudad"
+            label={t("city")}
             required
-            validation={{ required: "Requerido" }}
+            validation={{ required: t("required") }}
           />
           <TextInput
             name="department"
-            label="Departamento"
+            label={t("department")}
             required
-            validation={{ required: "Requerido" }}
+            validation={{ required: t("required") }}
           />
         </div>
 
-        <TextInput name="notes" as="textarea" label="Notas (opcional)" />
+        <TextInput name="notes" as="textarea" label={t("notes")} />
 
         <label className="flex items-center gap-3 text-sm">
           <input
@@ -109,7 +112,7 @@ export function AddressForm({
             {...methods.register("isDefault")}
             className="h-4 w-4 border-border accent-foreground"
           />
-          Usar como dirección predeterminada
+          {t("makeDefault")}
         </label>
 
         {error && (
@@ -125,17 +128,17 @@ export function AddressForm({
             className="bg-foreground px-6 py-4 text-xs font-semibold uppercase tracking-[0.16em] text-background transition-colors hover:bg-foreground/90 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {submitting
-              ? "Guardando…"
+              ? t("saving")
               : mode === "create"
-                ? "Guardar dirección"
-                : "Guardar cambios"}
+                ? t("saveNew")
+                : t("saveChanges")}
           </button>
           <button
             type="button"
             onClick={() => router.push("/account/addresses")}
             className="px-6 py-4 text-xs font-semibold uppercase tracking-[0.16em] underline-offset-4 hover:underline"
           >
-            Cancelar
+            {t("cancel")}
           </button>
         </div>
       </form>

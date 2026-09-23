@@ -30,7 +30,7 @@ app/[locale]/(marketing)/products/[slug]/    # Product detail
 app/[locale]/(marketing)/about|contact|faq|how-it-works|policy-privacy/
 ```
 
-Locale detection via `next-intl` middleware (locales: `en`, `es`; prefix strategy: `"never"` — no `/en/` or `/es/` in URLs). Configuration in `i18n/routing.ts`, translations in `locales/{en,es}/common.json`.
+Locale routing via `next-intl` (locales: `es` default, `en`; prefix strategy `"always"` — every public URL is `/es/...` or `/en/...`). Configuration in `i18n/routing.ts`; use the helpers from `i18n/navigation.ts` (`Link`, `useRouter`, `usePathname`, `redirect`) or `components/i18n/transition-link.tsx` for internal links. `middleware.ts`: `/` → 307 to the detected locale (NEXT_LOCALE cookie, Accept-Language, fallback `es`); other unprefixed URLs → 308 to the prefixed one (query kept); `/admin` stays unprefixed and Spanish-only (rewritten to `/es/admin`). Messages: one file per namespace in `locales/{es,en}/<ns>.json`, registered in `i18n/request.ts` and `global.d.ts` (typed keys); `pnpm i18n:check` verifies es/en parity.
 
 ### Data Fetching — API propia (NestJS)
 

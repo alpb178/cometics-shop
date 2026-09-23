@@ -4,6 +4,7 @@ import { Product } from "@/definitions/Product";
 import { groupProductsByCategory } from "../utils";
 import { cn } from "@/lib/utils";
 import { useMemo } from "react";
+import { useTranslations } from "next-intl";
 
 export type FilterFlag = "featured" | "isNew" | "discount";
 
@@ -28,6 +29,7 @@ export const Filter = ({
   minPrice,
   maxPrice
 }: Props) => {
+  const t = useTranslations("products.filter");
   const grouped = useMemo(() => groupProductsByCategory(products), [products]);
   const categories = useMemo(
     () => Object.keys(grouped).filter((c) => c !== "withoutCategory").sort(),
@@ -50,11 +52,11 @@ export const Filter = ({
   };
 
   return (
-    <aside aria-label="Filtros" className="text-sm">
-      <FilterSection title="Estilo">
+    <aside aria-label={t("ariaLabel")} className="text-sm">
+      <FilterSection title={t("style")}>
         <ul className="space-y-2">
           <FilterCheckbox
-            label="Todas"
+            label={t("all")}
             checked={filter.category === null}
             onChange={() => setCategory(null)}
           />
@@ -72,27 +74,27 @@ export const Filter = ({
         </ul>
       </FilterSection>
 
-      <FilterSection title="Destacar">
+      <FilterSection title={t("highlight")}>
         <ul className="space-y-2">
           <FilterCheckbox
-            label="Nuevos"
+            label={t("isNew")}
             checked={filter.flags.has("isNew")}
             onChange={() => toggleFlag("isNew")}
           />
           <FilterCheckbox
-            label="Destacados"
+            label={t("featured")}
             checked={filter.flags.has("featured")}
             onChange={() => toggleFlag("featured")}
           />
           <FilterCheckbox
-            label="En oferta"
+            label={t("discount")}
             checked={filter.flags.has("discount")}
             onChange={() => toggleFlag("discount")}
           />
         </ul>
       </FilterSection>
 
-      <FilterSection title="Precio" defaultOpen>
+      <FilterSection title={t("price")} defaultOpen>
         <PriceRange
           min={minPrice}
           max={maxPrice}
@@ -188,6 +190,7 @@ const PriceRange = ({
   value: [number, number];
   onChange: (v: [number, number]) => void;
 }) => {
+  const t = useTranslations("products.filter");
   if (max <= min) return null;
   const [lo, hi] = value;
 
@@ -220,7 +223,7 @@ const PriceRange = ({
           step={1}
           onChange={(e) => handleLo(Number(e.target.value))}
           className="pointer-events-auto absolute inset-0 h-1 w-full appearance-none bg-transparent [&::-webkit-slider-thumb]:pointer-events-auto [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-foreground"
-          aria-label="Precio mínimo"
+          aria-label={t("minPrice")}
         />
         <input
           type="range"
@@ -230,7 +233,7 @@ const PriceRange = ({
           step={1}
           onChange={(e) => handleHi(Number(e.target.value))}
           className="pointer-events-auto absolute inset-0 h-1 w-full appearance-none bg-transparent [&::-webkit-slider-thumb]:pointer-events-auto [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-foreground"
-          aria-label="Precio máximo"
+          aria-label={t("maxPrice")}
         />
       </div>
     </div>

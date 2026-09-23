@@ -1,0 +1,12 @@
+{
+  "page": {
+    "imageAlt": "Error",
+    "title": "Error loading the page",
+    "description": "We couldn't load the home page content. Please try again.",
+    "retryLabel": "Reload the page",
+    "retry": "Try again"
+  },
+  "toast": {
+    "title": "Something went wrong"
+  }
+}

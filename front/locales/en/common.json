@@ -1,1 +1,7 @@
-{}
+{
+  "localeSwitcher": {
+    "label": "Language",
+    "es": "Español",
+    "en": "English"
+  }
+}

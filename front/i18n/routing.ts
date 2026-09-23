@@ -1,15 +1,21 @@
 import { defineRouting } from "next-intl/routing";
 
-export const DEFAULT_LOCALE = "en";
+export const DEFAULT_LOCALE = "es";
 
-export const locales = ["en", "es"];
+export const locales = ["es", "en"] as const;
 
-// No locale segment in the URL: the locale comes from the NEXT_LOCALE cookie
-// or the Accept-Language header.
-export const localePrefix = "never" as const;
+export type AppLocale = (typeof locales)[number];
+
+// Every public URL carries its locale (`/es/...`, `/en/...`). Unprefixed URLs
+// are redirected by the middleware (see middleware.ts).
+export const localePrefix = "always" as const;
 
 export const routing = defineRouting({
   locales,
   defaultLocale: DEFAULT_LOCALE,
   localePrefix
 });
+
+export function isAppLocale(value: unknown): value is AppLocale {
+  return typeof value === "string" && (locales as readonly string[]).includes(value);
+}

@@ -63,7 +63,7 @@ export function DashboardShell({
   // /api/auth/logout and returns to the website login.
   async function handleLogout() {
     await logout();
-    router.push("/sign-in");
+    router.push("/es/sign-in");
     router.refresh();
   }
   // The menu lives collapsed as a rail. It expands on hover (CSS) or with ☰.
@@ -186,7 +186,7 @@ export function DashboardShell({
       <div className="flex min-w-0 flex-1 flex-col">
         <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-outline-variant bg-white px-4 sm:px-6">
           <Link
-            href="/"
+            href="/es"
             className="flex min-w-0 items-center gap-3"
             aria-label="Ir a la página principal"
           >

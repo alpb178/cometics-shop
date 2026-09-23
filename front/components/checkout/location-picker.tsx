@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
+import { useTranslations } from "next-intl";
 import { LocateFixed, Maximize2, X } from "lucide-react";
 import "maplibre-gl/dist/maplibre-gl.css";
 
@@ -52,6 +53,7 @@ export function LocationPicker({
   center: { lat: number; lng: number };
   onChange: (coords: { lat: number; lng: number }) => void;
 }) {
+  const t = useTranslations("checkout.locationPicker");
   const [mounted, setMounted] = useState(false);
   const [expanded, setExpanded] = useState(false);
   const [geoStatus, setGeoStatus] = useState<"idle" | "locating" | "error">(
@@ -105,12 +107,12 @@ export function LocationPicker({
 
   const hint =
     geoStatus === "locating"
-      ? "Obteniendo tu ubicación…"
+      ? t("locating")
       : geoStatus === "error"
-        ? "No pudimos obtener tu ubicación. Marca el punto manualmente."
+        ? t("error")
         : value
-          ? "Toca el mapa o arrastra el pin a tu ubicación de entrega"
-          : "Toca el mapa para marcar tu ubicación de entrega";
+          ? t("hintWithPin")
+          : t("hintNoPin");
 
   const renderMap = (zoom: number) => (
     <Map
@@ -154,8 +156,8 @@ export function LocationPicker({
       type="button"
       onClick={locate}
       disabled={geoStatus === "locating"}
-      title="Usar mi ubicación actual"
-      aria-label="Usar mi ubicación actual"
+      title={t("useMyLocation")}
+      aria-label={t("useMyLocation")}
       className="flex h-9 w-9 items-center justify-center border border-border bg-background/95 text-foreground shadow transition-colors hover:bg-background disabled:cursor-wait"
     >
       <LocateFixed
@@ -173,8 +175,8 @@ export function LocationPicker({
           <button
             type="button"
             onClick={() => setExpanded(true)}
-            title="Agrandar mapa"
-            aria-label="Agrandar mapa"
+            title={t("expand")}
+            aria-label={t("expand")}
             className="flex h-9 w-9 items-center justify-center border border-border bg-background/95 text-foreground shadow transition-colors hover:bg-background"
           >
             <Maximize2 className="h-4 w-4" />
@@ -189,18 +191,18 @@ export function LocationPicker({
         <div
           role="dialog"
           aria-modal="true"
-          aria-label="Mapa de ubicación de entrega ampliado"
+          aria-label={t("expandedLabel")}
           className="fixed inset-0 z-[10000] flex flex-col bg-black/80 p-4 sm:p-8"
         >
           <div className="mx-auto flex h-full w-full max-w-5xl flex-col overflow-hidden border border-border bg-background">
             <div className="flex items-center justify-between border-b border-border px-4 py-3">
               <p className="text-xs font-semibold uppercase tracking-[0.16em] text-foreground">
-                Ubicación de entrega
+                {t("expandedTitle")}
               </p>
               <button
                 type="button"
                 onClick={() => setExpanded(false)}
-                aria-label="Cerrar mapa"
+                aria-label={t("close")}
                 className="flex h-8 w-8 items-center justify-center text-muted-foreground hover:text-foreground"
               >
                 <X className="h-5 w-5" />

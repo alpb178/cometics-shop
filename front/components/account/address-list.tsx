@@ -1,7 +1,7 @@
 "use client";
 
-import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
+import { Link, useRouter } from "@/i18n/navigation";
 import { useState } from "react";
 import { Pencil, Trash2 } from "lucide-react";
 import type { Address } from "@/definitions/Address";
@@ -11,12 +11,13 @@ export function AddressList({
 }: {
   initialAddresses: Address[];
 }) {
+  const t = useTranslations("account.addresses");
   const router = useRouter();
   const [addresses, setAddresses] = useState(initialAddresses);
   const [deleting, setDeleting] = useState<number | null>(null);
 
   async function handleDelete(id: number) {
-    if (!window.confirm("¿Eliminar esta dirección?")) return;
+    if (!window.confirm(t("confirmDelete"))) return;
     setDeleting(id);
     const res = await fetch(`/api/addresses/${id}`, {
       method: "DELETE",
@@ -32,7 +33,7 @@ export function AddressList({
   if (addresses.length === 0) {
     return (
       <p className="py-12 text-center text-sm text-muted-foreground">
-        Aún no tienes direcciones guardadas.
+        {t("empty")}
       </p>
     );
   }
@@ -48,7 +49,7 @@ export function AddressList({
             <p className="font-semibold">{addr.fullName}</p>
             {addr.isDefault && (
               <span className="border border-foreground px-2 py-0.5 text-[10px] uppercase tracking-[0.12em]">
-                Predeterminada
+                {t("default")}
               </span>
             )}
           </div>
@@ -63,7 +64,7 @@ export function AddressList({
             <br />
             {addr.city}, {addr.department}
             <br />
-            Tel: {addr.phone}
+            {t("phoneLine", { phone: addr.phone })}
           </address>
 
           <div className="mt-4 flex items-center gap-4 border-t border-border pt-3 text-xs">
@@ -72,7 +73,7 @@ export function AddressList({
               className="flex items-center gap-1 underline-offset-4 hover:underline"
             >
               <Pencil className="h-3.5 w-3.5" />
-              Editar
+              {t("edit")}
             </Link>
             <button
               type="button"
@@ -81,7 +82,7 @@ export function AddressList({
               className="flex items-center gap-1 text-red-600 underline-offset-4 hover:underline disabled:opacity-50"
             >
               <Trash2 className="h-3.5 w-3.5" />
-              {deleting === addr.id ? "Eliminando…" : "Eliminar"}
+              {deleting === addr.id ? t("deleting") : t("delete")}
             </button>
           </div>
         </li>

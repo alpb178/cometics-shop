@@ -1,4 +1,5 @@
-import Link from "next/link";
+import { getTranslations } from "next-intl/server";
+import { Link } from "@/i18n/navigation";
 import { requireUser } from "@/lib/auth/server";
 import { authFetch } from "@/lib/strapi/auth-fetch";
 import type { Address } from "@/definitions/Address";
@@ -6,6 +7,7 @@ import { AddressList } from "@/components/account/address-list";
 
 export default async function AddressesPage() {
   await requireUser("/account/addresses");
+  const t = await getTranslations("account");
 
   const res = await authFetch(
     "/api/addresses?sort[0]=isDefault:desc&sort[1]=createdAt:desc&pagination[pageSize]=50"
@@ -20,23 +22,23 @@ export default async function AddressesPage() {
         href="/account"
         className="text-xs uppercase tracking-[0.16em] text-muted-foreground underline-offset-4 hover:underline"
       >
-        ← Mi cuenta
+        {t("addresses.backToAccount")}
       </Link>
 
       <header className="mt-6 mb-10 flex flex-wrap items-end justify-between gap-4 border-b border-border pb-6">
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.22em] text-primary">
-            Mi cuenta
+            {t("eyebrow")}
           </p>
           <h1 className="font-display text-3xl font-semibold tracking-tight">
-            Mis direcciones
+            {t("addresses.title")}
           </h1>
         </div>
         <Link
           href="/account/addresses/new"
           className="bg-foreground px-6 py-3 text-xs font-semibold uppercase tracking-[0.16em] text-background transition-colors hover:bg-foreground/90"
         >
-          Nueva dirección
+          {t("addresses.newAddress")}
         </Link>
       </header>
 

@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useEffect } from "react";
 import { Toaster, toast } from "sonner";
 import { useTheme } from "@/context/theme-context";
@@ -39,6 +40,7 @@ function describe(reason: unknown): string {
 
 export function ErrorToaster() {
   const { theme } = useTheme();
+  const t = useTranslations("errors.toast");
 
   useEffect(() => {
     const lastShown = new Map<string, number>();
@@ -52,7 +54,7 @@ export function ErrorToaster() {
       if (previous && now - previous < DEDUPE_MS) return;
       lastShown.set(message, now);
 
-      toast.error("Algo salió mal", {
+      toast.error(t("title"), {
         // The message as id: sonner updates the existing toast instead of
         // stacking duplicates if the error repeats.
         id: message,
@@ -77,7 +79,7 @@ export function ErrorToaster() {
       window.removeEventListener("error", onError);
       window.removeEventListener("unhandledrejection", onRejection);
     };
-  }, []);
+  }, [t]);
 
   return (
     <Toaster

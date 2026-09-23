@@ -20,19 +20,22 @@ type Me = StaffCheckUser & {
  * `/sign-in` (with `redirect` to come back to the panel); if the account is not
  * staff it redirects to the home page (fail-closed) instead of showing the panel.
  */
+// The panel is Spanish-only, so its sign-in hop goes straight to `/es`.
+const SIGN_IN = "/es/sign-in?redirect=/admin";
+
 export async function requireStaff(): Promise<Me> {
   const token = await getSessionToken();
-  if (!token) redirect("/sign-in?redirect=/admin");
+  if (!token) redirect(SIGN_IN);
 
   const res = await fetch(`${STRAPI_URL}/api/users/me?populate=role`, {
     headers: { Authorization: `Bearer ${token}` },
     cache: "no-store"
   });
-  if (!res.ok) redirect("/sign-in?redirect=/admin");
+  if (!res.ok) redirect(SIGN_IN);
 
   const me = (await res.json()) as Me;
   if (!isStaffUser(me)) {
-    redirect("/");
+    redirect("/es");
   }
   return me;
 }
