@@ -8,9 +8,8 @@ import { useAppMode } from "@/hooks/useAppMode";
 import { CartIcon } from "../cart/cart-icon";
 import { UserMenu } from "../auth/user-menu";
 import { useTranslations } from "next-intl";
-import { Suspense } from "react";
 import { TransitionLink as Link } from "@/components/i18n/transition-link";
-import { LocaleSwitcher } from "@/components/i18n/locale-switcher";
+import { LocaleMenu } from "@/components/i18n/locale-menu";
 import { usePathname } from "@/i18n/navigation";
 import type { NavItem } from "@/lib/constants/navbar";
 
@@ -59,9 +58,7 @@ export const DesktopNavbar = ({ leftNavbarItems, logo, locale }: Props) => {
           className="flex items-center justify-end gap-1"
           aria-label={t("accountAndCart")}
         >
-          <Suspense fallback={null}>
-            <LocaleSwitcher className="mr-2" />
-          </Suspense>
+          <LocaleMenu className="mr-2" />
           <UserMenu locale={locale} />
           <CartIcon
             href="/cart"

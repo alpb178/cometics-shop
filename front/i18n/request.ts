@@ -1,8 +1,8 @@
 import { getRequestConfig } from "next-intl/server";
 import { isAppLocale, routing } from "./routing";
 
-// One JSON file per namespace under locales/<locale>/. Add the file for both
-// locales and list its name here.
+// One JSON file per namespace under locales/<locale>/. Add the file for every
+// locale (es, en, pt) and list its name here.
 export const NAMESPACES = [
   "common",
   "nav",

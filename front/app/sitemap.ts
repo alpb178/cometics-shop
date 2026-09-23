@@ -1,5 +1,5 @@
 import type { MetadataRoute } from "next";
-import { locales } from "@/i18n/routing";
+import { DEFAULT_LOCALE, LOCALE_TAGS, locales } from "@/i18n/routing";
 import fetchContentType from "@/lib/strapi/fetchContentType";
 import { localizedUrl } from "@/lib/seo-pages";
 
@@ -12,9 +12,12 @@ const STATIC_PATHS = [
   "/policy-privacy"
 ];
 
-/** Every locale's URL for a path, as `hreflang` alternates. */
+/** Every locale's URL for a path, as `hreflang` alternates (BCP 47 tags, plus x-default). */
 function languagesFor(path: string): Record<string, string> {
-  return Object.fromEntries(locales.map((l) => [l, localizedUrl(path, l)]));
+  return {
+    ...Object.fromEntries(locales.map((l) => [LOCALE_TAGS[l], localizedUrl(path, l)])),
+    "x-default": localizedUrl(path, DEFAULT_LOCALE)
+  };
 }
 
 /** One entry per locale; each lists all locale versions as alternates. */

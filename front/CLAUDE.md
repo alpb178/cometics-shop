@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Iris Natural — e-commerce website built with **Next.js 15** (App Router), **React 18** and **TypeScript** (strict mode). Deployed on Vercel. Storefront **plus the admin panel** on the internal `/admin` route. Products, orders, addresses and analytics come from the project's own **NestJS + Prisma API** (`api/`), which replaced Strapi in July 2026. Checkout is on-site (cash on delivery or QR); WhatsApp is now only a contact channel. Bilingual (English/Spanish) for a business in Santa Cruz de la Sierra, Bolivia.
+Iris Natural — e-commerce website built with **Next.js 15** (App Router), **React 18** and **TypeScript** (strict mode). Deployed on Vercel. Storefront **plus the admin panel** on the internal `/admin` route. Products, orders, addresses and analytics come from the project's own **NestJS + Prisma API** (`api/`), which replaced Strapi in July 2026. Checkout is on-site (cash on delivery or QR); WhatsApp is now only a contact channel. Trilingual (Spanish, English, Brazilian Portuguese) for a business in Santa Cruz de la Sierra, Bolivia.
 
 ## Commands
 
@@ -30,7 +30,7 @@ app/[locale]/(marketing)/products/[slug]/    # Product detail
 app/[locale]/(marketing)/about|contact|faq|how-it-works|policy-privacy/
 ```
 
-Locale routing via `next-intl` (locales: `es` default, `en`; prefix strategy `"always"` — every public URL is `/es/...` or `/en/...`). Configuration in `i18n/routing.ts`; use the helpers from `i18n/navigation.ts` (`Link`, `useRouter`, `usePathname`, `redirect`) or `components/i18n/transition-link.tsx` for internal links. `middleware.ts`: `/` → 307 to the detected locale (NEXT_LOCALE cookie, Accept-Language, fallback `es`); other unprefixed URLs → 308 to the prefixed one (query kept); `/admin` stays unprefixed and Spanish-only (rewritten to `/es/admin`). Messages: one file per namespace in `locales/{es,en}/<ns>.json`, registered in `i18n/request.ts` and `global.d.ts` (typed keys); `pnpm i18n:check` verifies es/en parity.
+Locale routing via `next-intl` (locales: `es` default, `en`, `pt` = Brazilian Portuguese with `lang="pt-BR"`/hreflang `pt-BR`; prefix strategy `"always"` — every public URL is `/es/...`, `/en/...` or `/pt/...`). Configuration in `i18n/routing.ts`; use the helpers from `i18n/navigation.ts` (`Link`, `useRouter`, `usePathname`, `redirect`) or `components/i18n/transition-link.tsx` for internal links. Language menu: `components/i18n/locale-menu.tsx` wires the group-wide `components/language-switcher/language-switcher.tsx` (shared verbatim across the CORPSC sites — do not edit or reformat it here; colours via `--lang-*` vars in `styles/globals.scss`). `middleware.ts`: `/` → 307 to the detected locale (NEXT_LOCALE cookie, Accept-Language — `pt-BR`/`pt-PT` → `pt` — fallback `es`); other unprefixed URLs → 308 to the prefixed one (query kept); `/admin` stays unprefixed and Spanish-only (rewritten to `/es/admin`). Messages: one file per namespace in `locales/{es,en,pt}/<ns>.json`, registered in `i18n/request.ts` and `global.d.ts` (typed keys); `pnpm i18n:check` verifies es/en/pt parity.
 
 ### Data Fetching — API propia (NestJS)
 

@@ -5,7 +5,8 @@ import { locales, type AppLocale } from "@/i18n/routing";
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://irisnatural.corpsc.com";
 const SITE_NAME = "Iris Natural Cosmética";
 const OG_IMAGE = `${SITE_URL}/logo.png`;
-const OG_LOCALES: Record<AppLocale, string> = { es: "es_BO", en: "en_US" };
+/** Open Graph locale per app locale. */
+export const OG_LOCALES: Record<AppLocale, string> = { es: "es_BO", en: "en_US", pt: "pt_BR" };
 
 // Locale-independent site data. Localized copy (title, description, keywords)
 // lives in the `seo` messages namespace.

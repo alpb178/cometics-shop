@@ -5,11 +5,13 @@ import { requireUser } from "@/lib/auth/server";
 import { authFetch } from "@/lib/strapi/auth-fetch";
 import type { Order } from "@/definitions/Order";
 import { formatAmount } from "@/lib/price";
+import { INTL_LOCALES } from "@/i18n/routing";
+import { toAppLocale } from "@/lib/seo-pages";
 
 export default async function OrdersPage() {
   await requireUser("/account/orders");
   const t = await getTranslations("account");
-  const dateLocale = (await getLocale()) === "en" ? "en-US" : "es-BO";
+  const dateLocale = INTL_LOCALES[toAppLocale(await getLocale())];
 
   // scope=mine: this view shares its endpoint with the admin panel; without the
   // parameter a staff account would see every customer's orders here.

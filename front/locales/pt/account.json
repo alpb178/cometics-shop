@@ -1,0 +1,70 @@
+{
+  "eyebrow": "Minha conta",
+  "home": {
+    "email": "E-mail",
+    "phone": "Telefone",
+    "myOrders": "Meus pedidos",
+    "myAddresses": "Meus endereços"
+  },
+  "addresses": {
+    "backToAccount": "← Minha conta",
+    "backToAddresses": "← Meus endereços",
+    "title": "Meus endereços",
+    "newAddress": "Novo endereço",
+    "editAddress": "Editar endereço",
+    "empty": "Você ainda não tem endereços salvos.",
+    "default": "Padrão",
+    "phoneLine": "Tel.: {phone}",
+    "edit": "Editar",
+    "delete": "Excluir",
+    "deleting": "Excluindo…",
+    "confirmDelete": "Excluir este endereço?"
+  },
+  "addressForm": {
+    "fullName": "Nome completo",
+    "phone": "Telefone",
+    "line1": "Endereço",
+    "line2": "Complemento / apartamento (opcional)",
+    "city": "Cidade",
+    "department": "Departamento",
+    "notes": "Observações (opcional)",
+    "required": "Obrigatório",
+    "makeDefault": "Usar como endereço padrão",
+    "saving": "Salvando…",
+    "saveNew": "Salvar endereço",
+    "saveChanges": "Salvar alterações",
+    "cancel": "Cancelar",
+    "saveError": "Não foi possível salvar o endereço.",
+    "genericError": "Algo deu errado."
+  },
+  "orders": {
+    "title": "Meus pedidos",
+    "empty": "Você ainda não fez nenhum pedido.",
+    "startShopping": "Comece a comprar",
+    "orderNumber": "Pedido nº {id}",
+    "backToOrders": "← Voltar para meus pedidos",
+    "products": "Produtos",
+    "delivery": "Entrega",
+    "deliveryHome": "Entrega em domicílio",
+    "deliveryPickup": "Retirar na loja",
+    "phoneLine": "Tel.: {phone}",
+    "ciLine": "CI: {ci}",
+    "payment": "Pagamento",
+    "paymentProofAlt": "Comprovante de pagamento",
+    "subtotal": "Subtotal",
+    "shipping": "Frete",
+    "total": "Total",
+    "status": {
+      "pending_verification": "Aguardando verificação",
+      "confirmed": "Confirmado",
+      "shipped": "Enviado",
+      "delivered": "Entregue",
+      "cancelled": "Cancelado"
+    },
+    "paymentMethod": {
+      "cash": "Dinheiro",
+      "qr": "Pagamento via QR",
+      "bank_transfer": "Transferência bancária"
+    }
+  }
+}

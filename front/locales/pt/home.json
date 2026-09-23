@@ -1,0 +1,50 @@
+{
+  "productsError": "Não foi possível carregar os produtos. Por favor, tente mais tarde.",
+  "hero": {
+    "sectionLabel": "Iris Natural — boas-vindas",
+    "eyebrow": "Iris Natural · Cosméticos",
+    "title": "O poder da natureza em forma de cosmético",
+    "subtitle": "Fórmulas naturais pensadas para cuidar e realçar a beleza de cada pele. Feitas com dedicação em Santa Cruz de la Sierra, Bolívia.",
+    "exploreProducts": "Explorar produtos",
+    "viewStoreOnMap": "Ver a loja no mapa",
+    "carousel": "carrossel",
+    "previous": "Anterior",
+    "next": "Próximo",
+    "slide": "Imagem {number}"
+  },
+  "shippingNotice": {
+    "text": "Nos pedidos feitos pelo site, <strong>o frete dos produtos é grátis até o 10.º anel.</strong> Para outras áreas e departamentos da Bolívia, são cobrados Bs. 17 adicionais."
+  },
+  "shippingWelcome": {
+    "shipping": "Nos pedidos feitos pelo nosso site, o frete de todos os nossos produtos é grátis dentro do 10.º anel de Santa Cruz de la Sierra. Para envios fora do 10.º anel e para outros departamentos da Bolívia, é cobrada uma taxa adicional de Bs. 17.",
+    "payment": "Além disso, você pode pagar em dinheiro no momento da entrega ou via QR para reservar seu pedido.",
+    "continue": "Continuar"
+  },
+  "groupCompanies": {
+    "sectionLabel": "Sites do Grupo CorpSC",
+    "visitSite": "Visitar site",
+    "visitSiteLabel": "Visitar o site de {name} (abre em uma nova aba)",
+    "goTo": "Ir para {name}"
+  },
+  "groupTicker": {
+    "label": "Sites de interesse"
+  },
+  "companies": {
+    "corpsc": {
+      "description": "Seu site ou app sob medida pelos melhores preços.",
+      "tagline": "Transformamos suas ideias em produtos digitais"
+    },
+    "dando-muela": {
+      "description": "App para conhecer pessoas. Baixe e comece a conversar.",
+      "tagline": "Conheça gente e converse"
+    },
+    "tu-chamba": {
+      "description": "O portal boliviano para encontrar e publicar vagas de emprego de forma rápida e segura.",
+      "tagline": "Empregos na Bolívia"
+    },
+    "invoices": {
+      "description": "Portal para gerar e gerenciar suas faturas de forma rápida e simples.",
+      "tagline": "Fatura em PDF em minutos"
+    }
+  }
+}

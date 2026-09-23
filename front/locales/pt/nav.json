@@ -1,0 +1,29 @@
+{
+  "mainNavigation": "Barra de navegação principal",
+  "accountAndCart": "Conta e carrinho",
+  "sections": "Categorias",
+  "openMenu": "Abrir menu",
+  "closeMenu": "Fechar menu",
+  "myAccount": "Minha conta",
+  "myOrders": "Meus pedidos",
+  "signOut": "Sair",
+  "signInOrSignUp": "Entrar / Cadastrar-se",
+  "goHome": "Ir para o início",
+  "loading": "Carregando…",
+  "items": {
+    "products": "Produtos",
+    "howItWorks": "Como funciona?",
+    "faq": "Perguntas Frequentes",
+    "about": "Quem Somos?",
+    "contact": "Contato"
+  },
+  "help": {
+    "buttonLabel": "Ajuda",
+    "title": "Precisa de ajuda?",
+    "contactWhatsapp": "Falar pelo WhatsApp",
+    "hoursLabel": "Horário de atendimento:",
+    "hours": "Segunda a sexta: 10:00 - 18:00",
+    "whatsappMessage": "Olá! Vocês poderiam me ajudar com uma dúvida sobre seus produtos ou serviços?",
+    "productWhatsappMessage": "Olá! Vocês poderiam me ajudar com uma dúvida sobre o produto {productName}?"
+  }
+}
