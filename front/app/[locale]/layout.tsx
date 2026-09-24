@@ -10,7 +10,7 @@ import { Providers } from "../providers";
 import { buildDefaultMetadata } from "@/lib/next-metadata";
 import { OrganizationWebSiteJsonLd } from "@/components/seo/json-ld";
 import { PageTracker } from "@/components/analytics/page-tracker";
-import { HubAnalytics } from "@/components/analytics/hub-analytics";
+import { SiteAnalytics } from "@/components/analytics/site-analytics";
 
 export async function generateMetadata({
   params
@@ -47,7 +47,7 @@ export default async function LocaleLayout({
         <OrganizationWebSiteJsonLd locale={locale} description={t("site.description")} />
         <PageTracker />
         {/* Renders nothing: sends the visit and clicks to the group hub. */}
-        <HubAnalytics />
+        <SiteAnalytics />
         <Providers locale={locale} messages={messages}>
           {children}
         </Providers>
