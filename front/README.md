@@ -21,10 +21,13 @@ Welcome to our cutting-edge Next.js Multilingual Blog Template! This powerful an
 
 ## Analítica del grupo
 
-El storefront manda al hub de CORPSC su visita y los clics que se van a un sitio
-hermano: `components/analytics/hub-analytics.tsx` recoge, `app/api/hub-track`
-reenvía con la clave. Es independiente de `PageTracker`, que sigue alimentando
-el panel de esta tienda.
+El storefront manda al hub de CORPSC sus páginas vistas y sus clics con el
+tracker compartido del grupo, que vive en `corpsc-hub/tracker` y se copia a
+`lib/hub-tracker/` con `pnpm sync` (esa carpeta no se edita a mano: lo comprueba
+su `integrity.test.ts`). `components/analytics/site-analytics.tsx` fija lo propio
+de esta tienda —zonas privadas y rutas con id— y `app/api/hub-track` reenvía con
+la clave. Es independiente de `PageTracker`, que sigue alimentando el panel de
+esta tienda.
 
 Dos variables en `.env.local` (sin ellas la ruta no envía nada, que es lo que se
 quiere en local):
