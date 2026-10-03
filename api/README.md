@@ -1,6 +1,6 @@
 # Iris Natural — API (NestJS)
 
-API propia de Iris Natural, destinada a reemplazar por completo al backend Strapi (`back/`) de forma incremental (patrón strangler). Mientras dura la migración, Strapi sigue sirviendo todo lo que aún no se ha migrado; los clientes (`front/`, `backoffice/`, `mobile/`) van apuntando endpoint a endpoint a esta API.
+API propia de Iris Natural, destinada a reemplazar por completo al backend Strapi (`back/`) de forma incremental (patrón strangler). Mientras dura la migración, Strapi sigue sirviendo todo lo que aún no se ha migrado; los clientes (`web/`, `backoffice/`, `mobile/`) van apuntando endpoint a endpoint a esta API.
 
 ## Stack
 
