@@ -43,11 +43,17 @@ interface SignupDayRow {
   count: number;
 }
 
+interface UsersTotalDayRow {
+  day: string;
+  total: number;
+}
+
 interface DayBucket {
   orders: number;
   orders_paid: number;
   revenue: number;
   signups: number;
+  users_total: number;
   statusBreakdown: Record<string, number>;
   signupBreakdown: Record<string, number>;
 }
@@ -103,9 +109,10 @@ export class HubService {
 
   /** Builds the `/api/ingest/metrics` payload for the closed days in [from, to]. */
   async buildPayload(from: string, to: string) {
-    const [orderRows, signupRows] = await Promise.all([
+    const [orderRows, signupRows, usersTotalRows] = await Promise.all([
       this.ordersByDay(from, to),
       this.signupsByDay(from, to),
+      this.usersTotalByDay(from, to),
     ]);
 
     const days = new Map<string, DayBucket>();
@@ -117,6 +124,7 @@ export class HubService {
           orders_paid: 0,
           revenue: 0,
           signups: 0,
+          users_total: 0,
           statusBreakdown: {},
           signupBreakdown: {},
         };
@@ -143,6 +151,13 @@ export class HubService {
       bucket.signupBreakdown[method] = (bucket.signupBreakdown[method] ?? 0) + row.count;
     }
 
+    // `users_total` is a point-in-time snapshot, not a daily aggregate: every
+    // day in the declared window gets its own cumulative count, independent
+    // of whether that day had any orders or signups of its own.
+    for (const row of usersTotalRows) {
+      bucketOf(row.day).users_total = row.total;
+    }
+
     const sortedDates = [...days.keys()].sort((a, b) => a.localeCompare(b));
 
     return {
@@ -162,6 +177,12 @@ export class HubService {
           currency: "BOB",
         },
         { key: "signups", label: "Altas", unit: "count" as const },
+        {
+          key: "users_total",
+          label: "Usuarios registrados",
+          unit: "count" as const,
+          aggregation: "last" as const,
+        },
       ],
       days: sortedDates.map((date) => {
         const bucket = days.get(date)!;
@@ -172,6 +193,7 @@ export class HubService {
             orders_paid: bucket.orders_paid,
             revenue: round2(bucket.revenue),
             signups: bucket.signups,
+            users_total: bucket.users_total,
           },
           breakdowns: [
             {
@@ -230,6 +252,24 @@ export class HubService {
        WHERE (created_at AT TIME ZONE 'UTC' AT TIME ZONE 'America/La_Paz')::date
              BETWEEN ${from}::date AND ${to}::date
        GROUP BY 1, 2
+       ORDER BY 1`;
+  }
+
+  /**
+   * Cumulative registered-user count as of each day in [from, to] — a
+   * point-in-time snapshot, not a daily aggregate (CONTRATO.md rule 3: the
+   * explicit `aggregation: "last"` exception). The window is only a handful
+   * of days, so a correlated subquery per day is cheap and keeps the cut
+   * consistent with the other queries here (`AT TIME ZONE`, local day).
+   */
+  private usersTotalByDay(from: string, to: string): Promise<UsersTotalDayRow[]> {
+    return this.prisma.$queryRaw<UsersTotalDayRow[]>`
+      SELECT gs.day::date::text AS day,
+             (SELECT count(*)::int
+                FROM up_users u
+               WHERE (u.created_at AT TIME ZONE 'UTC' AT TIME ZONE 'America/La_Paz')::date <= gs.day)
+             AS total
+        FROM generate_series(${from}::date, ${to}::date, '1 day') AS gs(day)
        ORDER BY 1`;
   }
 }
