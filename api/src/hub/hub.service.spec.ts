@@ -11,19 +11,41 @@ describe("HubService.buildPayload", () => {
   });
 
   it("only declares business + signup metrics, never traffic", async () => {
-    prismaMock.$queryRaw.mockResolvedValueOnce([]).mockResolvedValueOnce([]);
+    prismaMock.$queryRaw
+      .mockResolvedValueOnce([])
+      .mockResolvedValueOnce([])
+      .mockResolvedValueOnce([]);
     const payload = await service.buildPayload("2026-03-01", "2026-03-02");
     const keys = payload.definitions.map((d) => d.key);
-    expect(keys).toEqual(["orders", "orders_paid", "revenue", "signups"]);
+    expect(keys).toEqual([
+      "orders",
+      "orders_paid",
+      "revenue",
+      "signups",
+      "users_total",
+    ]);
     expect(keys).not.toContain("visits");
     expect(keys).not.toContain("page_views");
   });
 
   it("declares revenue in BOB", async () => {
-    prismaMock.$queryRaw.mockResolvedValueOnce([]).mockResolvedValueOnce([]);
+    prismaMock.$queryRaw
+      .mockResolvedValueOnce([])
+      .mockResolvedValueOnce([])
+      .mockResolvedValueOnce([]);
     const payload = await service.buildPayload("2026-03-01", "2026-03-02");
     const revenue = payload.definitions.find((d) => d.key === "revenue");
     expect(revenue).toMatchObject({ unit: "currency", currency: "BOB" });
+  });
+
+  it("declares users_total as a point-in-time snapshot (aggregation: last)", async () => {
+    prismaMock.$queryRaw
+      .mockResolvedValueOnce([])
+      .mockResolvedValueOnce([])
+      .mockResolvedValueOnce([]);
+    const payload = await service.buildPayload("2026-03-01", "2026-03-02");
+    const usersTotal = payload.definitions.find((d) => d.key === "users_total");
+    expect(usersTotal).toMatchObject({ unit: "count", aggregation: "last" });
   });
 
   it("counts every status into `orders`, only verified ones into `orders_paid`/`revenue`", async () => {
@@ -33,6 +55,7 @@ describe("HubService.buildPayload", () => {
         { day: "2026-03-01", status: "pending_verification", count: 3, revenue: 150 },
         { day: "2026-03-01", status: "cancelled", count: 1, revenue: 80 },
       ])
+      .mockResolvedValueOnce([])
       .mockResolvedValueOnce([]);
     const payload = await service.buildPayload("2026-03-01", "2026-03-01");
     const day = payload.days.find((d) => d.date === "2026-03-01")!;
@@ -41,6 +64,7 @@ describe("HubService.buildPayload", () => {
       orders_paid: 2,
       revenue: 200,
       signups: 0,
+      users_total: 0,
     });
     const statusBreakdown = day.breakdowns.find((b) => b.metric === "orders")!;
     expect(statusBreakdown.values).toEqual({
@@ -56,6 +80,7 @@ describe("HubService.buildPayload", () => {
         { day: "2026-03-01", status: "shipped", count: 1, revenue: 50 },
         { day: "2026-03-01", status: "delivered", count: 1, revenue: 70 },
       ])
+      .mockResolvedValueOnce([])
       .mockResolvedValueOnce([]);
     const payload = await service.buildPayload("2026-03-01", "2026-03-01");
     const day = payload.days.find((d) => d.date === "2026-03-01")!;
@@ -64,11 +89,14 @@ describe("HubService.buildPayload", () => {
   });
 
   it("maps the signup provider to a readable method, breakdown sums to the total", async () => {
-    prismaMock.$queryRaw.mockResolvedValueOnce([]).mockResolvedValueOnce([
-      { day: "2026-03-01", provider: "local", count: 4 },
-      { day: "2026-03-01", provider: "google", count: 3 },
-      { day: "2026-03-01", provider: null, count: 1 },
-    ]);
+    prismaMock.$queryRaw
+      .mockResolvedValueOnce([])
+      .mockResolvedValueOnce([
+        { day: "2026-03-01", provider: "local", count: 4 },
+        { day: "2026-03-01", provider: "google", count: 3 },
+        { day: "2026-03-01", provider: null, count: 1 },
+      ])
+      .mockResolvedValueOnce([]);
     const payload = await service.buildPayload("2026-03-01", "2026-03-01");
     const day = payload.days.find((d) => d.date === "2026-03-01")!;
     expect(day.metrics.signups).toBe(8);
@@ -83,7 +111,8 @@ describe("HubService.buildPayload", () => {
       ])
       .mockResolvedValueOnce([
         { day: "2026-03-01", provider: "local", count: 1 },
-      ]);
+      ])
+      .mockResolvedValueOnce([]);
     const payload = await service.buildPayload("2026-03-01", "2026-03-01");
     const allValueKeys = payload.days.flatMap((d) =>
       d.breakdowns.flatMap((b) => Object.keys(b.values)),
@@ -99,9 +128,47 @@ describe("HubService.buildPayload", () => {
       .mockResolvedValueOnce([
         { day: "2026-03-01", status: "confirmed", count: 1, revenue: 10 },
       ])
-      .mockResolvedValueOnce([]);
+      .mockResolvedValueOnce([])
+      .mockResolvedValueOnce([
+        { day: "2026-03-01", total: 10 },
+        { day: "2026-03-02", total: 10 },
+      ]);
     const payload = await service.buildPayload("2026-03-01", "2026-03-02");
     expect(payload.range).toEqual({ from: "2026-03-01", to: "2026-03-02" });
+  });
+
+  it("carries the cumulative users_total per day, excluding users created after that day", async () => {
+    prismaMock.$queryRaw
+      .mockResolvedValueOnce([])
+      .mockResolvedValueOnce([])
+      .mockResolvedValueOnce([
+        { day: "2026-03-01", total: 10 },
+        { day: "2026-03-02", total: 12 },
+      ]);
+    const payload = await service.buildPayload("2026-03-01", "2026-03-02");
+    const day1 = payload.days.find((d) => d.date === "2026-03-01")!;
+    const day2 = payload.days.find((d) => d.date === "2026-03-02")!;
+    // day1's total (10) must not include the 2 users counted in day2's total
+    // (12) — the cumulative count as of day1 excludes anyone who signed up
+    // after it, even though they're still in the window being sent.
+    expect(day1.metrics.users_total).toBe(10);
+    expect(day2.metrics.users_total).toBe(12);
+  });
+
+  it("creates a day bucket for every row the users_total query returns, even without orders/signups", async () => {
+    prismaMock.$queryRaw
+      .mockResolvedValueOnce([])
+      .mockResolvedValueOnce([])
+      .mockResolvedValueOnce([{ day: "2026-03-02", total: 5 }]);
+    const payload = await service.buildPayload("2026-03-01", "2026-03-02");
+    const day = payload.days.find((d) => d.date === "2026-03-02")!;
+    expect(day.metrics).toEqual({
+      orders: 0,
+      orders_paid: 0,
+      revenue: 0,
+      signups: 0,
+      users_total: 5,
+    });
   });
 });
 
